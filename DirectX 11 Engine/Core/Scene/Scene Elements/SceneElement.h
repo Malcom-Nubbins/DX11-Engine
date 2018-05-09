@@ -21,6 +21,7 @@ private:
 
 	ID3D11ShaderResourceView* _colourTex;
 	ID3D11ShaderResourceView* _normalMap;
+	ID3D11ShaderResourceView* _displacementMap;
 
 	bool _castShadows;
 	bool _affectedByLight;
@@ -44,6 +45,7 @@ public:
 
 	void SetColourTexture(ID3D11ShaderResourceView* colourTex) { _colourTex = colourTex; }
 	void SetNormalMap(ID3D11ShaderResourceView* normalMap) { _normalMap = normalMap; }
+	void SetDisplacementMap(ID3D11ShaderResourceView* displacementMap) { _displacementMap = displacementMap; }
 
 	void SetCastShadows(bool castShadows) { _castShadows = castShadows; }
 	bool CanCastShadows() const { return _castShadows; }
@@ -53,9 +55,11 @@ public:
 
 	ID3D11ShaderResourceView * GetColourTex() const { return _colourTex; }
 	ID3D11ShaderResourceView * GetNormalMap() const { return _normalMap; }
+	ID3D11ShaderResourceView * GetDisplacementMap() const { return _displacementMap; }
 
 	bool HasColourTexture() const { return _colourTex ? true : false; }
 	bool HasNormalMap() const { return _normalMap ? true : false; }
+	bool HasDisplacementMap() const { return _displacementMap ? true : false; }
 
 	void UpdateObjectMesh(ObjectMesh updatedMesh) { _mesh = updatedMesh; }
 	ObjectMesh GetObjectMesh() const { return _mesh; }

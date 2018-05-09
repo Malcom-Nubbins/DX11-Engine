@@ -19,6 +19,9 @@ void TextureHandler::Cleanup()
 void TextureHandler::LoadAllTextures()
 {
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/grassyStone.dds", nullptr, &_groundColourTex);
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/grassyStone_NRM.dds", nullptr, &_groundNormalMap);
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/grassyStone_DISP.dds", nullptr, &_groundDisplacementMap);
+
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/distortionMap.dds", nullptr, &_distortionMap);
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/snow.dds", nullptr, &_snowTexture);
 }

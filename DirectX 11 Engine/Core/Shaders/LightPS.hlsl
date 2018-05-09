@@ -2,6 +2,7 @@
 
 Texture2D texColour : register(t0);
 Texture2D texShadow : register(t1);
+Texture2D texBumpmap : register(t2);
 
 SamplerState samLinear : register(s0);
 SamplerComparisonState samShadow : register(s1);
@@ -39,11 +40,13 @@ struct VertexOutput
     float4 PosH : SV_POSITION0;
     float3 PosW : POSITION1;
     float3 NormW : NORMAL0;
-    float2 Tex : TEXCOORD0;
     float3 TangentW : TANGENT0;
     float3 BinormalW : BINORMAL0;
-   // float3 TangentTS : TANGENT1;
-   // float3 BinormalTS : BINORMAL1;
+    float2 Tex : TEXCOORD0;
+
+    float3 TangentTS : TANGENT1;
+    float3 BinormalTS : BINORMAL1;
+
     float4 ShadowProj : TEXCOORD1;
 };
 
@@ -60,11 +63,15 @@ float4 main(VertexOutput input) : SV_TARGET
     toEye = normalize(toEye);
 
     float4 textureColour = texColour.Sample(samLinear, input.Tex);
+    float3 bumpMapSample = texBumpmap.Sample(samLinear, input.Tex).rgb;
 
     if(affectedByLight == 1.0f)
     {
         float shadow = 1.0f;
         shadow = ComputeShadows(samShadow, texShadow, input.ShadowProj);
+
+        if(useBumpMap == 1.0f)
+            input.NormW = NormalSampleToWorldSpace(bumpMapSample, input.NormW, input.TangentW);
 
         float3 A, D, S;
         ComputeDirectionalLight(surface, dirLight, input.NormW, toEye, A, D, S);

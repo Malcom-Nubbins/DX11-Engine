@@ -126,6 +126,26 @@ void BufferClass::SetVertexShaderBuffers(ID3D11Buffer** buffer, int index)
 	_d3dClass->GetContext()->VSSetConstantBuffers(index, 1, buffer);
 }
 
+void BufferClass::SetHullShaderBuffers(ID3D11Buffer ** buffer)
+{
+	SetHullShaderBuffers(buffer, 0);
+}
+
+void BufferClass::SetHullShaderBuffers(ID3D11Buffer ** buffer, int index)
+{
+	_d3dClass->GetContext()->HSSetConstantBuffers(index, 1, buffer);
+}
+
+void BufferClass::SetDomainShaderBuffers(ID3D11Buffer ** buffer)
+{
+	SetDomainShaderBuffers(buffer, 0);
+}
+
+void BufferClass::SetDomainShaderBuffers(ID3D11Buffer ** buffer, int index)
+{
+	_d3dClass->GetContext()->DSSetConstantBuffers(index, 1, buffer);
+}
+
 void BufferClass::SetPixelShaderBuffers(ID3D11Buffer** buffer)
 {
 	SetPixelShaderBuffers(buffer, 0);

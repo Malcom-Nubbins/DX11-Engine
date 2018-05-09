@@ -9,6 +9,17 @@ cbuffer MatrixBuffer : register(b0)
     matrix ShadowTransform;
 }
 
+cbuffer TesselationBuffer : register(b1)
+{
+    float MaxTessDistance;
+    float MinTessDistance;
+    float MinTessFactor;
+    float MaxTessFactor;
+
+    float3 EyePos;
+    float padding;
+};
+
 struct VertexInput
 {
     float3 Pos : POSITION0;
@@ -23,13 +34,16 @@ struct VertexOutput
     float4 PosH : SV_POSITION0;
     float3 PosW : POSITION1;
     float3 NormW : NORMAL0;
-    float2 Tex : TEXCOORD0;
     float3 TangentW : TANGENT0;
     float3 BinormalW : BINORMAL0;
-    //float3 TangentTS : TANGENT1;
-    //float3 BinormalTS : BINORMAL1;
+    float2 Tex : TEXCOORD0;
+
+    float3 TangentTS : TANGENT1;
+    float3 BinormalTS : BINORMAL1;
 
     float4 ShadowProj : TEXCOORD1;
+
+    float TessFactor : TESS;
 };
 
 VertexOutput main( VertexInput input )
@@ -47,5 +61,11 @@ VertexOutput main( VertexInput input )
 
     output.ShadowProj = mul(float4(input.Pos.xyz, 1.0f), mul(World, ShadowTransform));
 
+    // Tesselation
+    float dist = distance(output.PosW, EyePos);
+    float tess = saturate((MinTessDistance - dist) / (MinTessDistance - MaxTessDistance));
+
+    output.TessFactor = MinTessFactor + tess * (MaxTessFactor - MinTessFactor);
+    
 	return output;
 }

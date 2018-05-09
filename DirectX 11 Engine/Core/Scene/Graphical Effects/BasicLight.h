@@ -25,7 +25,11 @@ private:
 	BufferClass* _bufferClass;
 
 	ID3D11RasterizerState* _cwCullMode;
+	ID3D11RasterizerState* _wireframeMode;
+
 	ID3D11VertexShader* _lightVS;
+	ID3D11HullShader* _tesselationHS;
+	ID3D11DomainShader* _tesselationDS;
 	ID3D11PixelShader*	_lightPS;
 	ID3D11InputLayout*	_simpleVertexInputLayout;
 
@@ -39,6 +43,7 @@ private:
 	D3D11_VIEWPORT _viewport;
 
 	ID3D11Buffer*	_fogValuesBuffer;
+	ID3D11Buffer* _tesselationBuffer;
 
 	XMFLOAT4 _lightColourDayDiffuse;
 	XMFLOAT4 _lightColourDayAmbient;
@@ -47,6 +52,8 @@ private:
 	XMFLOAT4 _lightColourSunsetDiffuse;
 	XMFLOAT4 _lightColourSunsetAmbient;
 	XMFLOAT4 _lightColourSunsetSpecular;
+
+	bool _renderWireframe;
 
 public:
 	BasicLight(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass);
@@ -61,6 +68,11 @@ public:
 	void SetAsCurrentRenderTarget();
 	void SetAsCurrentViewport();
 	void SetDepthEnabled();
+
+	void SetWireframeMode(bool state) { _renderWireframe = state; }
+	bool GetWireframeState() const { return _renderWireframe; }
+	void WireframeMode();
+	void FillMode();
 
 	void CalculateLightColour(DirectionalLight & sceneLight, float sunHeight, FogValuesBuffer & sceneFog);
 	ID3D11ShaderResourceView* GetRenderTargetSRV() const { return _renderTargetSRV; }

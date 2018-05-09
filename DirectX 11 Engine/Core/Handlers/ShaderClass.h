@@ -25,9 +25,14 @@ public:
 	void Cleanup();
 
 	HRESULT CreateVertexShader(WCHAR* shaderFilename, ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements);
+	HRESULT CreateHullShader(WCHAR* shaderFilename, ID3D11HullShader** hullShader);
+	HRESULT CreateDomainShader(WCHAR* shaderFilename, ID3D11DomainShader** domainShader);
 	HRESULT CreatePixelShader(WCHAR* shaderFilename, ID3D11PixelShader** pixelShader);
 
 	void SetShadersAndInputLayout(ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout);
+	void SetHullAndDomainShaders(ID3D11HullShader* hullShader, ID3D11DomainShader* domainShader);
+
+	void UnbindTesselationStages();
 
 	HRESULT CreateSamplerStates();
 	ID3D11SamplerState** GetSamplerState(SAMPLER_TYPE type);

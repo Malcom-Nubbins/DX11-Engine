@@ -5,6 +5,7 @@ SceneElement::SceneElement(std::string elementName, ObjectMesh mesh, ObjectMater
 {
 	_colourTex = nullptr;
 	_normalMap = nullptr;
+	_displacementMap = nullptr;
 }
 
 SceneElement::~SceneElement()

@@ -36,6 +36,8 @@ MainScene::MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* 
 	};
 
 	_diamondSquareTerrain = nullptr;
+	_buttonCooldown = 1.0f;
+	_currentCooldown = 0.0f;
 }
 
 MainScene::~MainScene()
@@ -113,8 +115,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneLight.LightDirection = XMFLOAT3(5.0f, 0.0f, 0.0f);
 
 	_spotLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 0.3f, 1.0f);
+	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 0.3f, 1.0f);
 	_spotLight.Attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	_spotLight.Spot = 60.0f;
 	_spotLight.Range = 100.0f;
@@ -164,16 +166,20 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	element->SetColourTexture(_textureHandler->GetGroundColourTexture());
+	element->SetNormalMap(_textureHandler->GetGroundNormalMap());
+	element->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
 	element->SetCastShadows(true);
 	element->SetAffectedByLight(true);
 	_diamondSquareTerrain->SetGameObject(element);
 	_diamondSquareTerrain->SetTerrainFinishedBuilding(true);
+	_sceneElements.push_back(element);
 
 	element = new SceneElement("Underworld", planeMesh, shiny);
 	element->SetPosition(XMFLOAT3(0.0f, -15.0f, 0.0f));
 	element->SetScale(XMFLOAT3(256.0f, 1.0f, 256.0f));
 	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	element->SetColourTexture(_textureHandler->GetGroundColourTexture());
+	element->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
 	element->SetCastShadows(true);
 	element->SetAffectedByLight(true);
 	_sceneElements.push_back(element);
@@ -426,6 +432,18 @@ void MainScene::Update(float deltaTime)
 	_heatHaze->Update(_timer->GameTime() / 2);
 
 	_diamondSquareTerrain->Update(deltaTime);
+
+	if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('R'))
+	{
+		if (_currentCooldown <= 0.0f)
+		{
+			_basicLight->SetWireframeMode(!_basicLight->GetWireframeState());
+			_currentCooldown = _buttonCooldown;
+		}
+	}
+
+	if(_currentCooldown > 0.0f)
+		_currentCooldown -= deltaTime;
 
 	std::wostringstream out;
 	out.precision(6);

@@ -143,7 +143,20 @@ void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
     specular *= attentuation;
 }
 
+float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normalW, float3 tangentW)
+{
+    float3 normalT = 2.0f * normalMapSample - 1.0f;
 
+    float3 N = normalW;
+    float3 T = normalize(tangentW - dot(tangentW, N) * N);
+    float3 B = cross(N, T);
+
+    float3x3 TBN = float3x3(T, B, N);
+
+    float3 bumpedNormalW = mul(normalT, TBN);
+
+    return normalize(bumpedNormalW);
+}
 
 float ComputeShadows(SamplerComparisonState shadowSampler, Texture2D shadowMap, float4 shadowPosH)
 {

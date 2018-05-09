@@ -73,6 +73,9 @@ private:
 	std::vector<PointLight> _pointLights;
 	SpotLight _spotLight;
 
+	float _buttonCooldown;
+	float _currentCooldown;
+
 public:
 	MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass, WindowClass* windowClass, Timer* timer);
 	~MainScene();

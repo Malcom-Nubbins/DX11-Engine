@@ -181,8 +181,8 @@ void DiamondSquareTerrain::GenerateTerrain()
 	float dx = _info.gridWidth / (_info.heightMapWidth - 1);
 	float dz = _info.gridDepth / (_info.heightMapHeight - 1);
 
-	float du = 5.0f / (_info.heightMapWidth - 1);
-	float dv = 5.0f / (_info.heightMapHeight - 1);
+	float du = 15.0f / (_info.heightMapWidth - 1);
+	float dv = 15.0f / (_info.heightMapHeight - 1);
 
 	_gridMesh = new GridMeshData();
 	_gridMesh->Vertices.resize(vertexCount);
@@ -423,7 +423,7 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 		{
 			cb.useBumpMap = 1.0f;
 			texture = _terrainGO->GetNormalMap();
-			_d3dClass->GetContext()->PSSetShaderResources(1, 1, &texture);
+			_d3dClass->GetContext()->PSSetShaderResources(2, 1, &texture);
 		}
 		else
 		{
@@ -449,12 +449,12 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 
 float DiamondSquareTerrain::GetWidth()
 {
-	return _info.gridWidth;
+	return (_info.heightMapWidth - 1) * _info.cellSpacing;
 }
 
 float DiamondSquareTerrain::GetDepth()
 {
-	return _info.gridDepth;
+	return (_info.heightMapHeight - 1) * _info.cellSpacing;
 }
 
 float DiamondSquareTerrain::GetHeight(float camX, float camZ)

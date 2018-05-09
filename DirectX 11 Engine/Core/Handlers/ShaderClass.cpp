@@ -44,6 +44,52 @@ HRESULT ShaderClass::CreateVertexShader(WCHAR * shaderFilename, ID3D11VertexShad
 	return S_OK;
 }
 
+HRESULT ShaderClass::CreateHullShader(WCHAR * shaderFilename, ID3D11HullShader ** hullShader)
+{
+	HRESULT hr;
+	ID3DBlob* hsBlob = nullptr;
+	hr = CompileShaderFromFile(shaderFilename, "main", "hs_5_0", &hsBlob);
+
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr,
+			L"The Hull shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+		return hr;
+	}
+
+	// Create the pixel shader
+	hr = _d3dClass->GetDevice()->CreateHullShader(hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, hullShader);
+	hsBlob->Release();
+
+	if (FAILED(hr))
+		return hr;
+
+	return S_OK;
+}
+
+HRESULT ShaderClass::CreateDomainShader(WCHAR * shaderFilename, ID3D11DomainShader ** domainShader)
+{
+	HRESULT hr;
+	ID3DBlob* dsBlob = nullptr;
+	hr = CompileShaderFromFile(shaderFilename, "main", "ds_5_0", &dsBlob);
+
+	if (FAILED(hr))
+	{
+		MessageBox(nullptr,
+			L"The Domain shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+		return hr;
+	}
+
+	// Create the pixel shader
+	hr = _d3dClass->GetDevice()->CreateDomainShader(dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, domainShader);
+	dsBlob->Release();
+
+	if (FAILED(hr))
+		return hr;
+
+	return S_OK;
+}
+
 HRESULT ShaderClass::CreatePixelShader(WCHAR * shaderFilename, ID3D11PixelShader ** pixelShader)
 {
 	HRESULT hr;
@@ -92,6 +138,21 @@ void ShaderClass::SetShadersAndInputLayout(ID3D11VertexShader * vertexShader, ID
 
 	if (pixelShader != nullptr)
 		_d3dClass->GetContext()->PSSetShader(pixelShader, nullptr, 0);
+}
+
+void ShaderClass::SetHullAndDomainShaders(ID3D11HullShader * hullShader, ID3D11DomainShader * domainShader)
+{
+	if (hullShader != nullptr)
+		_d3dClass->GetContext()->HSSetShader(hullShader, nullptr, 0);
+
+	if (domainShader != nullptr)
+		_d3dClass->GetContext()->DSSetShader(domainShader, nullptr, 0);
+}
+
+void ShaderClass::UnbindTesselationStages()
+{
+	_d3dClass->GetContext()->HSSetShader(nullptr, nullptr, 0);
+	_d3dClass->GetContext()->DSSetShader(nullptr, nullptr, 0);
 }
 
 HRESULT ShaderClass::CompileShaderFromFile(WCHAR * filename, LPCSTR entrypoint, LPCSTR shaderModel, ID3DBlob ** outBlob)

@@ -89,5 +89,8 @@ private:
 	SceneElement *_terrainGO;
 
 	bool _finishedBuilding;
+
+	static const int _cellsPerPatch = 64;
+
 };
 

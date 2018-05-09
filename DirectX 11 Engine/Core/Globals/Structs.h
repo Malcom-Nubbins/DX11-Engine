@@ -126,6 +126,17 @@ struct ShadowDepthMatrixBuffer
 	XMMATRIX LightProjection;
 };
 
+struct TesselationBuffer
+{
+	float MaxTessDistance;
+	float MinTessDistance;
+	float MinTessFactor;
+	float MaxTessFactor;
+
+	XMFLOAT3 EyePos;
+	float padding;
+};
+
 struct ObjectValuesBuffer
 {
 	SurfaceMaterial surface;

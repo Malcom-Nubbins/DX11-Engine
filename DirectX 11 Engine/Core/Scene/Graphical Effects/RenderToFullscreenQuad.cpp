@@ -98,6 +98,17 @@ HRESULT RenderToFullscreenQuad::InitialiseShaders()
 	if (FAILED(hr))
 		return hr;
 
+	D3D11_RASTERIZER_DESC rasteriserdesc;
+	ZeroMemory(&rasteriserdesc, sizeof(D3D11_RASTERIZER_DESC));
+	rasteriserdesc.FillMode = D3D11_FILL_SOLID;
+	rasteriserdesc.CullMode = D3D11_CULL_BACK;
+	rasteriserdesc.MultisampleEnable = true;
+	rasteriserdesc.AntialiasedLineEnable = true;
+	rasteriserdesc.FrontCounterClockwise = false;
+	hr = _d3dClass->GetDevice()->CreateRasterizerState(&rasteriserdesc, &_cwCullMode);
+	if (FAILED(hr))
+		return hr;
+
 	return S_OK;
 }
 
@@ -117,6 +128,7 @@ void RenderToFullscreenQuad::BuildQuad()
 
 void RenderToFullscreenQuad::Render(ID3D11ShaderResourceView * textureToRender)
 {
+	_d3dClass->GetContext()->RSSetState(_cwCullMode);
 	_d3dClass->GetContext()->PSSetSamplers(0, 1, _shaderClass->GetSamplerState(LINEAR));
 	SetAsCurrentRenderTarget();
 	SetAsCurrentVertexShader();

@@ -17,6 +17,8 @@ BasicLight::BasicLight(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass
 	_cwCullMode = nullptr;
 
 	_fogValuesBuffer = nullptr;
+
+	_renderWireframe = false;
 }
 
 BasicLight::~BasicLight()
@@ -102,6 +104,16 @@ void BasicLight::SetDepthEnabled()
 	_d3dClass->GetContext()->OMSetDepthStencilState(_dsLessEqual, 0);
 }
 
+void BasicLight::WireframeMode()
+{
+	_d3dClass->GetContext()->RSSetState(_wireframeMode);
+}
+
+void BasicLight::FillMode()
+{
+	_d3dClass->GetContext()->RSSetState(_cwCullMode);
+}
+
 HRESULT BasicLight::InitialiseShaders()
 {
 	HRESULT hr;
@@ -122,6 +134,10 @@ HRESULT BasicLight::InitialiseShaders()
 	if (FAILED(hr))
 		return hr;
 
+	hr = _shaderClass->CreateHullShader((WCHAR*)L"Core/Shaders/TesselationHS.hlsl", &_tesselationHS);
+
+	hr = _shaderClass->CreateDomainShader((WCHAR*)L"Core/Shaders/TesselationDS.hlsl", &_tesselationDS);
+
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
@@ -129,6 +145,13 @@ HRESULT BasicLight::InitialiseShaders()
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_fogValuesBuffer);
+
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(TesselationBuffer);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_tesselationBuffer);
 
 	return S_OK;
 }
@@ -231,6 +254,12 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 	if (FAILED(hr))
 		return hr;
 
+	D3D11_RASTERIZER_DESC wfdesc;
+	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
+	wfdesc.FillMode = D3D11_FILL_WIREFRAME;
+	wfdesc.CullMode = D3D11_CULL_NONE;
+	hr = _d3dClass->GetDevice()->CreateRasterizerState(&wfdesc, &_wireframeMode);
+
 	return S_OK;
 }
 
@@ -289,11 +318,15 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	_bufferClass->SetPixelShaderBuffers(&objectValueBuffer, 0);
 	_bufferClass->SetPixelShaderBuffers(&_fogValuesBuffer, 1);
 
-	_d3dClass->GetContext()->RSSetState(_cwCullMode);
+	if (_renderWireframe)
+		WireframeMode();
+	else
+		FillMode();
 
 	MatrixBuffer matBuffer;
 	ObjectValuesBuffer objValBuffer;
 	FogValuesBuffer fogValuesBuffer = fogValues;
+	TesselationBuffer tessValues;
 
 	XMMATRIX view = XMLoadFloat4x4(&camera.GetView());
 	XMMATRIX proj = XMLoadFloat4x4(&camera.GetProj());
@@ -306,6 +339,12 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	objValBuffer.dirLight = sceneLight;
 	objValBuffer.spotLight = spotLight;
 	objValBuffer.EyePos = camera.GetPosition();
+
+	tessValues.MaxTessDistance = 1.0f;
+	tessValues.MinTessDistance = 25.0f;
+	tessValues.MaxTessFactor = 10.0f;
+	tessValues.MinTessFactor = 1.0f;
+	tessValues.EyePos = camera.GetPosition();
 
 	if (pointLights.size() > 0)
 		objValBuffer.usePointLights = 0.0f;
@@ -353,11 +392,29 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 		{
 			objValBuffer.useBumpMap = 1.0f;
 			tex = element->GetNormalMap();
-			_d3dClass->GetContext()->PSSetShaderResources(1, 1, &tex);
+			_d3dClass->GetContext()->PSSetShaderResources(2, 1, &tex);
 		}
 		else
 		{
 			objValBuffer.useBumpMap = 0.0f;
+		}
+
+		if (element->HasDisplacementMap())
+		{
+			_d3dClass->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+			ID3D11ShaderResourceView* displacementMap = element->GetDisplacementMap();
+			_shaderClass->SetHullAndDomainShaders(_tesselationHS, _tesselationDS);
+			_d3dClass->GetContext()->DSSetShaderResources(0, 1, &displacementMap);
+			_d3dClass->GetContext()->DSSetSamplers(0, 1, _shaderClass->GetSamplerState(LINEAR));
+
+			_bufferClass->SetVertexShaderBuffers(&_tesselationBuffer, 1);
+			_bufferClass->SetDomainShaderBuffers(&matrixBuffer, 0);
+			_bufferClass->SetDomainShaderBuffers(&_tesselationBuffer, 1);
+		}
+		else
+		{
+			_d3dClass->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			_shaderClass->UnbindTesselationStages();
 		}
 
 		if (element->IsAffectedByLight())
@@ -371,10 +428,11 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 
 		_d3dClass->GetContext()->UpdateSubresource(matrixBuffer, 0, nullptr, &matBuffer, 0, 0);
 		_d3dClass->GetContext()->UpdateSubresource(objectValueBuffer, 0, nullptr, &objValBuffer, 0, 0);
+		_d3dClass->GetContext()->UpdateSubresource(_tesselationBuffer, 0, nullptr, &tessValues, 0, 0);
 		_d3dClass->GetContext()->UpdateSubresource(_fogValuesBuffer, 0, nullptr, &fogValuesBuffer, 0, 0);
 
 		element->Draw(_d3dClass->GetContext());
 	}
 
-	terrain.Draw(matBuffer, objValBuffer, matrixBuffer, objectValueBuffer, nullptr);
+	//terrain.Draw(matBuffer, objValBuffer, matrixBuffer, objectValueBuffer, nullptr);
 }
