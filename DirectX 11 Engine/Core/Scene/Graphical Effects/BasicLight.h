@@ -44,6 +44,7 @@ private:
 
 	ID3D11Buffer*	_fogValuesBuffer;
 	ID3D11Buffer* _tesselationBuffer;
+	ID3D11Buffer* _camLightBuffer;
 
 	XMFLOAT4 _lightColourDayDiffuse;
 	XMFLOAT4 _lightColourDayAmbient;

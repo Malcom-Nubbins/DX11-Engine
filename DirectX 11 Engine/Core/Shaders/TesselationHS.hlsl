@@ -3,14 +3,11 @@
 struct VertexOutput
 {
     float4 PosH : SV_POSITION0;
-    float3 PosW : WORLDPOS;
+    float3 PosW : WORLDPOS0;
     float3 NormW : NORMAL0;
     float3 TangentW : TANGENT0;
     float3 BinormalW : BINORMAL0;
     float2 Tex : TEXCOORD0;
-
-    float3 TangentTS : TANGENT1;
-    float3 BinormalTS : BINORMAL1;
 
     float4 ShadowProj : TEXCOORD1;
 
@@ -20,14 +17,11 @@ struct VertexOutput
 // Output control point
 struct HullOutput
 {
-    float3 PosW : WORLDPOS;
+    float3 PosW : WORLDPOS0;
     float3 NormW : NORMAL0;
     float3 TangentW : TANGENT0;
     float3 BinormalW : BINORMAL0;
     float2 Tex : TEXCOORD0;
-
-    float3 TangentTS : TANGENT1;
-    float3 BinormalTS : BINORMAL1;
 
     float4 ShadowProj : TEXCOORD1;
 
@@ -71,8 +65,6 @@ HullOutput main(
     output.TangentW = ip[i].TangentW;
     output.BinormalW = ip[i].BinormalW;
     output.Tex = ip[i].Tex;
-    output.TangentTS = ip[i].TangentTS;
-    output.BinormalTS = ip[i].BinormalTS;
     output.ShadowProj = ip[i].ShadowProj;
     output.TessFactor = ip[i].TessFactor;
 

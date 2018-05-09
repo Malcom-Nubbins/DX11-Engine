@@ -115,8 +115,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneLight.LightDirection = XMFLOAT3(5.0f, 0.0f, 0.0f);
 
 	_spotLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 0.3f, 1.0f);
-	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 0.3f, 1.0f);
+	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	_spotLight.Spot = 60.0f;
 	_spotLight.Range = 100.0f;
@@ -132,7 +132,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	ObjectMaterial shiny;
 	shiny.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	shiny.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	shiny.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 20.0f);
+	shiny.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 8.0f);
 
 	ObjectMaterial matte;
 	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -179,6 +179,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	element->SetScale(XMFLOAT3(256.0f, 1.0f, 256.0f));
 	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	element->SetColourTexture(_textureHandler->GetGroundColourTexture());
+	element->SetNormalMap(_textureHandler->GetGroundNormalMap());
 	element->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
 	element->SetCastShadows(true);
 	element->SetAffectedByLight(true);
@@ -192,10 +193,12 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		float randomX = MathsHandler::RandomFloat(-128, 128);
 		float randomZ = MathsHandler::RandomFloat(-128, 128);
 
-		element->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
-		element->SetScale(XMFLOAT3(0.2f, 0.8f, 0.2f));
+		element->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ) + 2.0f, randomZ));
+		element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 		element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		element->SetColourTexture(nullptr);
+		element->SetColourTexture(_textureHandler->GetStoneTexture());
+		element->SetNormalMap(_textureHandler->GetStoneNormalMap());
+		//element->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
 

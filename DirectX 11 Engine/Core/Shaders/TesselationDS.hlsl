@@ -18,9 +18,12 @@ cbuffer TesselationBuffer : register(b1)
     float MinTessDistance;
     float MinTessFactor;
     float MaxTessFactor;
+};
 
-    float3 EyePos;
-    float padding;
+cbuffer CamLightBuffer : register(b2)
+{
+    float4 EyePos;
+    float4 LightVector;
 };
 
 struct DomainOutput
@@ -32,23 +35,17 @@ struct DomainOutput
     float3 BinormalW : BINORMAL0;
     float2 Tex : TEXCOORD0;
 
-    float3 TangentTS : TANGENT1;
-    float3 BinormalTS : BINORMAL1;
-
     float4 ShadowProj : TEXCOORD1;
 };
 
 //// Output control point
 struct HullOutput
 {
-    float3 PosW : WORLDPOS;
+    float3 PosW : WORLDPOS0;
     float3 NormW : NORMAL0;
     float3 TangentW : TANGENT0;
     float3 BinormalW : BINORMAL0;
     float2 Tex : TEXCOORD0;
-
-    float3 TangentTS : TANGENT1;
-    float3 BinormalTS : BINORMAL1;
 
     float4 ShadowProj : TEXCOORD1;
 
@@ -77,19 +74,16 @@ DomainOutput main(
     output.BinormalW = domain.x * tri[0].BinormalW + domain.y * tri[1].BinormalW + domain.z * tri[2].BinormalW;
     output.Tex = domain.x * tri[0].Tex + domain.y * tri[1].Tex + domain.z * tri[2].Tex;
 
-    output.TangentTS = domain.x * tri[0].TangentTS + domain.y * tri[1].TangentTS + domain.z * tri[2].TangentTS;
-    output.BinormalTS = domain.x * tri[0].BinormalTS + domain.y * tri[1].BinormalTS + domain.z * tri[2].BinormalTS;
-
     output.ShadowProj = domain.x * tri[0].ShadowProj + domain.y * tri[1].ShadowProj + domain.z * tri[2].ShadowProj;
 
     output.NormW = normalize(output.NormW);
 
     const float MipInterval = 20.0f;
-    float mipLevel = clamp((distance(output.PosW, EyePos) - MipInterval) / MipInterval, 0.0f, 6.0f);
+    float mipLevel = clamp((distance(output.PosW, EyePos.xyz) - MipInterval) / MipInterval, 0.0f, 6.0f);
 
     float height = texDisplacement.SampleLevel(samLinear, output.Tex, mipLevel).r;
 
-    output.PosW += (0.7f * (height - 1.0)) * output.NormW;
+    output.PosW += (0.2f * (height)) * output.NormW;
 
     output.PosH = mul(mul(float4(output.PosW, 1.0f), View), Projection);
 

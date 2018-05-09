@@ -153,6 +153,13 @@ HRESULT BasicLight::InitialiseShaders()
 	bd.CPUAccessFlags = 0;
 	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_tesselationBuffer);
 
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(CamLightBuffer);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_camLightBuffer);
+
 	return S_OK;
 }
 
@@ -327,6 +334,7 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	ObjectValuesBuffer objValBuffer;
 	FogValuesBuffer fogValuesBuffer = fogValues;
 	TesselationBuffer tessValues;
+	CamLightBuffer camLightValues;
 
 	XMMATRIX view = XMLoadFloat4x4(&camera.GetView());
 	XMMATRIX proj = XMLoadFloat4x4(&camera.GetProj());
@@ -342,9 +350,11 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 
 	tessValues.MaxTessDistance = 1.0f;
 	tessValues.MinTessDistance = 25.0f;
-	tessValues.MaxTessFactor = 10.0f;
+	tessValues.MaxTessFactor = 15.0f;
 	tessValues.MinTessFactor = 1.0f;
-	tessValues.EyePos = camera.GetPosition();
+
+	camLightValues.EyePos = XMFLOAT4(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 1.0f);
+	camLightValues.LightVector = XMFLOAT4(sceneLight.LightDirection.x, sceneLight.LightDirection.y, sceneLight.LightDirection.z, 1.0f);
 
 	if (pointLights.size() > 0)
 		objValBuffer.usePointLights = 0.0f;
@@ -402,14 +412,18 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 		if (element->HasDisplacementMap())
 		{
 			_d3dClass->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
+
 			ID3D11ShaderResourceView* displacementMap = element->GetDisplacementMap();
 			_shaderClass->SetHullAndDomainShaders(_tesselationHS, _tesselationDS);
 			_d3dClass->GetContext()->DSSetShaderResources(0, 1, &displacementMap);
 			_d3dClass->GetContext()->DSSetSamplers(0, 1, _shaderClass->GetSamplerState(LINEAR));
 
 			_bufferClass->SetVertexShaderBuffers(&_tesselationBuffer, 1);
+			_bufferClass->SetVertexShaderBuffers(&_camLightBuffer, 2);
+
 			_bufferClass->SetDomainShaderBuffers(&matrixBuffer, 0);
 			_bufferClass->SetDomainShaderBuffers(&_tesselationBuffer, 1);
+			_bufferClass->SetDomainShaderBuffers(&_camLightBuffer, 2);
 		}
 		else
 		{
@@ -430,6 +444,7 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 		_d3dClass->GetContext()->UpdateSubresource(objectValueBuffer, 0, nullptr, &objValBuffer, 0, 0);
 		_d3dClass->GetContext()->UpdateSubresource(_tesselationBuffer, 0, nullptr, &tessValues, 0, 0);
 		_d3dClass->GetContext()->UpdateSubresource(_fogValuesBuffer, 0, nullptr, &fogValuesBuffer, 0, 0);
+		_d3dClass->GetContext()->UpdateSubresource(_camLightBuffer, 0, nullptr, &camLightValues, 0, 0);
 
 		element->Draw(_d3dClass->GetContext());
 	}

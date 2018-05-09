@@ -73,7 +73,7 @@ void Camera::Yaw(float angle)
 
 void Camera::Update(float deltaTime)
 {
-	float movementSpeed = 1.0f;
+	float movementSpeed = 3.0f;
 	if (GetAsyncKeyState('A'))
 	{
 		Strafe(-movementSpeed * deltaTime);

@@ -132,9 +132,12 @@ struct TesselationBuffer
 	float MinTessDistance;
 	float MinTessFactor;
 	float MaxTessFactor;
+};
 
-	XMFLOAT3 EyePos;
-	float padding;
+struct CamLightBuffer
+{
+	XMFLOAT4 EyePos;
+	XMFLOAT4 LightVector;
 };
 
 struct ObjectValuesBuffer

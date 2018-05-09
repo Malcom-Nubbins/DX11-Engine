@@ -44,9 +44,6 @@ struct VertexOutput
     float3 BinormalW : BINORMAL0;
     float2 Tex : TEXCOORD0;
 
-    float3 TangentTS : TANGENT1;
-    float3 BinormalTS : BINORMAL1;
-
     float4 ShadowProj : TEXCOORD1;
 };
 
@@ -71,7 +68,7 @@ float4 main(VertexOutput input) : SV_TARGET
         shadow = ComputeShadows(samShadow, texShadow, input.ShadowProj);
 
         if(useBumpMap == 1.0f)
-            input.NormW = NormalSampleToWorldSpace(bumpMapSample, input.NormW, input.TangentW);
+            input.NormW = CalculateBumpedNormal(bumpMapSample, input.NormW, input.TangentW, input.BinormalW);
 
         float3 A, D, S;
         ComputeDirectionalLight(surface, dirLight, input.NormW, toEye, A, D, S);

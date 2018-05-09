@@ -15,9 +15,12 @@ cbuffer TesselationBuffer : register(b1)
     float MinTessDistance;
     float MinTessFactor;
     float MaxTessFactor;
+};
 
-    float3 EyePos;
-    float padding;
+cbuffer CamLightBuffer : register(b2)
+{
+    float4 EyePos;
+    float4 LightVector;
 };
 
 struct VertexInput
@@ -38,9 +41,6 @@ struct VertexOutput
     float3 BinormalW : BINORMAL0;
     float2 Tex : TEXCOORD0;
 
-    float3 TangentTS : TANGENT1;
-    float3 BinormalTS : BINORMAL1;
-
     float4 ShadowProj : TEXCOORD1;
 
     float TessFactor : TESS;
@@ -60,9 +60,9 @@ VertexOutput main( VertexInput input )
     output.BinormalW = mul(float4(input.Binormal, 1.0f), World);
 
     output.ShadowProj = mul(float4(input.Pos.xyz, 1.0f), mul(World, ShadowTransform));
-
+    
     // Tesselation
-    float dist = distance(output.PosW, EyePos);
+    float dist = distance(output.PosW, EyePos.xyz);
     float tess = saturate((MinTessDistance - dist) / (MinTessDistance - MaxTessDistance));
 
     output.TessFactor = MinTessFactor + tess * (MaxTessFactor - MinTessFactor);
