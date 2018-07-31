@@ -80,9 +80,6 @@ void ComputePointLight(Surface surface, PointLight pointLight, float3 pos,
     float3 lightVec = pointLight.Position - pos;
     float distance = length(lightVec);
 
-    if(distance > pointLight.Range)
-        return;
-
     lightVec /= distance;
 
     ambient = surface.Ambient * pointLight.Ambient;
@@ -101,8 +98,8 @@ void ComputePointLight(Surface surface, PointLight pointLight, float3 pos,
 
     float attenuation = 1.0f / dot(pointLight.Attenuation, float3(1.0f, distance, distance * distance));
 
-    diffuse *= attenuation;
-    specular *= attenuation;
+    diffuse *= attenuation / (distance * pointLight.Range);
+    specular *= attenuation / (distance * pointLight.Range);
 }
 
 void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
@@ -116,7 +113,7 @@ void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
     float3 lightVec = spotLight.Position - pos;
     float distance = length(lightVec);
 
-    if (distance > spotLight.Range)
+    if(distance > spotLight.Range)
         return;
 
     lightVec /= distance;

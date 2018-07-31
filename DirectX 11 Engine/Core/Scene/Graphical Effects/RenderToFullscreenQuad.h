@@ -14,7 +14,6 @@ private:
 	RenderClass* _renderClass;
 	BufferClass* _bufferClass;
 
-	ID3D11RasterizerState* _cwCullMode;
 	ID3D11RenderTargetView* _backBuffer;
 
 	ID3D11VertexShader* _quadVS;

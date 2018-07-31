@@ -164,6 +164,7 @@ HRESULT ShaderClass::CompileShaderFromFile(WCHAR * filename, LPCSTR entrypoint, 
 	dwShaderFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
+	
 	ID3DBlob* pErrorBlob;
 	hr = D3DCompileFromFile(filename, nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, entrypoint, shaderModel,
 		dwShaderFlags, 0, outBlob, &pErrorBlob);

@@ -18,8 +18,6 @@ private:
 	RenderClass* _renderClass;
 	BufferClass* _bufferClass;
 
-	ID3D11RasterizerState* _noCullRasterizer;
-	ID3D11DepthStencilState* _depthDisabled;
 	ID3D11VertexShader* _colourGradientVS;
 	ID3D11PixelShader* _colourGradientPS;
 	ID3D11InputLayout* _inputLayout;

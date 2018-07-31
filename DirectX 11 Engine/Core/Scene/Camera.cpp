@@ -30,7 +30,7 @@ void Camera::LookAt(XMFLOAT3 right, XMFLOAT3 at, XMFLOAT3 up)
 	XMVECTOR At = XMLoadFloat3(&_at);
 	XMVECTOR Up = XMLoadFloat3(&_up);
 
-	XMStoreFloat4x4(&_view, XMMatrixLookToLH(Right, At, Up));
+	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(Right, At, Up));
 }
 
 void Camera::SetPosition(XMFLOAT3 position)

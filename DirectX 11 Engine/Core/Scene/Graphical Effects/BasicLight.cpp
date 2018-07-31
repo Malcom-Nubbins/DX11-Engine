@@ -13,8 +13,6 @@ BasicLight::BasicLight(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass
 
 	_depthStencilBuffer = nullptr;
 	_depthStencilView = nullptr;
-	_dsLessEqual = nullptr;
-	_cwCullMode = nullptr;
 
 	_fogValuesBuffer = nullptr;
 
@@ -37,7 +35,6 @@ void BasicLight::Cleanup()
 
 	_depthStencilBuffer->Release();
 	_depthStencilView->Release();
-	_dsLessEqual->Release();
 
 	_fogValuesBuffer->Release();
 }
@@ -47,8 +44,6 @@ void BasicLight::Resize(float newWidth, float newHeight)
 	_renderTargetView->Release();
 	_depthStencilBuffer->Release();
 	_depthStencilView->Release();
-	_dsLessEqual->Release();
-	_cwCullMode->Release();
 
 	InitialiseRenderTargetAndDepthStencilViews(newWidth, newHeight);
 	InitialiseViewport(newWidth, newHeight);
@@ -97,21 +92,6 @@ void BasicLight::SetAsCurrentRenderTarget()
 void BasicLight::SetAsCurrentViewport()
 {
 	_renderClass->SetViewport(_viewport);
-}
-
-void BasicLight::SetDepthEnabled()
-{
-	_d3dClass->GetContext()->OMSetDepthStencilState(_dsLessEqual, 0);
-}
-
-void BasicLight::WireframeMode()
-{
-	_d3dClass->GetContext()->RSSetState(_wireframeMode);
-}
-
-void BasicLight::FillMode()
-{
-	_d3dClass->GetContext()->RSSetState(_cwCullMode);
 }
 
 HRESULT BasicLight::InitialiseShaders()
@@ -225,48 +205,6 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 	if (FAILED(hr))
 		return hr;
 
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	depthStencilDesc.StencilEnable = true;
-	depthStencilDesc.StencilReadMask = 0xFF;
-	depthStencilDesc.StencilWriteMask = 0xFF;
-
-	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	hr = _d3dClass->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &_dsLessEqual);
-	if (FAILED(hr))
-		return hr;
-
-	_d3dClass->GetContext()->OMSetDepthStencilState(_dsLessEqual, 0);
-
-	D3D11_RASTERIZER_DESC rasteriserdesc;
-	ZeroMemory(&rasteriserdesc, sizeof(D3D11_RASTERIZER_DESC));
-	rasteriserdesc.FillMode = D3D11_FILL_SOLID;
-	rasteriserdesc.CullMode = D3D11_CULL_BACK;
-	rasteriserdesc.MultisampleEnable = true;
-	rasteriserdesc.AntialiasedLineEnable = true;
-	rasteriserdesc.FrontCounterClockwise = false;
-	hr = _d3dClass->GetDevice()->CreateRasterizerState(&rasteriserdesc, &_cwCullMode);
-	if (FAILED(hr))
-		return hr;
-
-	D3D11_RASTERIZER_DESC wfdesc;
-	ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
-	wfdesc.FillMode = D3D11_FILL_WIREFRAME;
-	wfdesc.CullMode = D3D11_CULL_NONE;
-	hr = _d3dClass->GetDevice()->CreateRasterizerState(&wfdesc, &_wireframeMode);
-
 	return S_OK;
 }
 
@@ -318,7 +256,7 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 						const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, DiamondSquareTerrain& terrain, 
 						ID3D11Buffer* matrixBuffer, ID3D11Buffer* objectValueBuffer, Shadows& shadowClass)
 {
-	_d3dClass->GetContext()->OMSetDepthStencilState(_dsLessEqual, 0);
+	_renderClass->EnableZBuffer();
 
 	_bufferClass->SetVertexShaderBuffers(&matrixBuffer, 0);
 
@@ -326,9 +264,9 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	_bufferClass->SetPixelShaderBuffers(&_fogValuesBuffer, 1);
 
 	if (_renderWireframe)
-		WireframeMode();
+		_renderClass->SetRasterizerState(WIREFRAME);
 	else
-		FillMode();
+		_renderClass->SetRasterizerState(BACK_CULL);
 
 	MatrixBuffer matBuffer;
 	ObjectValuesBuffer objValBuffer;
@@ -349,8 +287,8 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	objValBuffer.EyePos = camera.GetPosition();
 
 	tessValues.MaxTessDistance = 1.0f;
-	tessValues.MinTessDistance = 25.0f;
-	tessValues.MaxTessFactor = 15.0f;
+	tessValues.MinTessDistance = 50.0f;
+	tessValues.MaxTessFactor = 10.0f;
 	tessValues.MinTessFactor = 1.0f;
 
 	camLightValues.EyePos = XMFLOAT4(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 1.0f);
@@ -363,9 +301,19 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 
 	objValBuffer.numOfLights = pointLights.size();
 
-	for (int i = 0; i < 96; ++i)
+	if (pointLights.size() < 96)
 	{
-		objValBuffer.pointLight[i] = pointLights.at(i);
+		for (int i = 0; i < pointLights.size(); ++i)
+		{
+			objValBuffer.pointLight[i] = pointLights.at(i);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < 96; ++i)
+		{
+			objValBuffer.pointLight[i] = pointLights.at(i);
+		}
 	}
 
 	_d3dClass->GetContext()->PSSetSamplers(0, 1, _shaderClass->GetSamplerState(ANISOTROPIC));

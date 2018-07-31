@@ -118,8 +118,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	_spotLight.Spot = 60.0f;
-	_spotLight.Range = 100.0f;
+	_spotLight.Spot = 50.0f;
+	_spotLight.Range = 40.0f;
 
 	_preOffsetLightDir = _sceneLight.LightDirection;
 
@@ -214,8 +214,10 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	light.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	light.Attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
 	light.Range = 25.0f;
+	light.Position = _camera->GetPosition();
+	//_pointLights.push_back(light);
 
-	for (int i = 0; i < 60; ++i)
+	/*for (int i = 0; i < 60; ++i)
 	{
 		float randomX = MathsHandler::RandomFloat(-90, 90);
 		float randomZ = MathsHandler::RandomFloat(-90, 90);
@@ -248,7 +250,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		_pointLights.push_back(light);
 
 		_sceneElements.push_back(element);
-	}
+	}*/
 
 	element = new SceneElement("Light Source Sphere", OBJLoader::Load((char*)"Core/Resources/Objects/sphere.obj", _d3dClass->GetDevice(), false), shiny);
 	element->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -301,6 +303,8 @@ void MainScene::Update(float deltaTime)
 
 	_spotLight.Position = _camera->GetPosition();
 	_spotLight.Direction = _camera->GetLookDirection();
+	//_pointLights.at(0).Position = _camera->GetPosition();
+	
 
 	XMFLOAT3 lightDir = _preOffsetLightDir;
 
@@ -463,7 +467,7 @@ void MainScene::Draw()
 	_basicLight->SetAsCurrentViewport();
 	_skyGradient->Render(_matrixBuffer, *_camera, sunPos);
 
-	_basicLight->SetDepthEnabled();
+	_renderClass->EnableZBuffer();
 	_shadows->Render(_sceneElements, *_diamondSquareTerrain);
 
 	_basicLight->Render(*_camera, _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_diamondSquareTerrain, _matrixBuffer, _objectValueBuffer, *_shadows);

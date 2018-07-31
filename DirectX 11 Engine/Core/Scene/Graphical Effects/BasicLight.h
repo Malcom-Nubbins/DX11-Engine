@@ -24,9 +24,6 @@ private:
 	RenderClass* _renderClass;
 	BufferClass* _bufferClass;
 
-	ID3D11RasterizerState* _cwCullMode;
-	ID3D11RasterizerState* _wireframeMode;
-
 	ID3D11VertexShader* _lightVS;
 	ID3D11HullShader* _tesselationHS;
 	ID3D11DomainShader* _tesselationDS;
@@ -37,7 +34,6 @@ private:
 	ID3D11RenderTargetView* _renderTargetView;
 	ID3D11ShaderResourceView* _renderTargetSRV;
 
-	ID3D11DepthStencilState* _dsLessEqual;
 	ID3D11Texture2D* _depthStencilBuffer;
 	ID3D11DepthStencilView* _depthStencilView;
 	D3D11_VIEWPORT _viewport;
@@ -68,12 +64,9 @@ public:
 	void SetAsCurrentShader();
 	void SetAsCurrentRenderTarget();
 	void SetAsCurrentViewport();
-	void SetDepthEnabled();
 
 	void SetWireframeMode(bool state) { _renderWireframe = state; }
 	bool GetWireframeState() const { return _renderWireframe; }
-	void WireframeMode();
-	void FillMode();
 
 	void CalculateLightColour(DirectionalLight & sceneLight, float sunHeight, FogValuesBuffer & sceneFog);
 	ID3D11ShaderResourceView* GetRenderTargetSRV() const { return _renderTargetSRV; }

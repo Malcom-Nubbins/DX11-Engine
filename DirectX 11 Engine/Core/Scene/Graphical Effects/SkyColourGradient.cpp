@@ -7,7 +7,6 @@ SkyColourGradient::SkyColourGradient(D3DClass * d3dClass, RenderClass * renderCl
 	_colourGradientVS = nullptr;
 	_colourGradientPS = nullptr;
 	_inputLayout = nullptr;
-	_noCullRasterizer = nullptr;
 	_gradientValuesBuffer = nullptr;
 }
 
@@ -20,7 +19,6 @@ void SkyColourGradient::Cleanup()
 	_colourGradientVS->Release();
 	_colourGradientPS->Release();
 	_inputLayout->Release();
-	_noCullRasterizer->Release();
 	_gradientValuesBuffer->Release();
 }
 
@@ -60,40 +58,6 @@ HRESULT SkyColourGradient::InitialiseShaders()
 	if (FAILED(hr))
 		return hr;
 	hr = _shaderClass->CreatePixelShader((WCHAR*)L"Core/Shaders/ColourGradientPS.hlsl", &_colourGradientPS);
-	if (FAILED(hr))
-		return hr;
-
-	D3D11_RASTERIZER_DESC rasteriserdesc;
-	ZeroMemory(&rasteriserdesc, sizeof(D3D11_RASTERIZER_DESC));
-	rasteriserdesc.FillMode = D3D11_FILL_SOLID;
-	rasteriserdesc.CullMode = D3D11_CULL_NONE;
-	rasteriserdesc.MultisampleEnable = false;
-	rasteriserdesc.AntialiasedLineEnable = false;
-	rasteriserdesc.FrontCounterClockwise = false;
-	hr = _d3dClass->GetDevice()->CreateRasterizerState(&rasteriserdesc, &_noCullRasterizer);
-	if (FAILED(hr))
-		return hr;
-
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
-	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-	depthStencilDesc.DepthEnable = false;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	depthStencilDesc.StencilEnable = true;
-	depthStencilDesc.StencilReadMask = 0xFF;
-	depthStencilDesc.StencilWriteMask = 0xFF;
-
-	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	hr = _d3dClass->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &_depthDisabled);
 	if (FAILED(hr))
 		return hr;
 
@@ -146,9 +110,8 @@ void SkyColourGradient::Update(float deltaTime)
 
 void SkyColourGradient::Render(ID3D11Buffer * matrixBuffer, const Camera& camera, const XMFLOAT3& sunPos)
 {
-	_d3dClass->GetContext()->OMSetDepthStencilState(_depthDisabled, 0);
-
-	_d3dClass->GetContext()->RSSetState(_noCullRasterizer);
+	_renderClass->DisableZBuffer();
+	_renderClass->SetRasterizerState(NO_CULL);
 
 	_bufferClass->SetVertexShaderBuffers(&matrixBuffer);
 	_bufferClass->SetPixelShaderBuffers(&_gradientValuesBuffer);

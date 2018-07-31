@@ -68,20 +68,6 @@ HRESULT Shadows::InitialiseShaders()
 	if (FAILED(hr))
 		return hr;
 
-	// Setup the rasterizer for depth mapping
-	D3D11_RASTERIZER_DESC ddesc;
-	ZeroMemory(&ddesc, sizeof(D3D11_RASTERIZER_DESC));
-	ddesc.FillMode = D3D11_FILL_SOLID;
-	ddesc.CullMode = D3D11_CULL_NONE;
-	ddesc.MultisampleEnable = false;
-	ddesc.FrontCounterClockwise = false;
-	ddesc.DepthBias = 5000;
-	ddesc.DepthBiasClamp = 0.0f;
-	ddesc.SlopeScaledDepthBias = 4.0f;
-	hr = _d3dClass->GetDevice()->CreateRasterizerState(&ddesc, &_shadowRasterizer);
-	if (FAILED(hr))
-		return hr;
-
 	return S_OK;
 }
 
@@ -158,6 +144,7 @@ void Shadows::BuildShadowTransform()
 	float r = sphereCenterLS.x + _sceneBoundary.sphereRadius;
 	float t = sphereCenterLS.y + _sceneBoundary.sphereRadius;
 	float f = sphereCenterLS.z + _sceneBoundary.sphereRadius;
+
 	XMMATRIX P = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
 
 	const XMMATRIX textureSpace(0.5f, 0.0f, 0.0f, 0.0f,
@@ -187,7 +174,7 @@ void Shadows::UpdateLightDirection(XMFLOAT3 lightDirection)
 
 void Shadows::Render(const std::vector<SceneElement*>& sceneElements, DiamondSquareTerrain& terrain)
 {
-	_d3dClass->GetContext()->RSSetState(_shadowRasterizer);
+	_renderClass->SetRasterizerState(SHADOWDEPTH);
 	SetAsCurrentViewport();
 	SetAsCurrentDepthStencil();
 	SetAsCurrentShader();
@@ -211,7 +198,7 @@ void Shadows::Render(const std::vector<SceneElement*>& sceneElements, DiamondSqu
 		}
 	}
 
-	terrain.ShadowDraw(shadowDepthMatrixBuffer, _shadowDepthMatrixBuffer);
+	//terrain.ShadowDraw(shadowDepthMatrixBuffer, _shadowDepthMatrixBuffer);
 }
 
 void Shadows::SetAsCurrentShader()

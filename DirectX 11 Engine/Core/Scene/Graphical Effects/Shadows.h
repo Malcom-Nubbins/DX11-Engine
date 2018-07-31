@@ -28,7 +28,6 @@ private:
 	RenderClass* _renderClass;
 	BufferClass* _bufferClass;
 
-	ID3D11RasterizerState* _shadowRasterizer;
 	ID3D11VertexShader* _shadowDepthVS;
 	ID3D11InputLayout* _inputLayout;
 
