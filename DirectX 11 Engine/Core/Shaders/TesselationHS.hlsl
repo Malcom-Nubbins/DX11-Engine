@@ -11,6 +11,10 @@ struct VertexOutput
 
     float4 ShadowProj : TEXCOORD1;
 
+    float3 EyePosTS : WORLDPOS1;
+    float3 LightVecTS : WORLDPOS2;
+    float3 NormalTS : NORMAL1;
+
     float TessFactor : TESS;
 };
 
@@ -24,6 +28,10 @@ struct HullOutput
     float2 Tex : TEXCOORD0;
 
     float4 ShadowProj : TEXCOORD1;
+
+    float3 EyePosTS : WORLDPOS1;
+    float3 LightVecTS : WORLDPOS2;
+    float3 NormalTS : NORMAL1;
 
     float TessFactor : TESS;
 };
@@ -66,6 +74,9 @@ HullOutput main(
     output.BinormalW = ip[i].BinormalW;
     output.Tex = ip[i].Tex;
     output.ShadowProj = ip[i].ShadowProj;
+    output.EyePosTS = ip[i].EyePosTS;
+    output.LightVecTS = ip[i].LightVecTS;
+    output.NormalTS = ip[i].NormalTS;
     output.TessFactor = ip[i].TessFactor;
 
 	return output;

@@ -17,6 +17,9 @@ private:
 
 	ID3D11ShaderResourceView* _distortionMap;
 	ID3D11ShaderResourceView* _snowTexture;
+
+	ID3D11ShaderResourceView* _aircraftTexture;
+	ID3D11ShaderResourceView* _aircraftNormalMap;
 public:
 	TextureHandler(D3DClass* d3dClass);
 	~TextureHandler();
@@ -34,5 +37,8 @@ public:
 
 	ID3D11ShaderResourceView* GetDistortionMap() const { return _distortionMap; }
 	ID3D11ShaderResourceView* GetSnowTexture() const { return _snowTexture; }
+
+	ID3D11ShaderResourceView* GetAircraftTexture() const { return _aircraftTexture; }
+	ID3D11ShaderResourceView* GetAircraftNormalMap() const { return _aircraftNormalMap; }
 };
 

@@ -342,19 +342,27 @@ void DiamondSquareTerrain::GetNormals(UINT faceCount, UINT vertexCount)
 		v3.Normal = _gridMesh->Vertices[i2].Normal;
 		v3.Tex = _gridMesh->Vertices[i2].TexCoord;
 
-		_gridMesh->Vertices[i0].Tangent.x += MathsHandler::CalculateTangent(v1, v2, v3).x;
-		_gridMesh->Vertices[i0].Tangent.y += MathsHandler::CalculateTangent(v1, v2, v3).y;
-		_gridMesh->Vertices[i0].Tangent.z += MathsHandler::CalculateTangent(v1, v2, v3).z;
+		_gridMesh->Vertices[i0].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		_gridMesh->Vertices[i1].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		_gridMesh->Vertices[i2].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
 
-		_gridMesh->Vertices[i1].Tangent.x += MathsHandler::CalculateTangent(v1, v2, v3).x;
+		_gridMesh->Vertices[i0].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		_gridMesh->Vertices[i1].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		_gridMesh->Vertices[i2].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+
+		//_gridMesh->Vertices[i0].Tangent.x += MathsHandler::CalculateTangent(v1, v2, v3).x;
+		//_gridMesh->Vertices[i0].Tangent.y += MathsHandler::CalculateTangent(v1, v2, v3).y;
+		//_gridMesh->Vertices[i0].Tangent.z += MathsHandler::CalculateTangent(v1, v2, v3).z;
+
+		/*_gridMesh->Vertices[i1].Tangent.x += MathsHandler::CalculateTangent(v1, v2, v3).x;
 		_gridMesh->Vertices[i1].Tangent.y += MathsHandler::CalculateTangent(v1, v2, v3).y;
 		_gridMesh->Vertices[i1].Tangent.z += MathsHandler::CalculateTangent(v1, v2, v3).z;
 
 		_gridMesh->Vertices[i2].Tangent.x += MathsHandler::CalculateTangent(v1, v2, v3).x;
 		_gridMesh->Vertices[i2].Tangent.y += MathsHandler::CalculateTangent(v1, v2, v3).y;
-		_gridMesh->Vertices[i2].Tangent.z += MathsHandler::CalculateTangent(v1, v2, v3).z;
+		_gridMesh->Vertices[i2].Tangent.z += MathsHandler::CalculateTangent(v1, v2, v3).z;*/
 
-		_gridMesh->Vertices[i0].Binormal.x += MathsHandler::CalculateBinormal(v1, v2, v3).x;
+		/*_gridMesh->Vertices[i0].Binormal.x += MathsHandler::CalculateBinormal(v1, v2, v3).x;
 		_gridMesh->Vertices[i0].Binormal.y += MathsHandler::CalculateBinormal(v1, v2, v3).y;
 		_gridMesh->Vertices[i0].Binormal.z += MathsHandler::CalculateBinormal(v1, v2, v3).z;
 
@@ -364,7 +372,7 @@ void DiamondSquareTerrain::GetNormals(UINT faceCount, UINT vertexCount)
 
 		_gridMesh->Vertices[i2].Binormal.x += MathsHandler::CalculateBinormal(v1, v2, v3).x;
 		_gridMesh->Vertices[i2].Binormal.y += MathsHandler::CalculateBinormal(v1, v2, v3).y;
-		_gridMesh->Vertices[i2].Binormal.z += MathsHandler::CalculateBinormal(v1, v2, v3).z;
+		_gridMesh->Vertices[i2].Binormal.z += MathsHandler::CalculateBinormal(v1, v2, v3).z;*/
 	}
 
 	for (UINT i = 0; i < vertexCount; ++i)

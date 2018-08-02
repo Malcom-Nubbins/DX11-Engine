@@ -45,6 +45,10 @@ struct VertexOutput
     float2 Tex : TEXCOORD0;
 
     float4 ShadowProj : TEXCOORD1;
+
+    float3 EyePosTS : POSITION2;
+    float3 LightVecTS : POSITION3;
+    float3 NormalTS : NORMAL1;
 };
 
 float4 main(VertexOutput input) : SV_TARGET
@@ -54,10 +58,17 @@ float4 main(VertexOutput input) : SV_TARGET
     float3 specular = float3(0.0f, 0.0f, 0.0f);
 
     input.NormW = normalize(input.NormW);
+    input.TangentW = normalize(input.TangentW);
+    input.BinormalW = normalize(input.BinormalW);
+    input.LightVecTS = normalize(input.LightVecTS);
+    input.NormalTS = normalize(input.NormalTS);
 
     float3 toEye = EyePos - input.PosW;
+    float3 toEyeTS = input.EyePosTS;
     float distToEye = length(toEye);
-    toEye = normalize(toEye);
+
+    toEyeTS = normalize(toEyeTS);
+    //toEye = normalize(toEye);
 
     float4 textureColour = texColour.Sample(samLinear, input.Tex);
     float3 bumpMapSample = texBumpmap.Sample(samLinear, input.Tex).rgb;
@@ -68,10 +79,10 @@ float4 main(VertexOutput input) : SV_TARGET
         shadow = ComputeShadows(samShadow, texShadow, input.ShadowProj);
 
         if(useBumpMap == 1.0f)
-            input.NormW = CalculateBumpedNormal(bumpMapSample, input.NormW, input.TangentW, input.BinormalW);
+            input.NormalTS = CalculateBumpedNormal(bumpMapSample, input.NormalTS, input.TangentW, input.BinormalW);
 
         float3 A, D, S;
-        ComputeDirectionalLight(surface, dirLight, input.NormW, toEye, A, D, S);
+        ComputeDirectionalLight(surface, dirLight, input.LightVecTS, input.NormalTS, toEyeTS, A, D, S);
         specular += shadow * S;
         diffuse += shadow * D;
         ambient += A;
@@ -82,7 +93,7 @@ float4 main(VertexOutput input) : SV_TARGET
             {
                 for (int i = 0; i < numOfLights; ++i)
                 {
-                    ComputePointLight(surface, pointLight[i], input.PosW, input.NormW, toEye, A, D, S);
+                    ComputePointLight(surface, pointLight[i], input.PosW, input.NormalTS, toEyeTS, A, D, S);
                     specular += S;
                     diffuse += D;
                 }
@@ -91,16 +102,16 @@ float4 main(VertexOutput input) : SV_TARGET
             {
                 for (int i = 0; i < 96; ++i)
                 {
-                    ComputePointLight(surface, pointLight[i], input.PosW, input.NormW, toEye, A, D, S);
+                    ComputePointLight(surface, pointLight[i], input.PosW, input.NormalTS, toEyeTS, A, D, S);
                     specular += S;
                     diffuse += D;
                 }
             }
         }
 
-        ComputeSpotLight(surface, spotLight, input.PosW, input.NormW, toEye, A, D, S);
-        specular += S;
-        diffuse += D;
+        //ComputeSpotLight(surface, spotLight, input.PosW, input.NormalTS, toEyeTS, A, D, S);
+       // specular += S;
+       // diffuse += D;
     
         float4 finalColour;
         if (useColourTex == 1.0f)

@@ -36,6 +36,10 @@ struct DomainOutput
     float2 Tex : TEXCOORD0;
 
     float4 ShadowProj : TEXCOORD1;
+
+    float3 EyePosTS : POSITION2;
+    float3 LightVecTS : POSITION3;
+    float3 NormalTS : NORMAL1;
 };
 
 //// Output control point
@@ -48,6 +52,10 @@ struct HullOutput
     float2 Tex : TEXCOORD0;
 
     float4 ShadowProj : TEXCOORD1;
+
+    float3 EyePosTS : WORLDPOS1;
+    float3 LightVecTS : WORLDPOS2;
+    float3 NormalTS : NORMAL1;
 
     float TessFactor : TESS;
 };
@@ -74,9 +82,16 @@ DomainOutput main(
     output.BinormalW = domain.x * tri[0].BinormalW + domain.y * tri[1].BinormalW + domain.z * tri[2].BinormalW;
     output.Tex = domain.x * tri[0].Tex + domain.y * tri[1].Tex + domain.z * tri[2].Tex;
 
+    output.EyePosTS = domain.x * tri[0].EyePosTS + domain.y * tri[1].EyePosTS + domain.z * tri[2].EyePosTS;
+    output.LightVecTS = domain.x * tri[0].LightVecTS + domain.y * tri[1].LightVecTS + domain.z * tri[2].LightVecTS;
+    output.NormalTS = domain.x * tri[0].NormalTS + domain.y * tri[1].NormalTS + domain.z * tri[2].NormalTS;
+
     output.ShadowProj = domain.x * tri[0].ShadowProj + domain.y * tri[1].ShadowProj + domain.z * tri[2].ShadowProj;
 
     output.NormW = normalize(output.NormW);
+    output.EyePosTS = normalize(output.EyePosTS);
+    output.LightVecTS = normalize(output.LightVecTS);
+    output.NormalTS = normalize(output.NormalTS);
 
     const float MipInterval = 20.0f;
     float mipLevel = clamp((distance(output.PosW, EyePos.xyz) - MipInterval) / MipInterval, 0.0f, 6.0f);

@@ -43,6 +43,10 @@ struct VertexOutput
 
     float4 ShadowProj : TEXCOORD1;
 
+    float3 EyePosTS : POSITION2;
+    float3 LightVecTS : POSITION3;
+    float3 NormalTS : NORMAL1;
+
     float TessFactor : TESS;
 };
 
@@ -56,8 +60,8 @@ VertexOutput main( VertexInput input )
 
     output.NormW = normalize(mul(float4(input.Normal, 0.0f), World).xyz);
 
-    output.TangentW = mul(float4(input.Tangent, 1.0f), World);
-    output.BinormalW = mul(float4(input.Binormal, 1.0f), World);
+    output.TangentW = mul(float4(input.Tangent, 0.0f), World);
+    output.BinormalW = mul(float4(input.Binormal, 0.0f), World);
 
     output.ShadowProj = mul(float4(input.Pos.xyz, 1.0f), mul(World, ShadowTransform));
     
@@ -66,6 +70,22 @@ VertexOutput main( VertexInput input )
     float tess = saturate((MinTessDistance - dist) / (MinTessDistance - MaxTessDistance));
 
     output.TessFactor = MinTessFactor + tess * (MaxTessFactor - MinTessFactor);
+
+    float3 binormal = cross(output.NormW, output.TangentW);
+    binormal = mul(float4(binormal, 0.0f), World);
+
+    float3x3 tangentToWorldSpace;
+    tangentToWorldSpace[0] = normalize(output.TangentW);
+    tangentToWorldSpace[1] = binormal;
+    tangentToWorldSpace[2] = output.NormW;
+
+    tangentToWorldSpace = transpose(tangentToWorldSpace);
+
+    float3 E = EyePos.xyz - output.PosW.xyz;
+
+    output.EyePosTS = mul(E, tangentToWorldSpace);
+    output.LightVecTS = mul(LightVector.xyz, tangentToWorldSpace);
+    output.NormalTS = mul(output.NormW, tangentToWorldSpace);
     
 	return output;
 }

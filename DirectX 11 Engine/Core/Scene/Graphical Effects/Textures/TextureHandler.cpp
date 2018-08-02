@@ -28,4 +28,7 @@ void TextureHandler::LoadAllTextures()
 
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/distortionMap.dds", nullptr, &_distortionMap);
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/snow.dds", nullptr, &_snowTexture);
+
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_COLOR.dds", nullptr, &_aircraftTexture);
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_NRM.dds", nullptr, &_aircraftNormalMap);
 }

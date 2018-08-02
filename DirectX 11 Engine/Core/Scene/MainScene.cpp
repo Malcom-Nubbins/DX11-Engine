@@ -118,8 +118,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	_spotLight.Spot = 50.0f;
-	_spotLight.Range = 40.0f;
+	_spotLight.Spot = 1.0f;
+	_spotLight.Range = 1.0f;
 
 	_preOffsetLightDir = _sceneLight.LightDirection;
 
@@ -147,6 +147,9 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	planeMesh.numberOfIndices = 6;
 	planeMesh.vertexBufferOffset = 0;
 	planeMesh.vertexBufferStride = sizeof(SimpleVertex);
+
+	ObjectMesh aircraftMesh;
+	aircraftMesh = OBJLoader::Load((char*)"Core/Resources/Objects/Hercules.obj", _d3dClass->GetDevice(), false);
 
 	_diamondSquareTerrain = new DiamondSquareTerrain(_d3dClass);
 	_diamondSquareTerrain->SetTerrainValues(256, 256, 512);
@@ -204,6 +207,18 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 		_sceneElements.push_back(element);
 	}
+
+	element = new SceneElement("Aircraft", aircraftMesh, shiny);
+	element->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 2.0f, 0));
+	element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	element->SetColourTexture(_textureHandler->GetAircraftTexture());
+	element->SetNormalMap(_textureHandler->GetAircraftNormalMap());
+	//element->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+	element->SetCastShadows(true);
+	element->SetAffectedByLight(true);
+
+	_sceneElements.push_back(element);
 
 	ObjectMesh plant0 = OBJLoader::Load((char*)"Core/Resources/Objects/plant0.obj", _d3dClass->GetDevice(), true);
 	ObjectMesh plant1 = OBJLoader::Load((char*)"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice(), true);
