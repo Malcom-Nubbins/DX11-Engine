@@ -110,16 +110,16 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_camera->LookAt(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	_sceneLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_sceneLight.Diffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
-	_sceneLight.Specular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	_sceneLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_sceneLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_sceneLight.LightDirection = XMFLOAT3(5.0f, 0.0f, 0.0f);
 
 	_spotLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	_spotLight.Spot = 1.0f;
-	_spotLight.Range = 1.0f;
+	_spotLight.Spot = 20.0f;
+	_spotLight.Range = 50.0f;
 
 	_preOffsetLightDir = _sceneLight.LightDirection;
 
@@ -129,10 +129,15 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneFog.FogColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
 	_sceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f); 
 	
+	ObjectMaterial aircraftMat;
+	aircraftMat.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	aircraftMat.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	aircraftMat.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 0.5f);
+
 	ObjectMaterial shiny;
 	shiny.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	shiny.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	shiny.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 8.0f);
+	shiny.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.1f);
 
 	ObjectMaterial matte;
 	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -164,7 +169,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	diamondSquareMesh.vertexBufferOffset = 0;
 	diamondSquareMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-	SceneElement* element = new SceneElement("Ground Plane", diamondSquareMesh, shiny);
+	SceneElement* element = new SceneElement("Ground Plane", diamondSquareMesh, matte);
 	element->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -188,7 +193,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	element->SetAffectedByLight(true);
 	_sceneElements.push_back(element);
 
-	ObjectMesh cube = OBJLoader::Load((char*)"Core/Resources/Objects/cube.obj", _d3dClass->GetDevice(), false);
+	ObjectMesh cube = OBJLoader::Load((char*)"Core/Resources/Objects/sphere.obj", _d3dClass->GetDevice(), false);
 	srand(time(NULL));
 	for (int i = 0; i < 90; ++i)
 	{
@@ -199,8 +204,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		element->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ) + 2.0f, randomZ));
 		element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 		element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		element->SetColourTexture(_textureHandler->GetStoneTexture());
-		element->SetNormalMap(_textureHandler->GetStoneNormalMap());
+		//element->SetColourTexture(_textureHandler->GetStoneTexture());
+		//element->SetNormalMap(_textureHandler->GetStoneNormalMap());
 		//element->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
@@ -208,7 +213,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		_sceneElements.push_back(element);
 	}
 
-	element = new SceneElement("Aircraft", aircraftMesh, shiny);
+	element = new SceneElement("Aircraft", aircraftMesh, aircraftMat);
 	element->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 2.0f, 0));
 	element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));

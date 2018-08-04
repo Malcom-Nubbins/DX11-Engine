@@ -1,3 +1,12 @@
+static const float Pi = 3.141592654f;
+static const float Pi2 = 6.283185307f;
+static const float Pi_2 = 1.570796327f;
+static const float Pi_4 = 0.7853981635f;
+static const float InvPi = 0.318309886f;
+static const float InvPi2 = 0.159154943f;
+
+static const float Roughness = 0.1f;
+
 struct Surface
 {
     float4 Ambient;
@@ -44,6 +53,47 @@ struct SpotLight
     float padding;
 };
 
+float3 SchlickFresnel(float3 f0, float3 h, float3 l)
+{
+    return f0 + (1.0f - f0) * pow((1.0f - dot(l, h)), 5.0f);
+}
+
+float GGX(float nDotV, float a)
+{
+    float k = a / 2;
+    return nDotV / (nDotV * (1.0f - k) + k);
+}
+
+float GSmith(float a, float nDotV, float nDotL)
+{
+    return GGX(nDotL, a * a) * GGX(nDotV, a * a);
+}
+
+float3 DirectDiffuseBRDF(float3 diffuseAlbedo, float nDotL)
+{
+    return (diffuseAlbedo * nDotL) / Pi;
+}
+
+float3 DirectSpecularBRDF(float4 specularAlbedo, float3 normal, float3 lightDir, float3 eyePos)
+{
+    float3 halfVec = normalize(eyePos + lightDir);
+
+    float nDotH = saturate(dot(normal, halfVec));
+    float nDotL = saturate(dot(normal, lightDir));
+    float nDotV = max(dot(normal, eyePos), 0.0001f);
+
+    float alpha2 = specularAlbedo.w * specularAlbedo.w;
+
+    float D = alpha2 / (Pi * pow(nDotH * nDotH * (alpha2 - 1) + 1, 2.0f));
+
+    float F = SchlickFresnel(specularAlbedo.rgb, halfVec, lightDir);
+
+    float G = GSmith(specularAlbedo.w, nDotV, nDotL);
+
+    return D * F * G;
+}
+
+
 void ComputeDirectionalLight(Surface surface, DirectionalLight dirLight,
                                 float3 lightDir, float3 normal, float3 toEye,
                                 out float3 ambient, out float3 diffuse, out float3 specular)
@@ -51,21 +101,15 @@ void ComputeDirectionalLight(Surface surface, DirectionalLight dirLight,
     ambient = float3(0.0f, 0.0f, 0.0f);
     diffuse = float3(0.0f, 0.0f, 0.0f);
     specular = float3(0.0f, 0.0f, 0.0f);
-
     ambient = surface.Ambient * dirLight.Ambient;
 
-    float3 lightVec = normalize(dirLight.LightDirection);
-
     float diffuseAmount = dot(lightDir, normal);
-    float specularAmount = 0.0f;
 
     if (diffuseAmount > 0.0f)
     {
-        float3 reflection = reflect(-lightDir, normal);
-        specularAmount = pow(max(dot(reflection, toEye), 0.0f), surface.Specular.w);
-
-        diffuse = diffuseAmount * surface.Diffuse * dirLight.Diffuse;
-        specular = specularAmount * surface.Specular * dirLight.Specular;
+        diffuse = DirectDiffuseBRDF(surface.Diffuse.rgb, diffuseAmount);
+        //diffuse = diffuseAmount * surface.Diffuse * dirLight.Diffuse;
+        specular = DirectSpecularBRDF(surface.Specular, normal, lightDir, toEye);
     }
 }
 
@@ -78,6 +122,7 @@ void ComputePointLight(Surface surface, PointLight pointLight, float3 pos,
     specular = float3(0.0f, 0.0f, 0.0f);
 
     float3 lightVec = pointLight.Position - pos;
+
     float distance = length(lightVec);
 
     lightVec /= distance;
@@ -103,7 +148,7 @@ void ComputePointLight(Surface surface, PointLight pointLight, float3 pos,
 }
 
 void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
-                                float3 normal, float3 toEye,
+                                float3 normal, float3 toEye, float3x3 tbn,
                                 out float3 ambient, out float3 diffuse, out float3 specular)
 {
     ambient = float3(0.0f, 0.0f, 0.0f);
@@ -111,6 +156,10 @@ void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
     specular = float3(0.0f, 0.0f, 0.0f);
 
     float3 lightVec = spotLight.Position - pos;
+ 
+    //lightVec = mul(lightVec, tbn);
+    //lightVec = normalize(lightVec);
+
     float distance = length(lightVec);
 
     if(distance > spotLight.Range)
@@ -147,17 +196,6 @@ float3 CalculateBumpedNormal(float3 normalMapSample, float3 normalW, float3 tang
     bumpedNormal = normalize(bumpedNormal);
 
     return bumpedNormal;
-
-    //float3 normalT = (2.0f * normalMapSample) - 1.0f;
-
-    //float3 N = normalW;
-    //float3 T = normalize(tangentW - dot(tangentW, N) * N);
-    //float3 B = cross(N, T);
-
-    //float3x3 TBN = float3x3(T, B, N);
-    //float3 bumpedNormal = mul(normalT, TBN);
-
-    //return bumpedNormal;
 }
 
 float ComputeShadows(SamplerComparisonState shadowSampler, Texture2D shadowMap, float4 shadowPosH)

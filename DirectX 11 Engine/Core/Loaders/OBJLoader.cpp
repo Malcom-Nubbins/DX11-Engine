@@ -421,7 +421,7 @@ void OBJLoader::CalculateNormal(XMFLOAT3 tangent, XMFLOAT3 binormal, XMFLOAT3& n
 
 	length = sqrt((normal.x * normal.x) + (normal.y * normal.y) + (normal.z * normal.z));
 
-	normal.x = normal.x / length;
-	normal.y = normal.y / length;
-	normal.z = normal.z / length;
+	normal.x = -(normal.x / length);
+	normal.y = -(normal.y / length);
+	normal.z = -(normal.z / length);
 }

@@ -68,7 +68,7 @@ float4 main(VertexOutput input) : SV_TARGET
     float distToEye = length(toEye);
 
     toEyeTS = normalize(toEyeTS);
-    //toEye = normalize(toEye);
+    toEye = normalize(toEye);
 
     float4 textureColour = texColour.Sample(samLinear, input.Tex);
     float3 bumpMapSample = texBumpmap.Sample(samLinear, input.Tex).rgb;
@@ -109,11 +109,25 @@ float4 main(VertexOutput input) : SV_TARGET
             }
         }
 
-        //ComputeSpotLight(surface, spotLight, input.PosW, input.NormalTS, toEyeTS, A, D, S);
-       // specular += S;
-       // diffuse += D;
+
+        //{
+        //    float3x3 tangentToWorldSpace;
+        //    tangentToWorldSpace[0] = input.TangentW;
+        //    tangentToWorldSpace[1] = input.BinormalW;
+        //    tangentToWorldSpace[2] = input.NormW;
+
+        //    tangentToWorldSpace = transpose(tangentToWorldSpace);
+
+        //    //input.PosW = mul(input.PosW, tangentToWorldSpace);
+
+        //    ComputeSpotLight(surface, spotLight, input.PosW, input.NormW, toEye, tangentToWorldSpace, A, D, S);
+        //    specular += S;
+        //    diffuse += D;
+        //}
+
     
         float4 finalColour;
+
         if (useColourTex == 1.0f)
         {
             finalColour.rgb = (textureColour.rgb * (ambient + diffuse) + specular);

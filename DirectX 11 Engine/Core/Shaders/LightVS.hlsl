@@ -71,12 +71,12 @@ VertexOutput main( VertexInput input )
 
     output.TessFactor = MinTessFactor + tess * (MaxTessFactor - MinTessFactor);
 
-    float3 binormal = cross(output.NormW, output.TangentW);
-    binormal = mul(float4(binormal, 0.0f), World);
+    output.BinormalW = cross(output.NormW, output.TangentW);
+    output.BinormalW = mul(float4(output.BinormalW, 0.0f), World);
 
     float3x3 tangentToWorldSpace;
     tangentToWorldSpace[0] = normalize(output.TangentW);
-    tangentToWorldSpace[1] = binormal;
+    tangentToWorldSpace[1] = normalize(output.BinormalW);
     tangentToWorldSpace[2] = output.NormW;
 
     tangentToWorldSpace = transpose(tangentToWorldSpace);
