@@ -130,8 +130,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f); 
 	
 	ObjectMaterial aircraftMat;
-	aircraftMat.ambient = XMFLOAT4(0.550, 0.556, 0.554, 1.0f);
-	aircraftMat.diffuse = XMFLOAT4(0.550, 0.556, 0.554, 1.0f);
+	aircraftMat.ambient = XMFLOAT4(0.913, 0.921, 0.925, 1.0f);
+	aircraftMat.diffuse = XMFLOAT4(0.913, 0.921, 0.925, 1.0f);
 	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 
 	ObjectMaterial shiny;
@@ -147,7 +147,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	ObjectMaterial matte;
 	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	matte.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.4f);
+	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.3f);
 
 	_bufferClass->CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
 

@@ -145,7 +145,7 @@ void Shadows::BuildShadowTransform()
 	float t = sphereCenterLS.y + _sceneBoundary.sphereRadius;
 	float f = sphereCenterLS.z + _sceneBoundary.sphereRadius;
 
-	XMMATRIX P = XMMatrixOrthographicOffCenterLH(l, r, b, t, n, f);
+	XMMATRIX P = XMMatrixPerspectiveOffCenterLH(l, r, b, t, n, f);
 
 	const XMMATRIX textureSpace(0.5f, 0.0f, 0.0f, 0.0f,
 		0.0f, -0.5f, 0.0f, 0.0f,
