@@ -50,6 +50,10 @@ private:
 	XMFLOAT4 _lightColourSunsetAmbient;
 	XMFLOAT4 _lightColourSunsetSpecular;
 
+	XMFLOAT4 _lightColourNightDiffuse;
+	XMFLOAT4 _lightColourNightAmbient;
+	XMFLOAT4 _lightColourNightSpecular;
+
 	bool _renderWireframe;
 
 public:

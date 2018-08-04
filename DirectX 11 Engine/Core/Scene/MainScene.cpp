@@ -123,26 +123,31 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 	_preOffsetLightDir = _sceneLight.LightDirection;
 
-	_sceneFog.FogStart = 2.5f;
-	_sceneFog.FogRange = 25.0f;
+	_sceneFog.FogStart = 5.0f;
+	_sceneFog.FogRange = 50.0f;
 	_sceneFog.FogColourDay = XMFLOAT4(0.7f, 0.80f, 0.92f, 1.0f);
 	_sceneFog.FogColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
 	_sceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f); 
 	
 	ObjectMaterial aircraftMat;
-	aircraftMat.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	aircraftMat.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	aircraftMat.specular = XMFLOAT4(0.8f, 0.8f, 0.8f, 0.5f);
+	aircraftMat.ambient = XMFLOAT4(0.550, 0.556, 0.554, 1.0f);
+	aircraftMat.diffuse = XMFLOAT4(0.550, 0.556, 0.554, 1.0f);
+	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 
 	ObjectMaterial shiny;
 	shiny.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	shiny.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	shiny.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.1f);
+	shiny.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.01f);
+
+	ObjectMaterial charcoal;
+	charcoal.ambient = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
+	charcoal.diffuse = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
+	charcoal.specular = XMFLOAT4(0.02, 0.02, 0.02, 0.3f);
 
 	ObjectMaterial matte;
 	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	matte.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	matte.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.4f);
 
 	_bufferClass->CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
 
@@ -193,11 +198,11 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	element->SetAffectedByLight(true);
 	_sceneElements.push_back(element);
 
-	ObjectMesh cube = OBJLoader::Load((char*)"Core/Resources/Objects/sphere.obj", _d3dClass->GetDevice(), false);
+	ObjectMesh cube = OBJLoader::Load((char*)"Core/Resources/Objects/spherex.obj", _d3dClass->GetDevice(), false);
 	srand(time(NULL));
 	for (int i = 0; i < 90; ++i)
 	{
-		element = new SceneElement("Cube", cube, shiny);
+		element = new SceneElement("Cube", cube, charcoal);
 		float randomX = MathsHandler::RandomFloat(-128, 128);
 		float randomZ = MathsHandler::RandomFloat(-128, 128);
 
@@ -214,7 +219,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	}
 
 	element = new SceneElement("Aircraft", aircraftMesh, aircraftMat);
-	element->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 2.0f, 0));
+	element->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 8.0f, 0));
 	element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	element->SetColourTexture(_textureHandler->GetAircraftTexture());
@@ -376,18 +381,18 @@ void MainScene::Update(float deltaTime)
 
 	if (_seasonNames.find(_currentSeason)->second == "Spring" || _seasonNames.find(_currentSeason)->second == "Autumn")
 	{
-		_sceneFog.FogStart = 6.5f;
-		_sceneFog.FogRange = 75.0f;
+		_sceneFog.FogStart = 13.0f;
+		_sceneFog.FogRange = 150.0f;
 	}
 	else if (_seasonNames.find(_currentSeason)->second == "Summer")
 	{
-		_sceneFog.FogStart = 12.0f;
-		_sceneFog.FogRange = 120.0f;
+		_sceneFog.FogStart = 24.0f;
+		_sceneFog.FogRange = 240.0f;
 	}
 	else if (_seasonNames.find(_currentSeason)->second == "Winter")
 	{
-		_sceneFog.FogStart = 3.5f;
-		_sceneFog.FogRange = 40.0f;
+		_sceneFog.FogStart = 7.0f;
+		_sceneFog.FogRange = 80.0f;
 	}
 
 	if (GetAsyncKeyState(VK_OEM_PERIOD))

@@ -107,9 +107,9 @@ void ComputeDirectionalLight(Surface surface, DirectionalLight dirLight,
 
     if (diffuseAmount > 0.0f)
     {
-        diffuse = DirectDiffuseBRDF(surface.Diffuse.rgb, diffuseAmount);
+        diffuse = DirectDiffuseBRDF(surface.Diffuse.rgb, diffuseAmount) * dirLight.Diffuse.rgb;
         //diffuse = diffuseAmount * surface.Diffuse * dirLight.Diffuse;
-        specular = DirectSpecularBRDF(surface.Specular, normal, lightDir, toEye);
+        specular = DirectSpecularBRDF(surface.Specular, normal, lightDir, toEye) * dirLight.Specular.rgb;
     }
 }
 

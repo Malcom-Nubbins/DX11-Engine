@@ -130,7 +130,7 @@ float4 main(VertexOutput input) : SV_TARGET
 
         if (useColourTex == 1.0f)
         {
-            finalColour.rgb = (textureColour.rgb * (ambient + diffuse) + specular);
+            finalColour.rgb = textureColour.rgb * ((ambient + diffuse) + specular);
         }
         else
         {

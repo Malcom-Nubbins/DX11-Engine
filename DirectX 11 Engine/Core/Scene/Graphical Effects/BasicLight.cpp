@@ -76,6 +76,10 @@ HRESULT BasicLight::Initialise(float windowWidth, float windowHeight)
 	_lightColourSunsetAmbient = XMFLOAT4(0.19f, 0.09f, 0.07f, 1.0f);
 	_lightColourSunsetSpecular = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
 
+	_lightColourNightDiffuse = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	_lightColourNightAmbient = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	_lightColourNightSpecular = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+
 	return S_OK;
 }
 
@@ -228,27 +232,41 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 	XMVECTOR ambientSunset = XMLoadFloat4(&_lightColourSunsetAmbient);
 	XMVECTOR specularSunset = XMLoadFloat4(&_lightColourSunsetSpecular);
 
-	if (sunHeight >= 10.0f)
+	XMVECTOR diffuseNight = XMLoadFloat4(&_lightColourNightDiffuse);
+	XMVECTOR ambientNight = XMLoadFloat4(&_lightColourNightAmbient);
+	XMVECTOR specularNight = XMLoadFloat4(&_lightColourNightSpecular);
+
+	if (sunHeight >= 20.0f)
 	{
 		XMStoreFloat4(&sceneLight.Diffuse, diffuseDay);
 		XMStoreFloat4(&sceneLight.Ambient, ambientDay);
 		XMStoreFloat4(&sceneLight.Specular, specularDay);
 	}
-	else if (sunHeight <= 10.0f && sunHeight > 0.0f)
+	else if (sunHeight <= 20.0f && sunHeight > 0.0f)
 	{
-		XMVECTOR blendedLightDiffuse = XMVectorLerp(diffuseSunset, diffuseDay, sunHeight / 10.0f);
-		XMVECTOR blendedLightAmbient = XMVectorLerp(ambientSunset, ambientDay, sunHeight / 10.0f);
-		XMVECTOR blendedLightSpecular = XMVectorLerp(specularSunset, specularDay, sunHeight / 10.0f);
+		XMVECTOR blendedLightDiffuse = XMVectorLerp(diffuseSunset, diffuseDay, sunHeight / 20.0f);
+		XMVECTOR blendedLightAmbient = XMVectorLerp(ambientSunset, ambientDay, sunHeight / 20.0f);
+		XMVECTOR blendedLightSpecular = XMVectorLerp(specularSunset, specularDay, sunHeight / 20.0f);
 		
 		XMStoreFloat4(&sceneLight.Diffuse, blendedLightDiffuse);
-		XMStoreFloat4(&sceneLight.Ambient, ambientDay);
+		XMStoreFloat4(&sceneLight.Ambient, blendedLightAmbient);
+		XMStoreFloat4(&sceneLight.Specular, blendedLightSpecular);
+	}
+	else if(sunHeight <= 0.0f && sunHeight > -10.0f)
+	{
+		XMVECTOR blendedLightDiffuse = XMVectorLerp(diffuseSunset, diffuseNight, -sunHeight / 10.0f);
+		XMVECTOR blendedLightAmbient = XMVectorLerp(ambientSunset, ambientNight, -sunHeight / 10.0f);
+		XMVECTOR blendedLightSpecular = XMVectorLerp(specularSunset, specularNight, -sunHeight / 10.0f);
+		
+		XMStoreFloat4(&sceneLight.Diffuse, blendedLightDiffuse);
+		XMStoreFloat4(&sceneLight.Ambient, blendedLightAmbient);
 		XMStoreFloat4(&sceneLight.Specular, blendedLightSpecular);
 	}
 	else
 	{
-		XMStoreFloat4(&sceneLight.Diffuse, diffuseSunset);
-		XMStoreFloat4(&sceneLight.Ambient, ambientDay);
-		XMStoreFloat4(&sceneLight.Specular, specularSunset);
+		XMStoreFloat4(&sceneLight.Diffuse, diffuseNight);
+		XMStoreFloat4(&sceneLight.Ambient, ambientNight);
+		XMStoreFloat4(&sceneLight.Specular, specularNight);
 	}
 }
 
