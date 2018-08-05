@@ -294,7 +294,7 @@ void DiamondSquareTerrain::UpdateMeshData()
 	updatedMesh.vertexBufferOffset = 0;
 	updatedMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-	_terrainGO->UpdateObjectMesh(updatedMesh);
+	_terrainGO->GetAppearance()->UpdateObjectMesh(updatedMesh);
 }
 
 void DiamondSquareTerrain::GetNormals(UINT faceCount, UINT vertexCount)
@@ -394,7 +394,7 @@ void DiamondSquareTerrain::ShadowDraw(ShadowDepthMatrixBuffer mb, ID3D11Buffer *
 	{
 		if (_terrainGO->CanCastShadows())
 		{
-			mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetWorld()));
+			mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
 			_d3dClass->GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
 			_terrainGO->Draw(_d3dClass->GetContext());
 		}
@@ -405,20 +405,23 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 {
 	if (_finishedBuilding)
 	{
-		ObjectMaterial material = _terrainGO->GetObjectMaterial();
+		Transform* transform = _terrainGO->GetTransform();
+		Appearance* appearance = _terrainGO->GetAppearance();
+
+		ObjectMaterial material = appearance->GetObjectMaterial();
 		// Copy material to shader
 		cb.surface.Ambient = material.ambient;
 		cb.surface.Diffuse = material.diffuse;
 		cb.surface.Specular = material.specular;
 
 		// Set world matrix
-		mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetWorld()));
+		mb.World = XMMatrixTranspose(XMLoadFloat4x4(&transform->GetWorld()));
 
 		ID3D11ShaderResourceView* texture;
 		// Set texture
-		if (_terrainGO->HasColourTexture())
+		if (appearance->HasColourTexture())
 		{
-			texture = _terrainGO->GetColourTex();
+			texture = appearance->GetColourTex();
 			_d3dClass->GetContext()->PSSetShaderResources(0, 1, &texture);
 			cb.useColourTex = 1.0f;
 		}
@@ -427,10 +430,10 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 			cb.useColourTex = 0.0f;
 		}
 
-		if (_terrainGO->HasNormalMap())
+		if (appearance->HasNormalMap())
 		{
 			cb.useBumpMap = 1.0f;
-			texture = _terrainGO->GetNormalMap();
+			texture = appearance->GetNormalMap();
 			_d3dClass->GetContext()->PSSetShaderResources(2, 1, &texture);
 		}
 		else

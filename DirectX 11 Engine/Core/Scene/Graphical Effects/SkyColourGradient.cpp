@@ -88,11 +88,15 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	matte.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	matte.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	_skyDomeElement = new SceneElement("Sky dome", OBJLoader::Load((char*)"Core/Resources/Objects/spherex1.obj", _d3dClass->GetDevice(), false), matte);
-	_skyDomeElement->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	_skyDomeElement->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	_skyDomeElement->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	_skyDomeElement->SetColourTexture(nullptr);
+	Transform* skyDomeTransform = new Transform();
+	skyDomeTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	skyDomeTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	skyDomeTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	Appearance * appearance = new Appearance(OBJLoader::Load((char*)"Core/Resources/Objects/spherex1.obj", _d3dClass->GetDevice(), false), matte);
+	appearance->SetColourTexture(nullptr);
+
+	_skyDomeElement = new SceneElement("Sky dome",  skyDomeTransform, appearance);
 	_skyDomeElement->SetCastShadows(false);
 	_skyDomeElement->SetAffectedByLight(false);
 }
@@ -104,7 +108,7 @@ void SkyColourGradient::SetAsCurrentShader()
 
 void SkyColourGradient::Update(float deltaTime)
 {
-	_skyDomeElement->SetPosition(_sceneCentre);
+	_skyDomeElement->GetTransform()->SetPosition(_sceneCentre);
 	_skyDomeElement->Update(deltaTime);
 }
 
@@ -137,7 +141,7 @@ void SkyColourGradient::Render(ID3D11Buffer * matrixBuffer, const Camera& camera
 	matrixBufferValues.View = XMMatrixTranspose(view);
 	matrixBufferValues.Projection = XMMatrixTranspose(proj);
 
-	XMMATRIX world = XMLoadFloat4x4(&_skyDomeElement->GetWorld());
+	XMMATRIX world = XMLoadFloat4x4(&_skyDomeElement->GetTransform()->GetWorld());
 	matrixBufferValues.World = XMMatrixTranspose(world);
 
 	_d3dClass->GetContext()->UpdateSubresource(matrixBuffer, 0, nullptr, &matrixBufferValues, 0, 0);

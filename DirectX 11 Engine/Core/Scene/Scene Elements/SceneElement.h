@@ -1,51 +1,39 @@
 #pragma once
 #include "../../Globals/stdafx.h"
 #include "../../Globals/Structs.h"
+#include "Element Components/Transform.h"
+#include "Element Components/Appearance.h"
 #include <string>
+#include <vector>
 
 using namespace DirectX;
 
 class SceneElement
 {
 private:
-	XMFLOAT3 _position;
-	XMFLOAT3 _rotation;
-	XMFLOAT3 _scale;
-
-	ObjectMesh _mesh;
-	ObjectMaterial _material;
+	Transform * _transform;
+	Appearance* _appearance;
 
 	std::string _name;
-
-	XMFLOAT4X4 _world;
-
-	ID3D11ShaderResourceView* _colourTex;
-	ID3D11ShaderResourceView* _normalMap;
-	ID3D11ShaderResourceView* _displacementMap;
 
 	bool _castShadows;
 	bool _affectedByLight;
 
+	std::vector<SceneElement*> _children;
+
 public:
-	SceneElement(std::string elementName, ObjectMesh mesh, ObjectMaterial material);
+	SceneElement(std::string elementName, Transform* transform, Appearance* appearance);
 	~SceneElement();
+
+	void Cleanup();
 
 	void Update(float deltaTime);
 	void Draw(ID3D11DeviceContext* deviceContext);
 
 public:
-	void SetPosition(XMFLOAT3 pos) { _position = pos; }
-	XMFLOAT3 GetPosition() const { return _position; }
-
-	void SetRotation(XMFLOAT3 rot) { _rotation = rot; }
-	XMFLOAT3 GetRotation() const { return _rotation; }
-
-	void SetScale(XMFLOAT3 scale) { _scale = scale; }
-	XMFLOAT3 GetScale() const { return _scale; }
-
-	void SetColourTexture(ID3D11ShaderResourceView* colourTex) { _colourTex = colourTex; }
-	void SetNormalMap(ID3D11ShaderResourceView* normalMap) { _normalMap = normalMap; }
-	void SetDisplacementMap(ID3D11ShaderResourceView* displacementMap) { _displacementMap = displacementMap; }
+	
+	Transform * GetTransform() const { return _transform; }
+	Appearance * GetAppearance() const { return _appearance; }
 
 	void SetCastShadows(bool castShadows) { _castShadows = castShadows; }
 	bool CanCastShadows() const { return _castShadows; }
@@ -53,20 +41,9 @@ public:
 	void SetAffectedByLight(bool affected) { _affectedByLight = affected; }
 	bool IsAffectedByLight() const { return _affectedByLight; }
 
-	ID3D11ShaderResourceView * GetColourTex() const { return _colourTex; }
-	ID3D11ShaderResourceView * GetNormalMap() const { return _normalMap; }
-	ID3D11ShaderResourceView * GetDisplacementMap() const { return _displacementMap; }
-
-	bool HasColourTexture() const { return _colourTex ? true : false; }
-	bool HasNormalMap() const { return _normalMap ? true : false; }
-	bool HasDisplacementMap() const { return _displacementMap ? true : false; }
-
-	void UpdateObjectMesh(ObjectMesh updatedMesh) { _mesh = updatedMesh; }
-	ObjectMesh GetObjectMesh() const { return _mesh; }
-
-	ObjectMaterial GetObjectMaterial() const { return _material; }
-	XMFLOAT4X4 GetWorld() const { return _world; }
-
 	std::string GetElementName() const { return _name; }
+
+	void AddChild(SceneElement* child);
+	std::vector<SceneElement*> GetChildren() { return _children; }
 };
 

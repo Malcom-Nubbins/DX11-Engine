@@ -117,9 +117,9 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_spotLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_spotLight.Attenuation = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	_spotLight.Attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
 	_spotLight.Spot = 20.0f;
-	_spotLight.Range = 50.0f;
+	_spotLight.Range = 1000.0f;
 
 	_preOffsetLightDir = _sceneLight.LightDirection;
 
@@ -158,8 +158,10 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	planeMesh.vertexBufferOffset = 0;
 	planeMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-	ObjectMesh aircraftMesh;
-	aircraftMesh = OBJLoader::Load((char*)"Core/Resources/Objects/Hercules.obj", _d3dClass->GetDevice(), false);
+	ObjectMesh aircraftMesh = OBJLoader::Load((char*)"Core/Resources/Objects/Hercules.obj", _d3dClass->GetDevice(), false);
+	ObjectMesh sphere = OBJLoader::Load((char*)"Core/Resources/Objects/spherex.obj", _d3dClass->GetDevice(), false);
+	ObjectMesh plant0 = OBJLoader::Load((char*)"Core/Resources/Objects/plant0.obj", _d3dClass->GetDevice(), true);
+	ObjectMesh plant1 = OBJLoader::Load((char*)"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice(), true);
 
 	_diamondSquareTerrain = new DiamondSquareTerrain(_d3dClass);
 	_diamondSquareTerrain->SetTerrainValues(256, 256, 512);
@@ -174,64 +176,87 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	diamondSquareMesh.vertexBufferOffset = 0;
 	diamondSquareMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-	SceneElement* element = new SceneElement("Ground Plane", diamondSquareMesh, matte);
-	element->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	element->SetColourTexture(_textureHandler->GetGroundColourTexture());
-	element->SetNormalMap(_textureHandler->GetGroundNormalMap());
-	element->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
+	// Transforms
+	Transform* groundTransform = new Transform();
+	groundTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	Transform* underworldTransform = new Transform();
+	underworldTransform->SetPosition(XMFLOAT3(0.0f, -15.0f, 0.0f));
+	underworldTransform->SetScale(XMFLOAT3(256.0f, 1.0f, 256.0f));
+	underworldTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	Transform* aircraftTransform = new Transform();
+	aircraftTransform->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 8.0f, 0));
+	aircraftTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	aircraftTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	Transform* sunSphereTransform = new Transform();
+	sunSphereTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	sunSphereTransform->SetScale(XMFLOAT3(4.0f, 4.0f, 4.0f));
+	sunSphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+
+	// Appearances
+	Appearance* groundAppearance = new Appearance(diamondSquareMesh, matte);
+	groundAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
+	groundAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
+	groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
+
+	Appearance* underworldAppearance = new Appearance(planeMesh, shiny);
+	underworldAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
+	underworldAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
+	underworldAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
+
+	Appearance* sphereAppearance = new Appearance(sphere, charcoal);
+	//sphereAppearance->SetColourTexture(_textureHandler->GetStoneTexture());
+	//sphereAppearance->SetNormalMap(_textureHandler->GetStoneNormalMap());
+	//sphereAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+
+	Appearance* aircraftAppearance = new Appearance(aircraftMesh, aircraftMat);
+	aircraftAppearance->SetColourTexture(_textureHandler->GetAircraftTexture());
+	aircraftAppearance->SetNormalMap(_textureHandler->GetAircraftNormalMap());
+	//aircraftAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+
+	Appearance* sunSphereAppearance = new Appearance(sphere, shiny);
+	sunSphereAppearance->SetColourTexture(nullptr);
+
+	SceneElement* element = new SceneElement("Ground Plane", groundTransform, groundAppearance);
 	element->SetCastShadows(true);
 	element->SetAffectedByLight(true);
 	_diamondSquareTerrain->SetGameObject(element);
 	_diamondSquareTerrain->SetTerrainFinishedBuilding(true);
 	_sceneElements.push_back(element);
 
-	element = new SceneElement("Underworld", planeMesh, shiny);
-	element->SetPosition(XMFLOAT3(0.0f, -15.0f, 0.0f));
-	element->SetScale(XMFLOAT3(256.0f, 1.0f, 256.0f));
-	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	element->SetColourTexture(_textureHandler->GetGroundColourTexture());
-	element->SetNormalMap(_textureHandler->GetGroundNormalMap());
-	element->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
+	element = new SceneElement("Underworld", underworldTransform, underworldAppearance);
 	element->SetCastShadows(true);
 	element->SetAffectedByLight(true);
 	_sceneElements.push_back(element);
 
-	ObjectMesh cube = OBJLoader::Load((char*)"Core/Resources/Objects/spherex.obj", _d3dClass->GetDevice(), false);
 	srand(time(NULL));
 	for (int i = 0; i < 90; ++i)
 	{
-		element = new SceneElement("Cube", cube, charcoal);
+		Transform* sphereTransform = new Transform();
+		sphereTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		sphereTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+		sphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+		element = new SceneElement("Spheres", sphereTransform, sphereAppearance);
 		float randomX = MathsHandler::RandomFloat(-128, 128);
 		float randomZ = MathsHandler::RandomFloat(-128, 128);
 
-		element->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ) + 2.0f, randomZ));
-		element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-		element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		//element->SetColourTexture(_textureHandler->GetStoneTexture());
-		//element->SetNormalMap(_textureHandler->GetStoneNormalMap());
-		//element->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+		element->GetTransform()->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ) + 2.0f, randomZ));
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
 
 		_sceneElements.push_back(element);
 	}
 
-	element = new SceneElement("Aircraft", aircraftMesh, aircraftMat);
-	element->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 8.0f, 0));
-	element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	element->SetColourTexture(_textureHandler->GetAircraftTexture());
-	element->SetNormalMap(_textureHandler->GetAircraftNormalMap());
-	//element->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+	element = new SceneElement("Aircraft", aircraftTransform, aircraftAppearance);
 	element->SetCastShadows(true);
 	element->SetAffectedByLight(true);
-
 	_sceneElements.push_back(element);
-
-	ObjectMesh plant0 = OBJLoader::Load((char*)"Core/Resources/Objects/plant0.obj", _d3dClass->GetDevice(), true);
-	ObjectMesh plant1 = OBJLoader::Load((char*)"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice(), true);
 	
 	PointLight light;
 	light.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -277,11 +302,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		_sceneElements.push_back(element);
 	}*/
 
-	element = new SceneElement("Light Source Sphere", OBJLoader::Load((char*)"Core/Resources/Objects/sphere.obj", _d3dClass->GetDevice(), false), shiny);
-	element->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	element->SetScale(XMFLOAT3(7.0f, 7.0f, 7.0f));
-	element->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	element->SetColourTexture(nullptr);
+	element = new SceneElement("Light Source Sphere", sunSphereTransform, sunSphereAppearance);
 	element->SetCastShadows(false);
 	element->SetAffectedByLight(false);
 	_sceneElements.push_back(element);
@@ -451,7 +472,7 @@ void MainScene::Update(float deltaTime)
 	{
 		if (element->GetElementName() == "Light Source Sphere")
 		{
-			element->SetPosition(_shadows->GetLightPosition());
+			element->GetTransform()->SetPosition(_shadows->GetLightPosition());
 		}
 		element->Update(deltaTime);
 	}

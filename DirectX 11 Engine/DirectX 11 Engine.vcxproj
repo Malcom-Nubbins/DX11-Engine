@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Scene\Scene Elements\Element Components\Appearance.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Handlers\BufferClass.cpp" />
     <ClCompile Include="Core\Handlers\D3DClass.cpp" />
@@ -160,8 +161,10 @@
     <ClCompile Include="Core\Scene\MainScene.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\SceneElement.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
+    <ClCompile Include="Core\Scene\Scene Elements\Element Components\Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Globals\AppValues.h" />
     <ClInclude Include="Core\Globals\stdafx.h" />
@@ -186,6 +189,7 @@
     <ClInclude Include="Core\Scene\Scene Elements\SceneElement.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FYP - Seasonal Day Night Cycle.rc" />

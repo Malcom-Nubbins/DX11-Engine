@@ -346,16 +346,19 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 
 	for (SceneElement* element : sceneElements)
 	{
-		ObjectMaterial mat = element->GetObjectMaterial();
+		Appearance* appearance = element->GetAppearance();
+		Transform* transform = element->GetTransform();
+
+		ObjectMaterial mat = appearance->GetObjectMaterial();
 		objValBuffer.surface.Ambient = mat.ambient;
 		objValBuffer.surface.Diffuse = mat.diffuse;
 		objValBuffer.surface.Specular = mat.specular;
 
-		matBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&element->GetWorld()));
+		matBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&transform->GetWorld()));
 		ID3D11ShaderResourceView* tex;
-		if (element->HasColourTexture())
+		if (appearance->HasColourTexture())
 		{
-			tex = element->GetColourTex();
+			tex = appearance->GetColourTex();
 			_d3dClass->GetContext()->PSSetShaderResources(0, 1, &tex);
 			objValBuffer.useColourTex = 1.0f;
 		}
@@ -364,10 +367,10 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 			objValBuffer.useColourTex = 0.0f;
 		}
 
-		if (element->HasNormalMap())
+		if (appearance->HasNormalMap())
 		{
 			objValBuffer.useBumpMap = 1.0f;
-			tex = element->GetNormalMap();
+			tex = appearance->GetNormalMap();
 			_d3dClass->GetContext()->PSSetShaderResources(2, 1, &tex);
 		}
 		else
@@ -375,11 +378,11 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 			objValBuffer.useBumpMap = 0.0f;
 		}
 
-		if (element->HasDisplacementMap())
+		if (appearance->HasDisplacementMap())
 		{
 			_d3dClass->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
-			ID3D11ShaderResourceView* displacementMap = element->GetDisplacementMap();
+			ID3D11ShaderResourceView* displacementMap = appearance->GetDisplacementMap();
 			_shaderClass->SetHullAndDomainShaders(_tesselationHS, _tesselationDS);
 			_d3dClass->GetContext()->DSSetShaderResources(0, 1, &displacementMap);
 			_d3dClass->GetContext()->DSSetSamplers(0, 1, _shaderClass->GetSamplerState(LINEAR));

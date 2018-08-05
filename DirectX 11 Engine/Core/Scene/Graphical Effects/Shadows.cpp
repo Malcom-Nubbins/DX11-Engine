@@ -192,7 +192,7 @@ void Shadows::Render(const std::vector<SceneElement*>& sceneElements, DiamondSqu
 	{
 		if (element->CanCastShadows())
 		{
-			shadowDepthMatrixBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&element->GetWorld()));
+			shadowDepthMatrixBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&element->GetTransform()->GetWorld()));
 			_d3dClass->GetContext()->UpdateSubresource(_shadowDepthMatrixBuffer, 0, nullptr, &shadowDepthMatrixBuffer, 0, 0);
 			element->Draw(_d3dClass->GetContext());
 		}

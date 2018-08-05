@@ -161,7 +161,7 @@ void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
 
     float distance = length(lightVec);
 
-    if(distance > spotLight.Range)
+    if (distance > spotLight.Range)
         return;
 
     lightVec /= distance;
