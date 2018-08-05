@@ -21,6 +21,9 @@ private:
 
 	ID3D11ShaderResourceView* _aircraftTexture;
 	ID3D11ShaderResourceView* _aircraftNormalMap;
+	ID3D11ShaderResourceView* _aircraftSpecularMap;
+	ID3D11ShaderResourceView* _aircraftDisplacementMap;
+
 public:
 	TextureHandler(D3DClass* d3dClass);
 	~TextureHandler();
@@ -42,5 +45,7 @@ public:
 
 	ID3D11ShaderResourceView* GetAircraftTexture() const { return _aircraftTexture; }
 	ID3D11ShaderResourceView* GetAircraftNormalMap() const { return _aircraftNormalMap; }
+	ID3D11ShaderResourceView* GetAircraftSpecularMap() const { return _aircraftSpecularMap; }
+	ID3D11ShaderResourceView* GetAircraftDisplacementMap() const { return _aircraftDisplacementMap; }
 };
 

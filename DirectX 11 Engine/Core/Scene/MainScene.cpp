@@ -218,7 +218,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	Appearance* aircraftAppearance = new Appearance(aircraftMesh, aircraftMat);
 	aircraftAppearance->SetColourTexture(_textureHandler->GetAircraftTexture());
 	aircraftAppearance->SetNormalMap(_textureHandler->GetAircraftNormalMap());
-	//aircraftAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+	aircraftAppearance->SetSpecularMap(_textureHandler->GetAircraftSpecularMap());
+	//aircraftAppearance->SetDisplacementMap(_textureHandler->GetAircraftDisplacementMap());
 
 	Appearance* sunSphereAppearance = new Appearance(sphere, shiny);
 	sunSphereAppearance->SetColourTexture(nullptr);
