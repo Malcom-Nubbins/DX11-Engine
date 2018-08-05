@@ -103,13 +103,15 @@ void ComputeDirectionalLight(Surface surface, DirectionalLight dirLight,
     specular = float3(0.0f, 0.0f, 0.0f);
     ambient = surface.Ambient * dirLight.Ambient;
 
-    float diffuseAmount = dot(lightDir, normal);
+    float3 normalisedLightDir = normalize(dirLight.LightDirection);
+
+    float diffuseAmount = dot(normalisedLightDir , normal);
 
     if (diffuseAmount > 0.0f)
     {
         diffuse = DirectDiffuseBRDF(surface.Diffuse.rgb, diffuseAmount) * dirLight.Diffuse.rgb;
         //diffuse = diffuseAmount * surface.Diffuse * dirLight.Diffuse;
-        specular = DirectSpecularBRDF(surface.Specular, normal, lightDir, toEye) * dirLight.Specular.rgb;
+        specular = DirectSpecularBRDF(surface.Specular, normal, normalisedLightDir, toEye) * dirLight.Specular.rgb;
     }
 }
 
@@ -148,7 +150,7 @@ void ComputePointLight(Surface surface, PointLight pointLight, float3 pos,
 }
 
 void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
-                                float3 normal, float3 toEye, float3x3 tbn,
+                                float3 normal, float3 toEye,
                                 out float3 ambient, out float3 diffuse, out float3 specular)
 {
     ambient = float3(0.0f, 0.0f, 0.0f);
@@ -156,9 +158,6 @@ void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
     specular = float3(0.0f, 0.0f, 0.0f);
 
     float3 lightVec = spotLight.Position - pos;
- 
-    //lightVec = mul(lightVec, tbn);
-    //lightVec = normalize(lightVec);
 
     float distance = length(lightVec);
 
@@ -171,14 +170,11 @@ void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
 
     float diffuseAmount = dot(lightVec, normal);
 
-    [flatten]
     if (diffuseAmount > 0.0f)
     {
-        float3 reflection = reflect(-lightVec, normal);
-        float specularAmount = pow(max(dot(reflection, toEye), 0.0f), surface.Specular.w);
-
-        diffuse = diffuseAmount * surface.Diffuse * spotLight.Diffuse;
-        specular = specularAmount * surface.Specular * spotLight.Specular;
+        diffuse = DirectDiffuseBRDF(surface.Diffuse.rgb, diffuseAmount) * spotLight.Diffuse.rgb;
+        //diffuse = diffuseAmount * surface.Diffuse * dirLight.Diffuse;
+        specular = DirectSpecularBRDF(surface.Specular, normal, lightVec, toEye) * spotLight.Specular.rgb;
     }
 
     float spot = pow(max(dot(-lightVec, spotLight.Direction), 0.0f), spotLight.Spot);

@@ -79,10 +79,10 @@ float4 main(VertexOutput input) : SV_TARGET
         shadow = ComputeShadows(samShadow, texShadow, input.ShadowProj);
 
         if(useBumpMap == 1.0f)
-            input.NormalTS = CalculateBumpedNormal(bumpMapSample, input.NormalTS, input.TangentW, input.BinormalW);
+            input.NormW = CalculateBumpedNormal(bumpMapSample, input.NormW, input.TangentW, input.BinormalW);
 
         float3 A, D, S;
-        ComputeDirectionalLight(surface, dirLight, input.LightVecTS, input.NormalTS, toEyeTS, A, D, S);
+        ComputeDirectionalLight(surface, dirLight, input.LightVecTS, input.NormW, toEye, A, D, S);
         specular += shadow * S;
         diffuse += shadow * D;
         ambient += A;
@@ -110,20 +110,9 @@ float4 main(VertexOutput input) : SV_TARGET
         }
 
 
-        //{
-        //    float3x3 tangentToWorldSpace;
-        //    tangentToWorldSpace[0] = input.TangentW;
-        //    tangentToWorldSpace[1] = input.BinormalW;
-        //    tangentToWorldSpace[2] = input.NormW;
-
-        //    tangentToWorldSpace = transpose(tangentToWorldSpace);
-
-        //    //input.PosW = mul(input.PosW, tangentToWorldSpace);
-
-        //    ComputeSpotLight(surface, spotLight, input.PosW, input.NormW, toEye, tangentToWorldSpace, A, D, S);
-        //    specular += S;
-        //    diffuse += D;
-        //}
+        ComputeSpotLight(surface, spotLight, input.PosW, input.NormW, toEye, A, D, S);
+        specular += S;
+        diffuse += D;
 
     
         float4 finalColour;
