@@ -400,6 +400,17 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 			_shaderClass->UnbindTesselationStages();
 		}
 
+		if (appearance->HasSpecularMap())
+		{
+			objValBuffer.useSpecularMap = 1.0f;
+			tex = appearance->GetSpecularMap();
+			_d3dClass->GetContext()->PSSetShaderResources(3, 1, &tex);
+		}
+		else
+		{
+			objValBuffer.useSpecularMap = 0.0f;
+		}
+
 		if (element->IsAffectedByLight())
 		{
 			objValBuffer.affectedByLight = 1.0f;

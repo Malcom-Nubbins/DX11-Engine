@@ -154,6 +154,9 @@ struct ObjectValuesBuffer
 
 	XMFLOAT3 EyePos;
 	float affectedByLight;
+
+	float useSpecularMap;
+	XMFLOAT3 padding;
 };
 
 struct GradientValuesBuffer

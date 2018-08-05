@@ -1,7 +1,7 @@
 #include "Appearance.h"
 
 Appearance::Appearance(ObjectMesh mesh, ObjectMaterial material)
-	: _mesh(mesh), _material(material), _colourTex(nullptr), _normalMap(nullptr), _displacementMap(nullptr)
+	: _mesh(mesh), _material(material), _colourTex(nullptr), _normalMap(nullptr), _displacementMap(nullptr), _specularMap(nullptr)
 {
 }
 

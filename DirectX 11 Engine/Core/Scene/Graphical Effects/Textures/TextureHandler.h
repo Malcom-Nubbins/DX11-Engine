@@ -10,6 +10,7 @@ private:
 	ID3D11ShaderResourceView* _groundColourTex;
 	ID3D11ShaderResourceView* _groundNormalMap;
 	ID3D11ShaderResourceView* _groundDisplacementMap;
+	ID3D11ShaderResourceView* _groundSpecularMap;
 
 	ID3D11ShaderResourceView* _stoneTex;
 	ID3D11ShaderResourceView* _stoneBumpMap;
@@ -30,6 +31,7 @@ public:
 	ID3D11ShaderResourceView* GetGroundColourTexture() const { return _groundColourTex; }
 	ID3D11ShaderResourceView* GetGroundNormalMap() const { return _groundNormalMap; }
 	ID3D11ShaderResourceView* GetGroundDisplacementMap() const { return _groundDisplacementMap; }
+	ID3D11ShaderResourceView* GetGroundSpecularMap() const { return _groundSpecularMap; }
 
 	ID3D11ShaderResourceView* GetStoneTexture() const { return _stoneTex; }
 	ID3D11ShaderResourceView* GetStoneNormalMap() const { return _stoneBumpMap; }

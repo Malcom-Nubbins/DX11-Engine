@@ -3,6 +3,7 @@
 Texture2D texColour : register(t0);
 Texture2D texShadow : register(t1);
 Texture2D texBumpmap : register(t2);
+Texture2D texSpecularMap : register(t3);
 
 SamplerState samLinear : register(s0);
 SamplerComparisonState samShadow : register(s1);
@@ -21,6 +22,9 @@ cbuffer ObjectValuesBuffer : register(b0)
 
     float3 EyePos;
     float affectedByLight;
+
+    float useSpecularMap;
+    float3 padding;
 }
 
 cbuffer FogValuesBuffer : register(b1)
@@ -114,7 +118,12 @@ float4 main(VertexOutput input) : SV_TARGET
         specular += S;
         diffuse += D;
 
-    
+        if(useSpecularMap == 1.0f)
+        {
+            float specularIntensity = texSpecularMap.Sample(samLinear, input.Tex);
+            specular *= specularIntensity;
+        }
+
         float4 finalColour;
 
         if (useColourTex == 1.0f)
@@ -157,7 +166,7 @@ float4 main(VertexOutput input) : SV_TARGET
     }
     else
     {
-        float4 finalColour = float4(1.0f, 1.0f, 1.0f, 1.0f);
+        float4 finalColour = dirLight.Diffuse * 2;
 
         return finalColour;
     }
