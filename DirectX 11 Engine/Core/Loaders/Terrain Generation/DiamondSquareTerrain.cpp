@@ -88,9 +88,9 @@ void DiamondSquareTerrain::SmoothTerrain(float smoothnessAmount)
 	{
 		for (z = 0; z < _info.heightMapHeight; ++z)
 		{
-			_gridMesh->Vertices[x * _info.heightMapHeight + z].Position.y =
-				_gridMesh->Vertices[(x - 1)*_info.heightMapHeight + z].Position.y * (1 - smoothnessAmount) +
-				_gridMesh->Vertices[x*_info.heightMapHeight + z].Position.y * smoothnessAmount;
+			_gridMesh->Vertices[x * _info.heightMapHeight + z].position.y =
+				_gridMesh->Vertices[(x - 1)*_info.heightMapHeight + z].position.y * (1 - smoothnessAmount) +
+				_gridMesh->Vertices[x*_info.heightMapHeight + z].position.y * smoothnessAmount;
 		}
 	}
 
@@ -98,9 +98,9 @@ void DiamondSquareTerrain::SmoothTerrain(float smoothnessAmount)
 	{
 		for (z = 0; z < _info.heightMapHeight; ++z)
 		{
-			_gridMesh->Vertices[x * _info.heightMapHeight + z].Position.y =
-				_gridMesh->Vertices[(x + 1)*_info.heightMapHeight + z].Position.y * (1 - smoothnessAmount) +
-				_gridMesh->Vertices[x*_info.heightMapHeight + z].Position.y * smoothnessAmount;
+			_gridMesh->Vertices[x * _info.heightMapHeight + z].position.y =
+				_gridMesh->Vertices[(x + 1)*_info.heightMapHeight + z].position.y * (1 - smoothnessAmount) +
+				_gridMesh->Vertices[x*_info.heightMapHeight + z].position.y * smoothnessAmount;
 		}
 	}
 
@@ -108,9 +108,9 @@ void DiamondSquareTerrain::SmoothTerrain(float smoothnessAmount)
 	{
 		for (z = 1; z < _info.heightMapHeight; ++z)
 		{
-			_gridMesh->Vertices[x * _info.heightMapHeight + z].Position.y =
-				_gridMesh->Vertices[x*_info.heightMapHeight + (z - 1)].Position.y * (1 - smoothnessAmount) +
-				_gridMesh->Vertices[x*_info.heightMapHeight + z].Position.y * smoothnessAmount;
+			_gridMesh->Vertices[x * _info.heightMapHeight + z].position.y =
+				_gridMesh->Vertices[x*_info.heightMapHeight + (z - 1)].position.y * (1 - smoothnessAmount) +
+				_gridMesh->Vertices[x*_info.heightMapHeight + z].position.y * smoothnessAmount;
 		}
 	}
 
@@ -118,9 +118,9 @@ void DiamondSquareTerrain::SmoothTerrain(float smoothnessAmount)
 	{
 		for (z = _info.heightMapHeight; z < 0; --z)
 		{
-			_gridMesh->Vertices[x * _info.heightMapHeight + z].Position.y =
-				_gridMesh->Vertices[x*_info.heightMapHeight + (z + 1)].Position.y * (1 - smoothnessAmount) +
-				_gridMesh->Vertices[(x + 1)*_info.heightMapHeight + z].Position.y * smoothnessAmount;
+			_gridMesh->Vertices[x * _info.heightMapHeight + z].position.y =
+				_gridMesh->Vertices[x*_info.heightMapHeight + (z + 1)].position.y * (1 - smoothnessAmount) +
+				_gridMesh->Vertices[(x + 1)*_info.heightMapHeight + z].position.y * smoothnessAmount;
 		}
 	}
 }
@@ -195,13 +195,13 @@ void DiamondSquareTerrain::GenerateTerrain()
 		{
 			float x = -halfWidth + j * dx;
 
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].Position = XMFLOAT3(x, static_cast<float>(_heightMap[j*_info.heightMapHeight + i]), z);
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].TexCoord.x = j * du;
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].TexCoord.y = i * dv;
+			_gridMesh->Vertices[i*_info.heightMapHeight + j].position = XMFLOAT3(x, static_cast<float>(_heightMap[j*_info.heightMapHeight + i]), z);
+			_gridMesh->Vertices[i*_info.heightMapHeight + j].texCoord.x = j * du;
+			_gridMesh->Vertices[i*_info.heightMapHeight + j].texCoord.y = i * dv;
 
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].Tangent = XMFLOAT3(0.0f, 0.0f, 0.0f);
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].Binormal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+			_gridMesh->Vertices[i*_info.heightMapHeight + j].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+			_gridMesh->Vertices[i*_info.heightMapHeight + j].tangent = XMFLOAT3(0.0f, 0.0f, 0.0f);
+			_gridMesh->Vertices[i*_info.heightMapHeight + j].binormal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		}
 	}
 
@@ -238,11 +238,11 @@ HRESULT DiamondSquareTerrain::CreateBuffers()
 
 	for (size_t i = 0; i < _gridMesh->Vertices.size(); i++, k++)
 	{
-		_gridVertices[k].Pos = _gridMesh->Vertices[i].Position;
-		_gridVertices[k].Normal = _gridMesh->Vertices[i].Normal;
-		_gridVertices[k].TexCoord = _gridMesh->Vertices[i].TexCoord;
-		_gridVertices[k].Tangent = _gridMesh->Vertices[i].Tangent;
-		_gridVertices[k].Binormal = _gridMesh->Vertices[i].Binormal;
+		_gridVertices[k].pos = _gridMesh->Vertices[i].position;
+		_gridVertices[k].normal = _gridMesh->Vertices[i].normal;
+		_gridVertices[k].texCoord = _gridMesh->Vertices[i].texCoord;
+		_gridVertices[k].tangent = _gridMesh->Vertices[i].tangent;
+		_gridVertices[k].binormal = _gridMesh->Vertices[i].binormal;
 	}
 
 	D3D11_BUFFER_DESC vbd;
@@ -306,49 +306,49 @@ void DiamondSquareTerrain::GetNormals(UINT faceCount, UINT vertexCount)
 		UINT i2 = _gridMesh->Indices[i * 3 + 2];
 
 		TempVertex v1, v2, v3;
-		v1.Pos = _gridMesh->Vertices[i0].Position;
-		v2.Pos = _gridMesh->Vertices[i1].Position;
-		v3.Pos = _gridMesh->Vertices[i2].Position;
+		v1.pos = _gridMesh->Vertices[i0].position;
+		v2.pos = _gridMesh->Vertices[i1].position;
+		v3.pos = _gridMesh->Vertices[i2].position;
 
-		XMFLOAT3 e0Float = MathsHandler::Subtract(v2.Pos, v1.Pos);
-		XMFLOAT3 e1Float = MathsHandler::Subtract(v3.Pos, v1.Pos);
+		XMFLOAT3 e0Float = MathsHandler::Subtract(v2.pos, v1.pos);
+		XMFLOAT3 e1Float = MathsHandler::Subtract(v3.pos, v1.pos);
 		XMVECTOR e0 = XMLoadFloat3(&e0Float);
 		XMVECTOR e1 = XMLoadFloat3(&e1Float);
 		XMVECTOR normal = XMVector3Cross(e0, e1);
 		XMFLOAT3 normalFloat;
 		XMStoreFloat3(&normalFloat, normal);
 
-		_gridMesh->Vertices[i0].Normal.x += normalFloat.x;
-		_gridMesh->Vertices[i0].Normal.y += normalFloat.y;
-		_gridMesh->Vertices[i0].Normal.z += normalFloat.z;
+		_gridMesh->Vertices[i0].normal.x += normalFloat.x;
+		_gridMesh->Vertices[i0].normal.y += normalFloat.y;
+		_gridMesh->Vertices[i0].normal.z += normalFloat.z;
 
-		_gridMesh->Vertices[i1].Normal.x += normalFloat.x;
-		_gridMesh->Vertices[i1].Normal.y += normalFloat.y;
-		_gridMesh->Vertices[i1].Normal.z += normalFloat.z;
+		_gridMesh->Vertices[i1].normal.x += normalFloat.x;
+		_gridMesh->Vertices[i1].normal.y += normalFloat.y;
+		_gridMesh->Vertices[i1].normal.z += normalFloat.z;
 
-		_gridMesh->Vertices[i2].Normal.x += normalFloat.x;
-		_gridMesh->Vertices[i2].Normal.y += normalFloat.y;
-		_gridMesh->Vertices[i2].Normal.z += normalFloat.z;
+		_gridMesh->Vertices[i2].normal.x += normalFloat.x;
+		_gridMesh->Vertices[i2].normal.y += normalFloat.y;
+		_gridMesh->Vertices[i2].normal.z += normalFloat.z;
 
-		v1.Pos = _gridMesh->Vertices[i0].Position;
-		v1.Normal = _gridMesh->Vertices[i0].Normal;
-		v1.Tex = _gridMesh->Vertices[i0].TexCoord;
+		v1.pos = _gridMesh->Vertices[i0].position;
+		v1.normal = _gridMesh->Vertices[i0].normal;
+		v1.tex = _gridMesh->Vertices[i0].texCoord;
 
-		v2.Pos = _gridMesh->Vertices[i1].Position;
-		v2.Normal = _gridMesh->Vertices[i1].Normal;
-		v2.Tex = _gridMesh->Vertices[i1].TexCoord;
+		v2.pos = _gridMesh->Vertices[i1].position;
+		v2.normal = _gridMesh->Vertices[i1].normal;
+		v2.tex = _gridMesh->Vertices[i1].texCoord;
 
-		v3.Pos = _gridMesh->Vertices[i2].Position;
-		v3.Normal = _gridMesh->Vertices[i2].Normal;
-		v3.Tex = _gridMesh->Vertices[i2].TexCoord;
+		v3.pos = _gridMesh->Vertices[i2].position;
+		v3.normal = _gridMesh->Vertices[i2].normal;
+		v3.tex = _gridMesh->Vertices[i2].texCoord;
 
-		_gridMesh->Vertices[i0].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
-		_gridMesh->Vertices[i1].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
-		_gridMesh->Vertices[i2].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		_gridMesh->Vertices[i0].tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		_gridMesh->Vertices[i1].tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		_gridMesh->Vertices[i2].tangent = MathsHandler::CalculateTangent(v1, v2, v3);
 
-		_gridMesh->Vertices[i0].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
-		_gridMesh->Vertices[i1].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
-		_gridMesh->Vertices[i2].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		_gridMesh->Vertices[i0].binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		_gridMesh->Vertices[i1].binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		_gridMesh->Vertices[i2].binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
 
 		//_gridMesh->Vertices[i0].Tangent.x += MathsHandler::CalculateTangent(v1, v2, v3).x;
 		//_gridMesh->Vertices[i0].Tangent.y += MathsHandler::CalculateTangent(v1, v2, v3).y;
@@ -377,9 +377,9 @@ void DiamondSquareTerrain::GetNormals(UINT faceCount, UINT vertexCount)
 
 	for (UINT i = 0; i < vertexCount; ++i)
 	{
-		XMVECTOR normal = XMLoadFloat3(&_gridMesh->Vertices[i].Normal);
+		XMVECTOR normal = XMLoadFloat3(&_gridMesh->Vertices[i].normal);
 		XMVector3Normalize(normal);
-		XMStoreFloat3(&_gridMesh->Vertices[i].Normal, normal);
+		XMStoreFloat3(&_gridMesh->Vertices[i].normal, normal);
 	}
 }
 
@@ -410,9 +410,9 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 
 		ObjectMaterial material = appearance->GetObjectMaterial();
 		// Copy material to shader
-		cb.surface.Ambient = material.ambient;
-		cb.surface.Diffuse = material.diffuse;
-		cb.surface.Specular = material.specular;
+		cb.surface.ambient = material.ambient;
+		cb.surface.diffuse = material.diffuse;
+		cb.surface.specular = material.specular;
 
 		// Set world matrix
 		mb.World = XMMatrixTranspose(XMLoadFloat4x4(&transform->GetWorld()));
@@ -489,10 +489,10 @@ float DiamondSquareTerrain::GetHeight(float camX, float camZ)
 	else if (col >= _info.heightMapWidth - 1)
 		col = _info.heightMapWidth - 2;
 
-	float A = _gridMesh->Vertices[row*_info.heightMapWidth + col].Position.y;
-	float B = _gridMesh->Vertices[row*_info.heightMapWidth + col + 1].Position.y;
-	float C = _gridMesh->Vertices[(row + 1)*_info.heightMapWidth + col].Position.y;
-	float D = _gridMesh->Vertices[(row + 1)*_info.heightMapWidth + col + 1].Position.y;
+	float A = _gridMesh->Vertices[row*_info.heightMapWidth + col].position.y;
+	float B = _gridMesh->Vertices[row*_info.heightMapWidth + col + 1].position.y;
+	float C = _gridMesh->Vertices[(row + 1)*_info.heightMapWidth + col].position.y;
+	float D = _gridMesh->Vertices[(row + 1)*_info.heightMapWidth + col + 1].position.y;
 
 	float s = c - static_cast<float>(col);
 	float t = d - static_cast<float>(row);

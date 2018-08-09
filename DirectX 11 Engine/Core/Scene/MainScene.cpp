@@ -79,7 +79,7 @@ void MainScene::Cleanup()
 
 void MainScene::ResizeViews(float windowWidth, float windowHeight)
 {
-	_camera->SetLens(XM_PIDIV4, (windowWidth / windowHeight), 0.01f, 1000.0f);
+	_camera->SetLens(XM_PIDIV4, windowWidth, windowHeight, 0.01f, 1000.0f);
 	//_d3dClass->GetSwapChain()->ResizeBuffers(1, windowWidth, windowHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 	_basicLight->Resize(windowWidth, windowHeight);
 	_renderToQuad->Resize(windowWidth, windowHeight);
@@ -106,22 +106,22 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_objectValueBuffer);
 
 	_camera = new Camera();
-	_camera->SetLens(XM_PIDIV4, (windowWidth / windowHeight), 0.01f, 1000.0f);
+	_camera->SetLens(XM_PIDIV4, windowWidth,  windowHeight, 0.01f, 1000.0f);
 	_camera->LookAt(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
-	_sceneLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_sceneLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_sceneLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_sceneLight.LightDirection = XMFLOAT3(5.0f, 0.0f, 0.0f);
+	_sceneLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	_sceneLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_sceneLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_sceneLight.lightDirection = XMFLOAT3(5.0f, 0.0f, 0.0f);
 
-	_spotLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_spotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_spotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_spotLight.Attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
-	_spotLight.Spot = 20.0f;
-	_spotLight.Range = 1000.0f;
+	_spotLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	_spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_spotLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
+	_spotLight.spot = 20.0f;
+	_spotLight.range = 1000.0f;
 
-	_preOffsetLightDir = _sceneLight.LightDirection;
+	_preOffsetLightDir = _sceneLight.lightDirection;
 
 	_sceneFog.FogStart = 5.0f;
 	_sceneFog.FogRange = 50.0f;
@@ -263,12 +263,12 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		_sceneElements.push_back(element);
 
 		PointLight light;
-		light.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-		light.Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-		light.Specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-		light.Attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
-		light.Range = 25.0f;
-		light.Position = _camera->GetPosition();
+		light.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+		light.diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+		light.specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+		light.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
+		light.range = 25.0f;
+		light.position = _camera->GetPosition();
 		//_pointLights.push_back(light);
 
 		/*for (int i = 0; i < 60; ++i)
@@ -352,8 +352,8 @@ void MainScene::Update(float deltaTime)
 {	
 	_camera->Update(deltaTime);
 
-	_spotLight.Position = _camera->GetPosition();
-	_spotLight.Direction = _camera->GetLookDirection();
+	_spotLight.position = _camera->GetPosition();
+	_spotLight.direction = _camera->GetLookDirection();
 	//_pointLights.at(0).Position = _camera->GetPosition();
 	
 
@@ -468,8 +468,8 @@ void MainScene::Update(float deltaTime)
 		_lightRotationAmount = 0.0f;
 	}
 
-	_sceneLight.LightDirection = lightDir;
-	_shadows->UpdateLightDirection(_sceneLight.LightDirection);
+	_sceneLight.lightDirection = lightDir;
+	_shadows->UpdateLightDirection(_sceneLight.lightDirection);
 	_shadows->SetSceneCentre(_camera->GetPosition());
 	_shadows->BuildShadowTransform();
 

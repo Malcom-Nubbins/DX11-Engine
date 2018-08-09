@@ -1,14 +1,18 @@
 #include "TextureHandler.h"
 
-TextureHandler::TextureHandler(D3DClass* d3dClass) : _d3dClass(d3dClass)
+TextureHandler::TextureHandler(D3DClass* d3dClass) : _d3dClass(d3dClass), _groundDisplacementMap(nullptr),
+                                                     _groundSpecularMap(nullptr), _stoneTex(nullptr),
+                                                     _stoneBumpMap(nullptr), _stoneDisplacementMap(nullptr),
+                                                     _distortionMap(nullptr), _snowTexture(nullptr),
+                                                     _aircraftTexture(nullptr), _aircraftNormalMap(nullptr),
+                                                     _aircraftSpecularMap(nullptr), _aircraftDisplacementMap(nullptr)
 {
 	_groundColourTex = nullptr;
 	_groundNormalMap = nullptr;
 }
 
 TextureHandler::~TextureHandler()
-{
-}
+= default;
 
 void TextureHandler::Cleanup()
 {

@@ -20,17 +20,24 @@ private:
 	float _nearWindowWidth;
 
 	XMFLOAT4X4 _view;
-	XMFLOAT4X4 _projection;
+
+	XMFLOAT4X4 _perspectiveProj;
+	XMFLOAT4X4 _othographicProj;
+
+	bool _orthographicMode;
 public:
 	Camera();
+	Camera(const Camera& copy);
 	~Camera();
 
 	XMFLOAT4X4 GetView() const { return _view; }
-	XMFLOAT4X4 GetProj() const { return _projection; }
+	XMFLOAT4X4 GetPerspectiveProj() const { return _perspectiveProj; }
+	XMFLOAT4X4 GetOthographicProj() const { return _othographicProj; }
 	XMFLOAT3 GetPosition() const { return _eye; }
 	XMFLOAT3 GetLookDirection()const { return _at; }
 
-	void SetLens(float fov, float aspect, float nearZ, float farZ);
+	void SetPerspective(bool usePerspective);
+	void SetLens(float fov, float width, float height, float nearZ, float farZ);
 	void LookAt(XMFLOAT3 right, XMFLOAT3 at, XMFLOAT3 up);
 	void SetPosition(XMFLOAT3 position);
 

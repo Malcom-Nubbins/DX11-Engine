@@ -5,11 +5,11 @@ using namespace DirectX;
 
 struct SimpleVertex
 {
-	XMFLOAT3 Pos;
-	XMFLOAT3 Normal;
-	XMFLOAT2 TexCoord;
-	XMFLOAT3 Tangent;
-	XMFLOAT3 Binormal;
+	XMFLOAT3 pos;
+	XMFLOAT3 normal;
+	XMFLOAT2 texCoord;
+	XMFLOAT3 tangent;
+	XMFLOAT3 binormal;
 
 	bool operator<(const SimpleVertex other) const
 	{
@@ -19,31 +19,32 @@ struct SimpleVertex
 
 struct TerrainVertex
 {
-	XMFLOAT3 Position;
-	XMFLOAT3 Normal;
-	XMFLOAT2 TexCoord;
-	XMFLOAT3 Tangent;
-	XMFLOAT3 Binormal;
+	XMFLOAT3 position;
+	XMFLOAT3 normal;
+	XMFLOAT2 texCoord;
+	XMFLOAT3 tangent;
+	XMFLOAT3 binormal;
 
 	TerrainVertex() {}
-	TerrainVertex(const XMFLOAT3& pos, const XMFLOAT3& norm, const XMFLOAT3& tangent, const XMFLOAT2& tex) : Position(pos), Normal(norm), TexCoord(tex), Tangent(tangent) {}
-	TerrainVertex(float px, float py, float pz,
-		float nx, float ny, float nz,
-		float tangx, float tangy, float tangz,
-		float texu, float texv) : Position(px, py, pz), Normal(nx, ny, nz), Tangent(tangx, tangy, tangz), TexCoord(texu, texv) {}
+	TerrainVertex(const XMFLOAT3& pos, const XMFLOAT3& norm, const XMFLOAT3& tangent, const XMFLOAT3& binormal, const XMFLOAT2& tex) : position(pos), normal(norm), texCoord(tex), tangent(tangent), binormal(binormal) {}
+	TerrainVertex(const float px, const float py, const float pz,
+	              const float nx, const float ny, const float nz,
+	              const float tangx, const float tangy, const float tangz,
+				const float binx, const float biny, const float binz,
+	              const float texu, const float texv) : position(px, py, pz), normal(nx, ny, nz), texCoord(texu, texv), tangent(tangx, tangy, tangz), binormal(binx, biny, binz) {}
 };
 
 struct TempVertex
 {
-	XMFLOAT3 Pos;
-	XMFLOAT3 Normal;
-	XMFLOAT2 Tex;
+	XMFLOAT3 pos;
+	XMFLOAT3 normal;
+	XMFLOAT2 tex;
 };
 
 struct SimpleQuad
 {
-	XMFLOAT3 Pos;
-	XMFLOAT2 TexCoord;
+	XMFLOAT3 pos;
+	XMFLOAT2 texCoord;
 };
 
 struct ObjectMesh
@@ -58,46 +59,46 @@ struct ObjectMesh
 
 struct SurfaceMaterial
 {
-	XMFLOAT4 Ambient;
-	XMFLOAT4 Diffuse;
-	XMFLOAT4 Specular;
+	XMFLOAT4 ambient;
+	XMFLOAT4 diffuse;
+	XMFLOAT4 specular;
 };
 
 struct DirectionalLight
 {
-	XMFLOAT4 Ambient;
-	XMFLOAT4 Diffuse;
-	XMFLOAT4 Specular;
-	XMFLOAT3 LightDirection;
+	XMFLOAT4 ambient;
+	XMFLOAT4 diffuse;
+	XMFLOAT4 specular;
+	XMFLOAT3 lightDirection;
 	float padding;
 };
 
 struct PointLight
 {
-	XMFLOAT4 Ambient;
-	XMFLOAT4 Diffuse;
-	XMFLOAT4 Specular;
+	XMFLOAT4 ambient;
+	XMFLOAT4 diffuse;
+	XMFLOAT4 specular;
 
-	XMFLOAT3 Position;
-	float Range;
+	XMFLOAT3 position;
+	float range;
 
-	XMFLOAT3 Attenuation;
+	XMFLOAT3 attenuation;
 	float padding;
 };
 
 struct SpotLight
 {
-	XMFLOAT4 Ambient;
-	XMFLOAT4 Diffuse;
-	XMFLOAT4 Specular;
+	XMFLOAT4 ambient;
+	XMFLOAT4 diffuse;
+	XMFLOAT4 specular;
 
-	XMFLOAT3 Position;
-	float Range;
+	XMFLOAT3 position;
+	float range;
 
-	XMFLOAT3 Direction;
-	float Spot;
+	XMFLOAT3 direction;
+	float spot;
 
-	XMFLOAT3 Attenuation;
+	XMFLOAT3 attenuation;
 	float padding;
 };
 

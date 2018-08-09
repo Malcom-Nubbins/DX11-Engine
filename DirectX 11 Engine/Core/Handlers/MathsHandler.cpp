@@ -82,11 +82,11 @@ XMFLOAT3 MathsHandler::CalculateTangent(TempVertex v1, TempVertex v2, TempVertex
 	XMFLOAT3 vector1, vector2;
 	XMFLOAT2 tuVector, tvVector;
 
-	vector1 = XMFLOAT3(v2.Pos.x - v1.Pos.x, v2.Pos.y - v1.Pos.y, v2.Pos.z - v1.Pos.z);
-	vector2 = XMFLOAT3(v3.Pos.x - v1.Pos.x, v3.Pos.y - v1.Pos.y, v3.Pos.z - v1.Pos.z);
+	vector1 = XMFLOAT3(v2.pos.x - v1.pos.x, v2.pos.y - v1.pos.y, v2.pos.z - v1.pos.z);
+	vector2 = XMFLOAT3(v3.pos.x - v1.pos.x, v3.pos.y - v1.pos.y, v3.pos.z - v1.pos.z);
 
-	tuVector = XMFLOAT2(v2.Tex.x - v1.Tex.x, v3.Tex.x - v1.Tex.x);
-	tvVector = XMFLOAT2(v2.Tex.y - v1.Tex.y, v3.Tex.y - v1.Tex.y);
+	tuVector = XMFLOAT2(v2.tex.x - v1.tex.x, v3.tex.x - v1.tex.x);
+	tvVector = XMFLOAT2(v2.tex.y - v1.tex.y, v3.tex.y - v1.tex.y);
 
 	den = 1.0f / (tuVector.x * tvVector.y - tuVector.y * tvVector.x);
 
@@ -112,11 +112,11 @@ XMFLOAT3 MathsHandler::CalculateBinormal(TempVertex v1, TempVertex v2, TempVerte
 	XMFLOAT3 vector1, vector2;
 	XMFLOAT2 tuVector, tvVector;
 
-	vector1 = XMFLOAT3(v2.Pos.x - v1.Pos.x, v2.Pos.y - v1.Pos.y, v2.Pos.z - v1.Pos.z);
-	vector2 = XMFLOAT3(v3.Pos.x - v1.Pos.x, v3.Pos.y - v1.Pos.y, v3.Pos.z - v1.Pos.z);
+	vector1 = XMFLOAT3(v2.pos.x - v1.pos.x, v2.pos.y - v1.pos.y, v2.pos.z - v1.pos.z);
+	vector2 = XMFLOAT3(v3.pos.x - v1.pos.x, v3.pos.y - v1.pos.y, v3.pos.z - v1.pos.z);
 
-	tuVector = XMFLOAT2(v2.Tex.x - v1.Tex.x, v3.Tex.x - v1.Tex.x);
-	tvVector = XMFLOAT2(v2.Tex.y - v1.Tex.y, v3.Tex.y - v1.Tex.y);
+	tuVector = XMFLOAT2(v2.tex.x - v1.tex.x, v3.tex.x - v1.tex.x);
+	tvVector = XMFLOAT2(v2.tex.y - v1.tex.y, v3.tex.y - v1.tex.y);
 
 	den = 1.0f / (tuVector.x * tvVector.y - tuVector.y * tvVector.x);
 

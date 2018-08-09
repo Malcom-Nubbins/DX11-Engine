@@ -90,7 +90,7 @@ void SkyColourGradient::InitialiseSkydomeElement()
 
 	Transform* skyDomeTransform = new Transform();
 	skyDomeTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	skyDomeTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	skyDomeTransform->SetScale(XMFLOAT3(1.0f, 0.5f, 1.0f));
 	skyDomeTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	Appearance * appearance = new Appearance(OBJLoader::Load((char*)"Core/Resources/Objects/spherex1.obj", _d3dClass->GetDevice(), false), matte);
@@ -137,7 +137,7 @@ void SkyColourGradient::Render(ID3D11Buffer * matrixBuffer, const Camera& camera
 	MatrixBuffer matrixBufferValues;
 	
 	XMMATRIX view = XMLoadFloat4x4(&camera.GetView());
-	XMMATRIX proj = XMLoadFloat4x4(&camera.GetProj());
+	XMMATRIX proj = XMLoadFloat4x4(&camera.GetPerspectiveProj());
 	matrixBufferValues.View = XMMatrixTranspose(view);
 	matrixBufferValues.Projection = XMMatrixTranspose(proj);
 

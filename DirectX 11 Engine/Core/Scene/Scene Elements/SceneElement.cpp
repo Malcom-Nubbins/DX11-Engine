@@ -1,9 +1,8 @@
 #include "SceneElement.h"
 
-SceneElement::SceneElement(std::string elementName, Transform* transform, Appearance* appearance) 
-	: _name(elementName), _transform(transform), _appearance(appearance)
+SceneElement::SceneElement(std::string elementName, Transform* transform, Appearance* appearance)
+	: _transform(transform), _appearance(appearance), _name(elementName), _castShadows(false), _affectedByLight(false)
 {
-
 }
 
 SceneElement::~SceneElement()

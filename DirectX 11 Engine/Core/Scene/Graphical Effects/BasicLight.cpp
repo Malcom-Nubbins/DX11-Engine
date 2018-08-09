@@ -238,9 +238,9 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 
 	if (sunHeight >= 20.0f)
 	{
-		XMStoreFloat4(&sceneLight.Diffuse, diffuseDay);
-		XMStoreFloat4(&sceneLight.Ambient, ambientDay);
-		XMStoreFloat4(&sceneLight.Specular, specularDay);
+		XMStoreFloat4(&sceneLight.diffuse, diffuseDay);
+		XMStoreFloat4(&sceneLight.ambient, ambientDay);
+		XMStoreFloat4(&sceneLight.specular, specularDay);
 	}
 	else if (sunHeight <= 20.0f && sunHeight > 0.0f)
 	{
@@ -248,9 +248,9 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 		XMVECTOR blendedLightAmbient = XMVectorLerp(ambientSunset, ambientDay, sunHeight / 20.0f);
 		XMVECTOR blendedLightSpecular = XMVectorLerp(specularSunset, specularDay, sunHeight / 20.0f);
 		
-		XMStoreFloat4(&sceneLight.Diffuse, blendedLightDiffuse);
-		XMStoreFloat4(&sceneLight.Ambient, blendedLightAmbient);
-		XMStoreFloat4(&sceneLight.Specular, blendedLightSpecular);
+		XMStoreFloat4(&sceneLight.diffuse, blendedLightDiffuse);
+		XMStoreFloat4(&sceneLight.ambient, blendedLightAmbient);
+		XMStoreFloat4(&sceneLight.specular, blendedLightSpecular);
 	}
 	else if(sunHeight <= 0.0f && sunHeight > -10.0f)
 	{
@@ -258,15 +258,15 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 		XMVECTOR blendedLightAmbient = XMVectorLerp(ambientSunset, ambientNight, -sunHeight / 10.0f);
 		XMVECTOR blendedLightSpecular = XMVectorLerp(specularSunset, specularNight, -sunHeight / 10.0f);
 		
-		XMStoreFloat4(&sceneLight.Diffuse, blendedLightDiffuse);
-		XMStoreFloat4(&sceneLight.Ambient, blendedLightAmbient);
-		XMStoreFloat4(&sceneLight.Specular, blendedLightSpecular);
+		XMStoreFloat4(&sceneLight.diffuse, blendedLightDiffuse);
+		XMStoreFloat4(&sceneLight.ambient, blendedLightAmbient);
+		XMStoreFloat4(&sceneLight.specular, blendedLightSpecular);
 	}
 	else
 	{
-		XMStoreFloat4(&sceneLight.Diffuse, diffuseNight);
-		XMStoreFloat4(&sceneLight.Ambient, ambientNight);
-		XMStoreFloat4(&sceneLight.Specular, specularNight);
+		XMStoreFloat4(&sceneLight.diffuse, diffuseNight);
+		XMStoreFloat4(&sceneLight.ambient, ambientNight);
+		XMStoreFloat4(&sceneLight.specular, specularNight);
 	}
 }
 
@@ -293,7 +293,7 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	CamLightBuffer camLightValues;
 
 	XMMATRIX view = XMLoadFloat4x4(&camera.GetView());
-	XMMATRIX proj = XMLoadFloat4x4(&camera.GetProj());
+	XMMATRIX proj = XMLoadFloat4x4(&camera.GetPerspectiveProj());
 	XMMATRIX shadowTransform = XMLoadFloat4x4(&shadowClass.GetShadowTransform());
 
 	matBuffer.View = XMMatrixTranspose(view);
@@ -310,7 +310,7 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	tessValues.MinTessFactor = 1.0f;
 
 	camLightValues.EyePos = XMFLOAT4(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 1.0f);
-	camLightValues.LightVector = XMFLOAT4(sceneLight.LightDirection.x, sceneLight.LightDirection.y, sceneLight.LightDirection.z, 1.0f);
+	camLightValues.LightVector = XMFLOAT4(sceneLight.lightDirection.x, sceneLight.lightDirection.y, sceneLight.lightDirection.z, 1.0f);
 
 	if (pointLights.size() > 0)
 		objValBuffer.usePointLights = 0.0f;
@@ -350,9 +350,9 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 		Transform* transform = element->GetTransform();
 
 		ObjectMaterial mat = appearance->GetObjectMaterial();
-		objValBuffer.surface.Ambient = mat.ambient;
-		objValBuffer.surface.Diffuse = mat.diffuse;
-		objValBuffer.surface.Specular = mat.specular;
+		objValBuffer.surface.ambient = mat.ambient;
+		objValBuffer.surface.diffuse = mat.diffuse;
+		objValBuffer.surface.specular = mat.specular;
 
 		matBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&transform->GetWorld()));
 		ID3D11ShaderResourceView* tex;

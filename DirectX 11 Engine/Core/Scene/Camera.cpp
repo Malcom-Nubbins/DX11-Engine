@@ -1,79 +1,93 @@
 #include "Camera.h"
 
 Camera::Camera()
+		: _nearZ(0), _farZ(0), _aspect(0), _fovY(0), _nearWindowHeight(0), _nearWindowWidth(0),
+         _orthographicMode(false)
+{
+}
+
+Camera::Camera(const Camera& copy): _nearZ(0), _farZ(0), _aspect(0), _fovY(0), _nearWindowHeight(0),
+                                    _nearWindowWidth(0), _orthographicMode(false)
 {
 }
 
 
 Camera::~Camera()
+= default;
+
+void Camera::SetPerspective(const bool usePerspective)
 {
+	_orthographicMode = !usePerspective;
 }
 
-void Camera::SetLens(float fov, float aspect, float nearZ, float farZ)
+void Camera::SetLens(const float fov, const float width, const float height, const float nearZ, const float farZ)
 {
 	_fovY = fov;
-	_aspect = aspect;
+	_aspect = (width / height);
 	_nearZ = nearZ;
 	_farZ = farZ;
 
-	XMMATRIX proj = XMMatrixPerspectiveFovLH(_fovY, _aspect, _nearZ, _farZ);
-	XMStoreFloat4x4(&_projection, proj);
+	auto proj = XMMatrixOrthographicLH(width, height, _nearZ, _farZ);
+	XMStoreFloat4x4(&_othographicProj, proj);
+
+	proj = XMMatrixPerspectiveFovLH(_fovY, _aspect, _nearZ, _farZ);
+	XMStoreFloat4x4(&_perspectiveProj, proj);
 }
 
-void Camera::LookAt(XMFLOAT3 right, XMFLOAT3 at, XMFLOAT3 up)
+void Camera::LookAt(const XMFLOAT3 right, const XMFLOAT3 at, const XMFLOAT3 up)
 {
 	_right = right;
 	_at = at;
 	_up = up;
 
-	XMVECTOR Right = XMLoadFloat3(&_right);
-	XMVECTOR At = XMLoadFloat3(&_at);
-	XMVECTOR Up = XMLoadFloat3(&_up);
+	const auto camRight = XMLoadFloat3(&_right);
+	const auto camAt = XMLoadFloat3(&_at);
+	const auto camUp = XMLoadFloat3(&_up);
 
-	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(Right, At, Up));
+	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(camRight, camAt, camUp));
 }
 
-void Camera::SetPosition(XMFLOAT3 position)
+void Camera::SetPosition(const XMFLOAT3 position)
 {
 	_eye = position;
 }
 
-void Camera::Strafe(float amount)
+void Camera::Strafe(const float amount)
 {
-	XMVECTOR strafe = XMVectorReplicate(amount);
-	XMVECTOR right = XMLoadFloat3(&_right);
-	XMVECTOR eye = XMLoadFloat3(&_eye);
+	const auto strafe = XMVectorReplicate(amount);
+	const auto right = XMLoadFloat3(&_right);
+	const auto eye = XMLoadFloat3(&_eye);
 	XMStoreFloat3(&_eye, XMVectorMultiplyAdd(strafe, right, eye));
 }
 
 void Camera::Walk(float amount)
 {
-	XMVECTOR walk = XMVectorReplicate(amount);
-	XMVECTOR at = XMLoadFloat3(&_at);
-	XMVECTOR eye = XMLoadFloat3(&_eye);
+	const auto walk = XMVectorReplicate(amount);
+	const auto at = XMLoadFloat3(&_at);
+	const auto eye = XMLoadFloat3(&_eye);
 	XMStoreFloat3(&_eye, XMVectorMultiplyAdd(walk, at, eye));
 }
 
-void Camera::Pitch(float angle)
+void Camera::Pitch(const float angle)
 {
-	XMMATRIX pitch = XMMatrixRotationAxis(XMLoadFloat3(&_right), angle);
+	const auto pitch = XMMatrixRotationAxis(XMLoadFloat3(&_right), angle);
 
 	XMStoreFloat3(&_up, XMVector3TransformNormal(XMLoadFloat3(&_up), pitch));
 	XMStoreFloat3(&_at, XMVector3TransformNormal(XMLoadFloat3(&_at), pitch));
 }
 
-void Camera::Yaw(float angle)
+void Camera::Yaw(const float angle)
 {
-	XMMATRIX yaw = XMMatrixRotationY(angle);
+	const auto yaw = XMMatrixRotationY(angle);
 
 	XMStoreFloat3(&_right, XMVector3TransformNormal(XMLoadFloat3(&_right), yaw));
 	XMStoreFloat3(&_up, XMVector3TransformNormal(XMLoadFloat3(&_up), yaw));
 	XMStoreFloat3(&_at, XMVector3TransformNormal(XMLoadFloat3(&_at), yaw));
 }
 
-void Camera::Update(float deltaTime)
+void Camera::Update(const float deltaTime)
 {
-	float movementSpeed = 3.0f;
+	const float movementSpeed = 3.0f;
 	if (GetAsyncKeyState('A'))
 	{
 		Strafe(-movementSpeed * deltaTime);
@@ -98,22 +112,22 @@ void Camera::Update(float deltaTime)
 
 void Camera::UpdateViewMatrix()
 {
-	XMVECTOR R = XMLoadFloat3(&_right);
-	XMVECTOR U = XMLoadFloat3(&_up);
-	XMVECTOR L = XMLoadFloat3(&_at);
-	XMVECTOR P = XMLoadFloat3(&_eye);
+	auto r = XMLoadFloat3(&_right);
+	auto u = XMLoadFloat3(&_up);
+	auto l = XMLoadFloat3(&_at);
+	const auto p = XMLoadFloat3(&_eye);
 
-	L = XMVector3Normalize(L); // Normalise the Look vector
-	U = XMVector3Normalize(XMVector3Cross(L, R)); // Normalise the Up vector
-	R = XMVector3Cross(U, L); // Normalise the Right vector
+	l = XMVector3Normalize(l); // Normalise the Look vector
+	u = XMVector3Normalize(XMVector3Cross(l, r)); // Normalise the Up vector
+	r = XMVector3Cross(u, l); // Normalise the Right vector
 
-	float x = -XMVectorGetX(XMVector3Dot(P, R));
-	float y = -XMVectorGetX(XMVector3Dot(P, U));
-	float z = -XMVectorGetX(XMVector3Dot(P, L));
+	const auto x = -XMVectorGetX(XMVector3Dot(p, r));
+	const auto y = -XMVectorGetX(XMVector3Dot(p, u));
+	const auto z = -XMVectorGetX(XMVector3Dot(p, l));
 
-	XMStoreFloat3(&_right, R);
-	XMStoreFloat3(&_up, U);
-	XMStoreFloat3(&_at, L);
+	XMStoreFloat3(&_right, r);
+	XMStoreFloat3(&_up, u);
+	XMStoreFloat3(&_at, l);
 
 	_view(0, 0) = _right.x;
 	_view(1, 0) = _right.y;
