@@ -282,7 +282,7 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 
 			//Put data into vertex and index buffers, then pass the relevant data to the MeshData object.
 			//The rest of the code will hopefully look familiar to you, as it's similar to whats in your InitVertexBuffer and InitIndexBuffer methods
-			ID3D11Buffer* vertexBuffer;
+			VertexBuffer* vertexBuffer;
 
 			D3D11_BUFFER_DESC bd;
 			ZeroMemory(&bd, sizeof(bd));

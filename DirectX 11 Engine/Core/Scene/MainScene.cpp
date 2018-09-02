@@ -159,13 +159,14 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	planeMesh.vertexBufferOffset = 0;
 	planeMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-	ObjectMesh aircraftMesh = OBJLoader::Load(L"Core/Resources/Objects/Hercules.obj", _d3dClass->GetDevice(), false);
-	ObjectMesh sphere = OBJLoader::Load(L"Core/Resources/Objects/spherex.obj", _d3dClass->GetDevice(), false);
-	ObjectMesh plant0 = OBJLoader::Load(L"Core/Resources/Objects/plant0.obj", _d3dClass->GetDevice());
-	ObjectMesh plant1 = OBJLoader::Load(L"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice());
+	//ObjectMesh aircraftMesh = OBJLoader::Load(L"Core/Resources/Objects/Hercules.obj", _d3dClass->GetDevice(), false);
+	//ObjectMesh sphere = OBJLoader::Load(L"Core/Resources/Objects/spherex.obj", _d3dClass->GetDevice(), false);
+	//ObjectMesh plant0 = OBJLoader::Load(L"Core/Resources/Objects/plant0.obj", _d3dClass->GetDevice());
+	//ObjectMesh plant1 = OBJLoader::Load(L"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice());
 
-	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
-	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
+	NewObjectMesh aircraftMesh, sphere, plant0, plant1;
+	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
+	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
 	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
 	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
 
@@ -260,7 +261,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			element->SetCastShadows(true);
 			element->SetAffectedByLight(true);
 
-			_sceneElements.push_back(element);
+			//_sceneElements.push_back(element);
 		}
 
 		element = new SceneElement("Aircraft", aircraftTransform, aircraftAppearance);

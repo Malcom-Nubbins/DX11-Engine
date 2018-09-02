@@ -26,3 +26,6 @@ enum RASTERIZER_TYPE
 	WIREFRAME,
 	SHADOWDEPTH
 };
+
+typedef ID3D11Buffer VertexBuffer;
+typedef ID3D11Buffer IndexBuffer;

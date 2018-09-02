@@ -37,15 +37,19 @@ struct TerrainVertex
 
 struct Subset
 {
-	Subset() : id(-1), vertexStart(0), vertexCount(0),faceStart(0), faceCount(0) {}
+	Subset() : vertexBuffer(nullptr), indexBuffer(nullptr), vertexBufferStride(0), vertexBufferOffset(0), id(-1),
+	           indexCount(0)
+	{
+	}
 
-	ID3D11Buffer* indexBuffer;
+	VertexBuffer* vertexBuffer;
+	IndexBuffer* indexBuffer;
 
+	UINT vertexBufferStride;
+	UINT vertexBufferOffset;
 	UINT id;
-	UINT vertexStart;
-	UINT vertexCount;
-	UINT faceStart;
-	UINT faceCount;
+
+	UINT indexCount;
 };
 
 struct TempVertex
@@ -61,17 +65,21 @@ struct SimpleQuad
 	XMFLOAT2 texCoord;
 };
 
+struct NewObjectMesh
+{
+	VertexBuffer* vertexBuffer;
+	UINT numOfSubsets;
+	std::vector<Subset> subsets;
+};
+
 struct ObjectMesh
 {
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
+	VertexBuffer* vertexBuffer;
+	IndexBuffer* indexBuffer;
 
 	UINT vertexBufferStride;
 	UINT vertexBufferOffset;
-	int numberOfIndices;
-
-	UINT numOfSubsets;
-	std::vector<Subset> subsets;
+	int numberOfIndices = -1;
 };
 
 struct SurfaceMaterial

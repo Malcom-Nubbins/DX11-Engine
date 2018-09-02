@@ -36,5 +36,10 @@ void SceneElement::Update(float deltaTime)
 
 void SceneElement::Draw(ID3D11DeviceContext* deviceContext)
 {
+	if(_name == "Aircraft")
+	{
+		auto temp = 1;
+	}
+
 	_appearance->Draw(deviceContext);
 }

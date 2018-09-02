@@ -55,7 +55,7 @@ void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int indices[
 	}
 
 	// binormal
-	output[1] = XMFLOAT3((fP.x * fB.x - fQ.x * fA.x) * fraction, 
+	output[1] = XMFLOAT3((fP.x * fB.x - fQ.x * fA.x) * fraction,
 		(fP.x * fB.y - fQ.x * fA.y) * fraction,
 		(fP.x * fB.z - fQ.x * fA.z) * fraction);
 
@@ -82,17 +82,18 @@ void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int indices[
 	vOutput[0] = vOutput[0] - NdotT * vOutput[2];
 	vOutput[1] = vOutput[1] - NdotB * vOutput[2] - TdotB * vOutput[0];
 
-	//XMStoreFloat3(&v0.normal, vOutput[2]);
+	XMStoreFloat3(&v0.normal, vOutput[2]);
 	XMStoreFloat3(&v0.tangent, vOutput[0]);
 	XMStoreFloat3(&v0.binormal, vOutput[1]);
 }
 
-bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectMesh& modelMesh, bool invertFaces)
+bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, NewObjectMesh& modelMesh, bool invertFaces)
 {
 	std::ifstream in;
 	in.open(filename);
 
-	modelMesh = ObjectMesh();
+	modelMesh = NewObjectMesh();
+	modelMesh.numOfSubsets = 0;
 
 	if(!in.good())
 	{
@@ -112,8 +113,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 	std::vector<Subset> subsets;
 	std::vector<UINT> indices = std::vector<UINT>();
 
-	UINT numOfVertices;
-	UINT numOfTriangles;
+	UINT vertexOffset = 0;
 	UINT currId = 0;
 
 	std::string ignore;
@@ -128,10 +128,14 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 		if (indices.empty())
 			return true;
 
+		Subset subset = Subset();
+		subset.id = currId;
+
+
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
 		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.ByteWidth = sizeof(DWORD) * indices.size();
+		bd.ByteWidth = sizeof(LONG) * indices.size();
 		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 		bd.CPUAccessFlags = 0;
 		bd.MiscFlags = 0;
@@ -140,14 +144,18 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 		ZeroMemory(&initData, sizeof(initData));
 		initData.pSysMem = &indices[0];
 
-		HRESULT hr = device->CreateBuffer(&bd, &initData, &modelMesh.indexBuffer);
+		auto hr = device->CreateBuffer(&bd, &initData, &subset.indexBuffer);
 		if (FAILED(hr))
 			return false;
 
+		subset.vertexBufferStride = sizeof(SimpleVertex);
+		subset.vertexBufferOffset = 0;
+		subset.indexCount = indices.size();
 
-		Subset subset = Subset();
-		subset.id = currId;
+		modelMesh.subsets.push_back(subset);
+		modelMesh.numOfSubsets++;
 
+		vertexOffset += indices.size();
 		indices.clear();
 
 		currId++;
@@ -166,9 +174,9 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 			if (tokens.size() != 4)
 				return false;
 
-			norm.x = static_cast<float>(atoi(tokens[1].c_str()));
-			norm.y = static_cast<float>(atoi(tokens[2].c_str()));
-			norm.z = static_cast<float>(atoi(tokens[3].c_str()));
+			norm.x = static_cast<float>(atof(tokens[1].c_str()));
+			norm.y = static_cast<float>(atof(tokens[2].c_str()));
+			norm.z = static_cast<float>(atof(tokens[3].c_str()));
 
 			normals.push_back(norm);
 
@@ -182,8 +190,8 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 			if (tokens.size() < 3)
 				return false;
 
-			texCoord.x = static_cast<float>(atoi(tokens[1].c_str()));
-			texCoord.y = static_cast<float>(atoi(tokens[2].c_str()));
+			texCoord.x = static_cast<float>(atof(tokens[1].c_str()));
+			texCoord.y = static_cast<float>(atof(tokens[2].c_str()));
 
 			texCoords.push_back(texCoord);
 		}
@@ -196,9 +204,9 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 			if (tokens.size() != 4)
 				return false;
 
-			vert.x = static_cast<float>(atoi(tokens[1].c_str()));
-			vert.y = static_cast<float>(atoi(tokens[2].c_str()));
-			vert.z = static_cast<float>(atoi(tokens[3].c_str()));
+			vert.x = static_cast<float>(atof(tokens[1].c_str()));
+			vert.y = static_cast<float>(atof(tokens[2].c_str()));
+			vert.z = static_cast<float>(atof(tokens[3].c_str()));
 
 			verts.push_back(vert);
 		}
@@ -250,7 +258,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 			}
 			else
 			{
-				SimpleVertex v;
+				SimpleVertex v{};
 
 				v.pos = verts[idPos];
 				if (idTex >= 0)
@@ -280,18 +288,19 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 				indices.push_back(indicesForThisFace[0]);
 				indices.push_back(indicesForThisFace[2]);
 
-				int indices[] = { vertexIndex, indicesForThisFace[0], indicesForThisFace[2] };
+				int lIndices[] = { vertexIndex, indicesForThisFace[0], indicesForThisFace[2] };
 				int inds[] = { 0, 1, 2 };
+				CalculateTBN(vertices, lIndices, inds);
 			}
 
 		}
 
-		int indices[] = { 2, 0, 1 };
+		int lIndices[] = { 2, 0, 1 };
 
 		for (int i = 0; i < 3; ++i)
 		{
-			int first = indices[0]; indices[0] = indices[1]; indices[1] = indices[2]; indices[2] = first;
-
+			int first = lIndices[0]; lIndices[0] = lIndices[1]; lIndices[1] = lIndices[2]; lIndices[2] = first;
+			CalculateTBN(vertices, &indicesForThisFace[0], lIndices);
 		}
 		return true;
 	};
@@ -311,6 +320,11 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 		case ' ':
 		case '#':
 		case 's':
+		case 'm':
+		case 'u':
+		case '\n':
+		case '\r':
+		case '\0':
 			continue;
 
 		case 'v':
@@ -340,7 +354,24 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, ObjectM
 		}
 	}
 
+	if (!buildSubset())
+		return false;
 
+	D3D11_BUFFER_DESC vbd;
+	ZeroMemory(&vbd, sizeof(vbd));
+	vbd.Usage = D3D11_USAGE_DEFAULT;
+	vbd.ByteWidth = sizeof(SimpleVertex) * vertices.size();
+	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vbd.CPUAccessFlags = 0;
+	vbd.MiscFlags = 0;
+
+	D3D11_SUBRESOURCE_DATA vInitData;
+	ZeroMemory(&vInitData, sizeof(vInitData));
+	vInitData.pSysMem = &vertices[0];
+
+	auto hr = device->CreateBuffer(&vbd, &vInitData, &modelMesh.vertexBuffer);
+	if (FAILED(hr))
+		return false;
 
 	return true;
 }

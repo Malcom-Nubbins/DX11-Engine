@@ -5,6 +5,8 @@ class Appearance
 {
 private:
 	ObjectMesh _mesh;
+	NewObjectMesh _newMesh;
+
 	ObjectMaterial _material;
 
 	ID3D11ShaderResourceView* _colourTex;
@@ -14,6 +16,7 @@ private:
 
 public:
 	Appearance(ObjectMesh mesh, ObjectMaterial material);
+	Appearance(NewObjectMesh mesh, ObjectMaterial material);
 	~Appearance();
 
 	void SetColourTexture(ID3D11ShaderResourceView* colourTex) { _colourTex = colourTex; }
