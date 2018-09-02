@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <vector>
 
 using namespace DirectX;
 
@@ -34,6 +35,19 @@ struct TerrainVertex
 	              const float texu, const float texv) : position(px, py, pz), normal(nx, ny, nz), texCoord(texu, texv), tangent(tangx, tangy, tangz), binormal(binx, biny, binz) {}
 };
 
+struct Subset
+{
+	Subset() : id(-1), vertexStart(0), vertexCount(0),faceStart(0), faceCount(0) {}
+
+	ID3D11Buffer* indexBuffer;
+
+	UINT id;
+	UINT vertexStart;
+	UINT vertexCount;
+	UINT faceStart;
+	UINT faceCount;
+};
+
 struct TempVertex
 {
 	XMFLOAT3 pos;
@@ -51,10 +65,13 @@ struct ObjectMesh
 {
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
-	int numberOfIndices;
 
 	UINT vertexBufferStride;
 	UINT vertexBufferOffset;
+	int numberOfIndices;
+
+	UINT numOfSubsets;
+	std::vector<Subset> subsets;
 };
 
 struct SurfaceMaterial

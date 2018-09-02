@@ -1,4 +1,5 @@
 #include "MainScene.h"
+#include "../Loaders/ModelLoader.h"
 
 MainScene::MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass, WindowClass* windowClass, Timer* timer)
 	: _d3dClass(d3dClass), _shaderClass(shaderClass), _renderClass(renderClass), _bufferClass(bufferClass), _windowClass(windowClass), _timer(timer)
@@ -158,10 +159,15 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	planeMesh.vertexBufferOffset = 0;
 	planeMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-	ObjectMesh aircraftMesh = OBJLoader::Load((char*)"Core/Resources/Objects/Hercules.obj", _d3dClass->GetDevice(), false);
-	ObjectMesh sphere = OBJLoader::Load((char*)"Core/Resources/Objects/spherex.obj", _d3dClass->GetDevice(), false);
-	ObjectMesh plant0 = OBJLoader::Load((char*)"Core/Resources/Objects/plant0.obj", _d3dClass->GetDevice(), true);
-	ObjectMesh plant1 = OBJLoader::Load((char*)"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice(), true);
+	ObjectMesh aircraftMesh = OBJLoader::Load(L"Core/Resources/Objects/Hercules.obj", _d3dClass->GetDevice(), false);
+	ObjectMesh sphere = OBJLoader::Load(L"Core/Resources/Objects/spherex.obj", _d3dClass->GetDevice(), false);
+	ObjectMesh plant0 = OBJLoader::Load(L"Core/Resources/Objects/plant0.obj", _d3dClass->GetDevice());
+	ObjectMesh plant1 = OBJLoader::Load(L"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice());
+
+	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
+	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
+	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
+	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
 
 	_diamondSquareTerrain = new DiamondSquareTerrain(_d3dClass);
 	_diamondSquareTerrain->SetTerrainValues(256, 256, 512);
@@ -177,22 +183,22 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	diamondSquareMesh.vertexBufferStride = sizeof(SimpleVertex);
 
 	// Transforms
-	Transform* groundTransform = new Transform();
+	auto* groundTransform = new Transform();
 	groundTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	Transform* underworldTransform = new Transform();
+	auto underworldTransform = new Transform();
 	underworldTransform->SetPosition(XMFLOAT3(0.0f, -15.0f, 0.0f));
 	underworldTransform->SetScale(XMFLOAT3(256.0f, 1.0f, 256.0f));
 	underworldTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	Transform* aircraftTransform = new Transform();
+	auto* aircraftTransform = new Transform();
 	aircraftTransform->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 8.0f, 0));
 	aircraftTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	aircraftTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	Transform* sunSphereTransform = new Transform();
+	auto* sunSphereTransform = new Transform();
 	sunSphereTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	sunSphereTransform->SetScale(XMFLOAT3(4.0f, 4.0f, 4.0f));
 	sunSphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));

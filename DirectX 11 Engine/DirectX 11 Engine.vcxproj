@@ -162,6 +162,7 @@
     <ClCompile Include="Core\Scene\Scene Elements\SceneElement.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Transform.cpp" />
+    <ClCompile Include="Core\Loaders\ModelLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
@@ -188,6 +189,7 @@
     <ClInclude Include="Core\Scene\MainScene.h" />
     <ClInclude Include="Core\Scene\Scene Elements\SceneElement.h" />
     <ClInclude Include="Core\Timer.h" />
+    <ClInclude Include="Core\Loaders\ModelLoader.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
   </ItemGroup>

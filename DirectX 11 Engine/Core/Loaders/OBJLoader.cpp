@@ -47,7 +47,7 @@ void OBJLoader::CreateIndices(
 			outTangents.push_back(vertex.tangent);
 			outBinormals.push_back(vertex.binormal);
 
-			UINT newIndex = (UINT)outVertices.size() - 1;
+			UINT newIndex = static_cast<UINT>(outVertices.size()) - 1;
 			outIndices.push_back(newIndex);
 
 			//Add it to the map
@@ -61,10 +61,10 @@ void OBJLoader::CreateIndices(
 //WARNING: This code makes a big assumption -- that your models have texture coordinates AND normals which they should have anyway (else you can't do texturing and lighting!)
 //If your .obj file has no lines beginning with "vt" or "vn", then you'll need to change the Export settings in your modelling software so that it exports the texture coordinates 
 //and normals. If you still have no "vt" lines, you'll need to do some texture unwrapping, also known as UV unwrapping.
-ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool invertTexCoords)
+ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, bool invertTexCoords)
 {
-	std::string binaryFilename = filename;
-	binaryFilename.append("Binary");
+	std::wstring binaryFilename = filename;
+	binaryFilename.append(L"Binary");
 	std::ifstream binaryInFile;
 	binaryInFile.open(binaryFilename, std::ios::in | std::ios::binary);
 
@@ -108,7 +108,7 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 				inFile >> input; //Get the next input from the file
 
 								 //Check what type of input it was, we are only interested in vertex positions, texture coordinates, normals and indices, nothing else
-				if (input.compare("v") == 0) //Vertex position
+				if (input == "v") //Vertex position
 				{
 					inFile >> vert.x;
 					inFile >> vert.y;
@@ -116,7 +116,7 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 
 					verts.push_back(vert);
 				}
-				else if (input.compare("vt") == 0) //Texture coordinate
+				else if (input == "vt") //Texture coordinate
 				{
 					inFile >> texCoord.x;
 					inFile >> texCoord.y;
@@ -125,7 +125,7 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 
 					texCoords.push_back(texCoord);
 				}
-				else if (input.compare("vn") == 0) //Normal
+				else if (input == "vn") //Normal
 				{
 					inFile >> normal.x;
 					inFile >> normal.y;
@@ -140,15 +140,15 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 
 					normals.push_back(normal);
 				}
-				else if (input.compare("f") == 0) //Face
+				else if (input == "f") //Face
 				{
 					if (invertTexCoords)
 					{
 						for (int i = 2; i > -1; --i)
 						{
 							inFile >> input;
-							int slash = input.find("/"); //Find first forward slash
-							int secondSlash = input.find("/", slash + 1); //Find second forward slash
+							int slash = input.find('/'); //Find first forward slash
+							int secondSlash = input.find('/', slash + 1); //Find second forward slash
 
 																		  //Extract from string
 							beforeFirstSlash = input.substr(0, slash); //The vertex position index
@@ -156,9 +156,9 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 							afterSecondSlash = input.substr(secondSlash + 1); //The normal index
 
 																			  //Parse into int
-							vInd[i] = (UINT)atoi(beforeFirstSlash.c_str()); //atoi = "ASCII to int"
-							tInd[i] = (UINT)atoi(afterFirstSlash.c_str());
-							nInd[i] = (UINT)atoi(afterSecondSlash.c_str());
+							vInd[i] = static_cast<UINT>(atoi(beforeFirstSlash.c_str())); //atoi = "ASCII to int"
+							tInd[i] = static_cast<UINT>(atoi(afterFirstSlash.c_str()));
+							nInd[i] = static_cast<UINT>(atoi(afterSecondSlash.c_str()));
 						}
 					}
 					else
@@ -166,8 +166,8 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 						for (int i = 0; i < 3; ++i)
 						{
 							inFile >> input;
-							int slash = input.find("/"); //Find first forward slash
-							int secondSlash = input.find("/", slash + 1); //Find second forward slash
+							int slash = input.find('/'); //Find first forward slash
+							int secondSlash = input.find('/', slash + 1); //Find second forward slash
 
 																		  //Extract from string
 							beforeFirstSlash = input.substr(0, slash); //The vertex position index
@@ -175,9 +175,9 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 							afterSecondSlash = input.substr(secondSlash + 1); //The normal index
 
 																			  //Parse into int
-							vInd[i] = (UINT)atoi(beforeFirstSlash.c_str()); //atoi = "ASCII to int"
-							tInd[i] = (UINT)atoi(afterFirstSlash.c_str());
-							nInd[i] = (UINT)atoi(afterSecondSlash.c_str());
+							vInd[i] = static_cast<UINT>(atoi(beforeFirstSlash.c_str())); //atoi = "ASCII to int"
+							tInd[i] = static_cast<UINT>(atoi(afterFirstSlash.c_str()));
+							nInd[i] = static_cast<UINT>(atoi(afterSecondSlash.c_str()));
 						}
 					}
 
@@ -224,7 +224,7 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 			int index = 0;
 
 			//Turn data from vector form to arrays
-			SimpleVertex* finalVerts = new SimpleVertex[expandedVertices.size()];
+			auto finalVerts = new SimpleVertex[expandedVertices.size()];
 			unsigned int numMeshVertices = expandedVertices.size();
 
 			for (int i = 0; i < numMeshVertices; i += 3)
@@ -301,7 +301,7 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 			meshData.vertexBufferOffset = 0;
 			meshData.vertexBufferStride = sizeof(SimpleVertex);
 
-			UINT* indicesArray = new UINT[meshIndices.size()];
+			auto indicesArray = new UINT[meshIndices.size()];
 			unsigned int numMeshIndices = meshIndices.size();
 			for (unsigned int i = 0; i < numMeshIndices; ++i)
 			{
@@ -309,12 +309,12 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 			}
 
 			//Output data into binary file, the next time you run this function, the binary file will exist and will load that instead which is much quicker than parsing into vectors
-			/*std::ofstream outbin(binaryFilename.c_str(), std::ios::out | std::ios::binary);
-			outbin.write((char*)&numMeshVertices, sizeof(unsigned int));
-			outbin.write((char*)&numMeshIndices, sizeof(unsigned int));
-			outbin.write((char*)finalVerts, sizeof(SimpleVertex) * numMeshVertices);
-			outbin.write((char*)indicesArray, sizeof(unsigned short) * numMeshIndices);
-			outbin.close();*/
+			std::ofstream outbin(binaryFilename.c_str(), std::ios::out | std::ios::binary);
+			outbin.write(reinterpret_cast<char*>(&numMeshVertices), sizeof(unsigned int));
+			outbin.write(reinterpret_cast<char*>(&numMeshIndices), sizeof(LONG));
+			outbin.write(reinterpret_cast<char*>(finalVerts), sizeof(SimpleVertex) * numMeshVertices);
+			outbin.write(reinterpret_cast<char*>(indicesArray), sizeof(LONG) * numMeshIndices);
+			outbin.close();
 
 			ID3D11Buffer* indexBuffer;
 
@@ -326,9 +326,8 @@ ObjectMesh OBJLoader::Load(char* filename, ID3D11Device* _pd3dDevice, bool inver
 
 			ZeroMemory(&InitData, sizeof(InitData));
 			InitData.pSysMem = indicesArray;
-			HRESULT hr;
 
-			hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &indexBuffer);
+			auto hr = _pd3dDevice->CreateBuffer(&bd, &InitData, &indexBuffer);
 			if (FAILED(hr))
 			{
 				MessageBox(nullptr, L"Error Building object", L"Error", MB_OK);

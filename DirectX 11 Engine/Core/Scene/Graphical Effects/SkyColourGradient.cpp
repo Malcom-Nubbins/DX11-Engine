@@ -93,7 +93,7 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	skyDomeTransform->SetScale(XMFLOAT3(1.0f, 0.5f, 1.0f));
 	skyDomeTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	Appearance * appearance = new Appearance(OBJLoader::Load((char*)"Core/Resources/Objects/spherex1.obj", _d3dClass->GetDevice(), false), matte);
+	Appearance * appearance = new Appearance(OBJLoader::Load(L"Core/Resources/Objects/spherex1.obj", _d3dClass->GetDevice(), false), matte);
 	appearance->SetColourTexture(nullptr);
 
 	_skyDomeElement = new SceneElement("Sky dome",  skyDomeTransform, appearance);
