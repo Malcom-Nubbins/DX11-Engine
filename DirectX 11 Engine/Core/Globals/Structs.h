@@ -205,7 +205,7 @@ struct FogValuesBuffer
 	float FogStart;
 	float FogRange;
 	float sunHeight;
-	float padding;
+	float UseFog;
 
 	XMFLOAT4 FogColourDay;
 	XMFLOAT4 FogColourSunriseSunset;

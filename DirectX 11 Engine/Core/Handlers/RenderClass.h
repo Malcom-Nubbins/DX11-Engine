@@ -18,6 +18,7 @@ public:
 	~RenderClass();
 	void Cleanup();
 
+	void Initialise();
 	void ResizeViews();
 
 	void DisableZBuffer();

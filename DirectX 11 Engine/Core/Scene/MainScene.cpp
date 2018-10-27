@@ -85,6 +85,8 @@ void MainScene::ResizeViews(float windowWidth, float windowHeight)
 
 void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 {
+	Scene::InitialiseScene(windowWidth, windowHeight);
+
 	InitialiseSceneGraphics(windowWidth, windowHeight);
 
 	D3D11_BUFFER_DESC bd;
@@ -101,10 +103,6 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_objectValueBuffer);
-
-	_camera = new Camera();
-	_camera->SetLens(XM_PIDIV4, windowWidth,  windowHeight, 0.01f, 1000.0f);
-	_camera->LookAt(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 
 	_sceneLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	_sceneLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -124,7 +122,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneFog.FogRange = 50.0f;
 	_sceneFog.FogColourDay = XMFLOAT4(0.7f, 0.80f, 0.92f, 1.0f);
 	_sceneFog.FogColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
-	_sceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f); 
+	_sceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
+	_sceneFog.UseFog = 1.0f;
 	
 	ObjectMaterial aircraftMat;
 	aircraftMat.ambient = XMFLOAT4(1.000, 0.766, 0.336, 1.0f);
@@ -336,21 +335,12 @@ void MainScene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 
 void MainScene::HandleMouse(WPARAM btnState, int x, int y)
 {
-	float dx = XMConvertToRadians(0.25f *static_cast<float>(x - _lastMousePos.x));
-	float dy = XMConvertToRadians(0.25f * static_cast<float>(y - _lastMousePos.y));
-
-	if ((btnState & MK_LBUTTON) != 0)
-	{
-		_camera->Pitch(dy);
-		_camera->Yaw(dx);
-	}
-
-	_lastMousePos = XMFLOAT2(x, y);
+	Scene::HandleMouse(btnState, x, y);
 }
 
 void MainScene::Update(float deltaTime)
 {	
-	__super::Update(deltaTime);
+	Scene::Update(deltaTime);
 
 	_spotLight.position = _camera->GetPosition();
 	_spotLight.direction = _camera->GetLookDirection();
@@ -519,9 +509,9 @@ void MainScene::Draw()
 	_skyGradient->Render(_matrixBuffer, *_camera, sunPos);
 
 	_renderClass->EnableZBuffer();
-	_shadows->Render(_sceneElements, *_diamondSquareTerrain);
+	_shadows->Render(_sceneElements);
 
-	_basicLight->Render(*_camera, _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_diamondSquareTerrain, _matrixBuffer, _objectValueBuffer, *_shadows);
+	_basicLight->Render(*_camera, _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, _matrixBuffer, _objectValueBuffer, *_shadows);
 	
 	_renderToQuad->SetAsCurrentVertexShader();
 

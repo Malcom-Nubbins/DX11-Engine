@@ -38,8 +38,6 @@ private:
 
 	DiamondSquareTerrain* _diamondSquareTerrain;
 
-	XMFLOAT2 _lastMousePos;
-
 	float _lightRotationAmount;
 	XMFLOAT3 _preOffsetLightDir;
 

@@ -18,6 +18,7 @@ Application::Application(Timer* timer) : _timer(timer)
 	_bufferClass = nullptr;
 
 	_mainScene = nullptr;
+	_testingScene = nullptr;
 
 	_windowWidth = WINDOW_WIDTH;
 	_windowHeight = WINDOW_HEIGHT;
@@ -30,9 +31,19 @@ Application::~Application()
 
 void Application::Cleanup()
 {
-	_mainScene->Cleanup();
-	delete _mainScene;
-	_mainScene = nullptr;
+	if(_testingScene != nullptr)
+	{
+		_testingScene->Cleanup();
+		delete _testingScene;
+		_testingScene = nullptr;
+	}
+
+	if (_mainScene != nullptr)
+	{
+		_mainScene->Cleanup();
+		delete _mainScene;
+		_mainScene = nullptr;
+	}
 
 	delete _bufferClass;
 	_bufferClass = nullptr;
@@ -79,6 +90,7 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	}
 
 	_renderClass = new RenderClass(_d3dClass);
+	_renderClass->Initialise();
 	_shaderClass = new ShaderClass(_d3dClass);
 	_bufferClass = new BufferClass(_d3dClass);
 
@@ -101,8 +113,11 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	_textureHandler = new TextureHandler(_d3dClass);
 	_textureHandler->LoadAllTextures();
 
-	_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _textureHandler, _timer);
-	_mainScene->InitialiseScene(_windowWidth, _windowHeight);
+	_testingScene = new TestingScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _textureHandler, _timer);
+	_testingScene->InitialiseScene(_windowWidth, _windowHeight);
+
+	//_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _textureHandler, _timer);
+	//_mainScene->InitialiseScene(_windowWidth, _windowHeight);
 
 	return S_OK;
 }
@@ -183,6 +198,11 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		{
 			_mainScene->HandleMouse(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		}
+
+		if (_testingScene != nullptr)
+		{
+			_testingScene->HandleMouse(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		}
 		return true;
 	}
 
@@ -197,15 +217,37 @@ void Application::Resize(float newWidth, float newHeight)
 	{
 		_mainScene->ResizeViews(newWidth, newHeight);
 	}
+
+	if (_testingScene != nullptr)
+	{
+		_testingScene->ResizeViews(newWidth, newHeight);
+	}
 }
 
 void Application::Update(float deltaTime)
 {
-	_mainScene->Update(deltaTime);
+	if(_testingScene != nullptr)
+	{
+		_testingScene->Update(deltaTime);
+	}
+
+	if (_mainScene != nullptr)
+	{
+		_mainScene->Update(deltaTime);
+	}
 }
 
 void Application::Draw()
 {
-	_mainScene->Draw();
+	if (_testingScene != nullptr)
+	{
+		_testingScene->Draw();
+	}
+
+	if (_mainScene != nullptr)
+	{
+		_mainScene->Draw();
+	}
+
 	_d3dClass->GetSwapChain()->Present(1, 0);
 }

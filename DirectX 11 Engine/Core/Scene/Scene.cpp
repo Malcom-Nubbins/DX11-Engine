@@ -26,6 +26,10 @@ void Scene::ResizeViews(float windowWidth, float windowHeight)
 
 void Scene::InitialiseScene(float windowWidth, float windowHeight)
 {
+	_camera = new Camera();
+	_camera->SetLens(XM_PIDIV4, windowWidth, windowHeight, 0.01f, 1000.0f);
+	_camera->LookAt(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
+	_camera->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
 }
 
 void Scene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
@@ -34,6 +38,16 @@ void Scene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 
 void Scene::HandleMouse(WPARAM btnState, int x, int y)
 {
+	float dx = XMConvertToRadians(0.25f *static_cast<float>(x - _lastMousePos.x));
+	float dy = XMConvertToRadians(0.25f * static_cast<float>(y - _lastMousePos.y));
+
+	if ((btnState & MK_LBUTTON) != 0)
+	{
+		_camera->Pitch(dy);
+		_camera->Yaw(dx);
+	}
+
+	_lastMousePos = XMFLOAT2(x, y);
 }
 
 void Scene::Update(float delta)

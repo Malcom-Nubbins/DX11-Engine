@@ -271,7 +271,7 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 }
 
 void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight, const std::vector<PointLight>& pointLights, const SpotLight& spotLight, 
-						const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, DiamondSquareTerrain& terrain, 
+						const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, 
 						ID3D11Buffer* matrixBuffer, ID3D11Buffer* objectValueBuffer, Shadows& shadowClass)
 {
 	_renderClass->EnableZBuffer();
@@ -312,7 +312,7 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	camLightValues.EyePos = XMFLOAT4(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 1.0f);
 	camLightValues.LightVector = XMFLOAT4(sceneLight.lightDirection.x, sceneLight.lightDirection.y, sceneLight.lightDirection.z, 1.0f);
 
-	if (pointLights.size() > 0)
+	if (!pointLights.empty())
 		objValBuffer.usePointLights = 0.0f;
 	else
 		objValBuffer.usePointLights = 0.0f;
@@ -430,4 +430,15 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 	}
 
 	//terrain.Draw(matBuffer, objValBuffer, matrixBuffer, objectValueBuffer, nullptr);
+}
+
+void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight, const SpotLight& spotLight,
+	const ::std::vector<SceneElement*>& sceneElements, ID3D11Buffer* matrixBuffer, ID3D11Buffer* objectValueBuffer,
+	Shadows& shadowClass)
+{
+	const auto emptyPointLightsVector = std::vector<PointLight>();
+	auto fogVals = FogValuesBuffer();
+	fogVals.UseFog = 0.0f;
+
+	Render(camera, sceneLight, emptyPointLightsVector, spotLight, fogVals, sceneElements, matrixBuffer, objectValueBuffer, shadowClass);
 }

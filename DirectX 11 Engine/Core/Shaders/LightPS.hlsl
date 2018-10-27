@@ -32,7 +32,7 @@ cbuffer FogValuesBuffer : register(b1)
     float FogStart;
     float FogRange;
     float sunHeight;
-    float fogValPad;
+    float UseFog;
 
     float4 FogColourDay;
     float4 FogColourSunriseSunset;
@@ -137,29 +137,32 @@ float4 main(VertexOutput input) : SV_TARGET
 
         finalColour.a = surface.Diffuse.a;
 
-        float fogLerp = saturate((distToEye - FogStart) / FogRange);
+        if(UseFog == 1.0f)
+        {
+            float fogLerp = saturate((distToEye - FogStart) / FogRange);
 
-        if (sunHeight >= 20.0f)
-        {
-            finalColour = lerp(finalColour, FogColourDay, fogLerp);
-        }
-        else if(sunHeight <= 20.0f && sunHeight > -10.0f)
-        {
-            float sunPosClamped = clamp(sunHeight, -20.0f, 20.0f);
-            if (sunHeight <= 20.0f && sunHeight > 0.0f)
+            if (sunHeight >= 20.0f)
             {
-                float4 blendedFogColour = lerp(FogColourSunriseSunset, FogColourDay, sunPosClamped / 20);
-                finalColour = lerp(finalColour, blendedFogColour, fogLerp);
+                finalColour = lerp(finalColour, FogColourDay, fogLerp);
             }
-            else if (sunHeight <= 0.0f && sunHeight > -10.0f)
+            else if (sunHeight <= 20.0f && sunHeight > -10.0f)
             {
-                float4 blendedFogColour = lerp(FogColourSunriseSunset, FogColourNight, -sunPosClamped / 10);
-                finalColour = lerp(finalColour, blendedFogColour, fogLerp);
+                float sunPosClamped = clamp(sunHeight, -20.0f, 20.0f);
+                if (sunHeight <= 20.0f && sunHeight > 0.0f)
+                {
+                    float4 blendedFogColour = lerp(FogColourSunriseSunset, FogColourDay, sunPosClamped / 20);
+                    finalColour = lerp(finalColour, blendedFogColour, fogLerp);
+                }
+                else if (sunHeight <= 0.0f && sunHeight > -10.0f)
+                {
+                    float4 blendedFogColour = lerp(FogColourSunriseSunset, FogColourNight, -sunPosClamped / 10);
+                    finalColour = lerp(finalColour, blendedFogColour, fogLerp);
+                }
             }
-        }
-        else
-        {
-            finalColour = lerp(finalColour, FogColourNight, fogLerp);
+            else
+            {
+                finalColour = lerp(finalColour, FogColourNight, fogLerp);
+            }
         }
 
         return finalColour;

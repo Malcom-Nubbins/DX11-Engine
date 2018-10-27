@@ -38,4 +38,7 @@ void TextureHandler::LoadAllTextures()
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_NRM_new.dds", nullptr, &_aircraftNormalMap);
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_SPEC_new.dds", nullptr, &_aircraftSpecularMap);
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_DISP_new.dds", nullptr, &_aircraftDisplacementMap);
+
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/metal_floor.dds", nullptr, &_metalFloorColourTex);
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/metal_floor_NRM.dds", nullptr, &_metalFloorNormalMap);
 }

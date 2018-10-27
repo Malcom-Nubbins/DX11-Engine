@@ -23,6 +23,7 @@ protected:
 
 	Camera * _camera;
 	DirectionalLight _sceneLight;
+	XMFLOAT2 _lastMousePos;
 
 public:
 	Scene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 

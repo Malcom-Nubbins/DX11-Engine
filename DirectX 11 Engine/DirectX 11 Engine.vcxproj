@@ -164,6 +164,7 @@
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Transform.cpp" />
     <ClCompile Include="Core\Loaders\ModelLoader.cpp" />
+    <ClCompile Include="Core\Scene\TestingScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
@@ -194,6 +195,7 @@
     <ClInclude Include="Core\Loaders\ModelLoader.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
+    <ClInclude Include="Core\Scene\TestingScene.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FYP - Seasonal Day Night Cycle.rc" />

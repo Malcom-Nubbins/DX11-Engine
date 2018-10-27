@@ -2,14 +2,15 @@
 #include "Globals\stdafx.h"
 //#include "Globals\AppValues.h"
 
-#include "Handlers\WindowClass.h"
-#include "Handlers\D3DClass.h"
-#include "Handlers\RenderClass.h"
-#include "Handlers\ShaderClass.h"
-#include "Handlers\BufferClass.h"
+#include "Handlers/WindowClass.h"
+#include "Handlers/D3DClass.h"
+#include "Handlers/RenderClass.h"
+#include "Handlers/ShaderClass.h"
+#include "Handlers/BufferClass.h"
 #include "Timer.h"
 
-#include "Scene\MainScene.h"
+#include "Scene/MainScene.h"
+#include "Scene/TestingScene.h"
 
 class Application
 {
@@ -38,6 +39,7 @@ private:
 	Timer* _timer;
 
 	MainScene* _mainScene;
+	TestingScene* _testingScene;
 
 	ID3D11InputLayout* _simpleQuadInputLayout;
 

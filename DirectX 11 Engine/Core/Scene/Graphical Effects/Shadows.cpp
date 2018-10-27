@@ -172,7 +172,7 @@ void Shadows::UpdateLightDirection(XMFLOAT3 lightDirection)
 	_lightDirection = lightDirection;
 }
 
-void Shadows::Render(const std::vector<SceneElement*>& sceneElements, DiamondSquareTerrain& terrain)
+void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 {
 	_renderClass->SetRasterizerState(SHADOWDEPTH);
 	SetAsCurrentViewport();

@@ -62,7 +62,7 @@ public:
 
 	void SetSceneCentre(XMFLOAT3 newCentre);
 
-	void Render(const std::vector<SceneElement*>& sceneElements, DiamondSquareTerrain& terrain);
+	void Render(const std::vector<SceneElement*>& sceneElements);
 
 	XMFLOAT4X4 GetShadowTransform() const { return _shadowTransformMatrix; }
 	ID3D11ShaderResourceView* GetShadowSRV() const { return _ShadowSRV; }

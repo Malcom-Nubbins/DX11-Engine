@@ -1,4 +1,5 @@
 #include "SkyColourGradient.h"
+#include "../../Loaders/ModelLoader.h"
 
 SkyColourGradient::SkyColourGradient(D3DClass * d3dClass, RenderClass * renderClass, ShaderClass * shaderClass, BufferClass * bufferClass)
 	: _d3dClass(d3dClass), _shaderClass(shaderClass), _renderClass(renderClass), _bufferClass(bufferClass)
@@ -88,12 +89,15 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	matte.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	matte.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	Transform* skyDomeTransform = new Transform();
+	auto* skyDomeTransform = new Transform();
 	skyDomeTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	skyDomeTransform->SetScale(XMFLOAT3(1.0f, 0.5f, 1.0f));
 	skyDomeTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	Appearance * appearance = new Appearance(OBJLoader::Load(L"Core/Resources/Objects/spherex1.obj", _d3dClass->GetDevice(), false), matte);
+	NewObjectMesh sphere;
+	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex1.obj", sphere, false);
+
+	auto appearance = new Appearance(sphere, matte);
 	appearance->SetColourTexture(nullptr);
 
 	_skyDomeElement = new SceneElement("Sky dome",  skyDomeTransform, appearance);
