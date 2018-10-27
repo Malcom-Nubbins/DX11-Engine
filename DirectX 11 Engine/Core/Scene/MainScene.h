@@ -2,15 +2,6 @@
 #include <vector>
 #include <map>
 
-#include "../Handlers/D3DClass.h"
-#include "../Handlers/RenderClass.h"
-#include "../Handlers/ShaderClass.h"
-#include "../Handlers/BufferClass.h"
-#include "../Handlers/WindowClass.h"
-
-#include "../Timer.h"
-
-#include "Camera.h"
 #include "../Globals/Structs.h"
 #include "Scene Elements\SceneElement.h"
 
@@ -23,20 +14,11 @@
 #include "Graphical Effects\Textures\TextureHandler.h"
 #include "../Loaders/OBJLoader.h"
 #include "../Loaders/Terrain Generation/DiamondSquareTerrain.h"
+#include "Scene.h"
 
-class MainScene
+class MainScene : Scene
 {
 private:
-	D3DClass * _d3dClass;
-	ShaderClass* _shaderClass;
-	RenderClass* _renderClass;
-	BufferClass* _bufferClass;
-	WindowClass* _windowClass;
-	TextureHandler* _textureHandler;
-
-	Timer* _timer;
-
-	Camera * _camera;
 	DirectionalLight _sceneLight;
 	FogValuesBuffer _sceneFog;
 
@@ -77,18 +59,20 @@ private:
 	float _currentCooldown;
 
 public:
-	MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass, WindowClass* windowClass, Timer* timer);
-	~MainScene();
-	void Cleanup();
+	MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
+		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, 
+		Timer* timer);
+	~MainScene() override;
+	void Cleanup() override;
 
-	void ResizeViews(float windowWidth, float windowHeight);
+	void ResizeViews(float windowWidth, float windowHeight) override;
 
-	void InitialiseScene(float windowWidth, float windowHeight);
-	void InitialiseSceneGraphics(float windowWidth, float windowHeight);
+	void InitialiseScene(float windowWidth, float windowHeight) override;
+	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;
 
-	void HandleMouse(WPARAM btnState, int x, int y);
+	void HandleMouse(WPARAM btnState, int x, int y) override;
 
-	void Update(float deltaTime);
-	void Draw();
+	void Update(float deltaTime) override;
+	void Draw() override;
 };
 

@@ -1,11 +1,10 @@
 #include "MainScene.h"
 #include "../Loaders/ModelLoader.h"
 
-MainScene::MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass, WindowClass* windowClass, Timer* timer)
-	: _d3dClass(d3dClass), _shaderClass(shaderClass), _renderClass(renderClass), _bufferClass(bufferClass), _windowClass(windowClass), _timer(timer)
+MainScene::MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
+	BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer) 
+	: Scene(d3dClass, shaderClass, renderClass, bufferClass, windowClass, textureHandler, timer)
 {
-	_camera = nullptr;
-	_basicLight = nullptr;
 	_shadows = nullptr;
 	_skyGradient = nullptr;
 	_renderToQuad = nullptr;
@@ -30,10 +29,10 @@ MainScene::MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* 
 
 	_seasonNames = std::map<int, std::string>
 	{
-		{ 0, "Spring" },
-		{ 1, "Summer" },
-		{ 2, "Autumn" },
-		{ 3, "Winter" }
+		{0, "Spring"},
+		{1, "Summer"},
+		{2, "Autumn"},
+		{3, "Winter"}
 	};
 
 	_diamondSquareTerrain = nullptr;
@@ -67,9 +66,6 @@ void MainScene::Cleanup()
 	delete _renderToQuad;
 	_renderToQuad = nullptr;
 
-	delete _camera;
-	_camera = nullptr;
-
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
 	_matrixBuffer->Release();
@@ -80,7 +76,7 @@ void MainScene::Cleanup()
 
 void MainScene::ResizeViews(float windowWidth, float windowHeight)
 {
-	_camera->SetLens(XM_PIDIV4, windowWidth, windowHeight, 0.01f, 1000.0f);
+	Scene::ResizeViews(windowWidth, windowHeight);
 	//_d3dClass->GetSwapChain()->ResizeBuffers(1, windowWidth, windowHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 	_basicLight->Resize(windowWidth, windowHeight);
 	_renderToQuad->Resize(windowWidth, windowHeight);
@@ -131,8 +127,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f); 
 	
 	ObjectMaterial aircraftMat;
-	aircraftMat.ambient = XMFLOAT4(0.913, 0.921, 0.925, 1.0f);
-	aircraftMat.diffuse = XMFLOAT4(0.913, 0.921, 0.925, 1.0f);
+	aircraftMat.ambient = XMFLOAT4(1.000, 0.766, 0.336, 1.0f);
+	aircraftMat.diffuse = XMFLOAT4(1.000, 0.766, 0.336, 1.0f);
 	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 
 	ObjectMaterial shiny;
@@ -225,7 +221,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	Appearance* aircraftAppearance = new Appearance(aircraftMesh, aircraftMat);
 	aircraftAppearance->SetColourTexture(_textureHandler->GetAircraftTexture());
 	aircraftAppearance->SetNormalMap(_textureHandler->GetAircraftNormalMap());
-	aircraftAppearance->SetSpecularMap(_textureHandler->GetAircraftSpecularMap());
+	//aircraftAppearance->SetSpecularMap(_textureHandler->GetAircraftSpecularMap());
 	//aircraftAppearance->SetDisplacementMap(_textureHandler->GetAircraftDisplacementMap());
 
 	Appearance* sunSphereAppearance = new Appearance(sphere, shiny);
@@ -261,7 +257,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			element->SetCastShadows(true);
 			element->SetAffectedByLight(true);
 
-			//_sceneElements.push_back(element);
+			_sceneElements.push_back(element);
 		}
 
 		element = new SceneElement("Aircraft", aircraftTransform, aircraftAppearance);
@@ -322,9 +318,6 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 void MainScene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 {
-	_textureHandler = new TextureHandler(_d3dClass);
-	_textureHandler->LoadAllTextures();
-
 	_basicLight = new BasicLight(_d3dClass, _shaderClass, _renderClass, _bufferClass);
 	_basicLight->Initialise(windowWidth, windowHeight);
 
@@ -357,7 +350,7 @@ void MainScene::HandleMouse(WPARAM btnState, int x, int y)
 
 void MainScene::Update(float deltaTime)
 {	
-	_camera->Update(deltaTime);
+	__super::Update(deltaTime);
 
 	_spotLight.position = _camera->GetPosition();
 	_spotLight.direction = _camera->GetLookDirection();

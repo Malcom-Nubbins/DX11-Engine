@@ -98,7 +98,10 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	if (FAILED(hr))
 		return hr;*/
 
-	_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _timer);
+	_textureHandler = new TextureHandler(_d3dClass);
+	_textureHandler->LoadAllTextures();
+
+	_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _textureHandler, _timer);
 	_mainScene->InitialiseScene(_windowWidth, _windowHeight);
 
 	return S_OK;

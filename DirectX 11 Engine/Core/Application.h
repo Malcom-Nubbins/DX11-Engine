@@ -33,7 +33,8 @@ private:
 	D3DClass* _d3dClass;
 	RenderClass* _renderClass;
 	ShaderClass* _shaderClass;
-	BufferClass* _bufferClass;
+	BufferClass* _bufferClass;	
+	TextureHandler* _textureHandler;
 	Timer* _timer;
 
 	MainScene* _mainScene;

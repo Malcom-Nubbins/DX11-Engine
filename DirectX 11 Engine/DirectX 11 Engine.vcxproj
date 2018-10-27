@@ -160,6 +160,7 @@
     <ClCompile Include="Core\Scene\Graphical Effects\Textures\TextureHandler.cpp" />
     <ClCompile Include="Core\Scene\MainScene.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\SceneElement.cpp" />
+    <ClCompile Include="Core\Scene\Scene.cpp" />
     <ClCompile Include="Core\Timer.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Transform.cpp" />
     <ClCompile Include="Core\Loaders\ModelLoader.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="Core\Scene\Graphical Effects\Textures\TextureHandler.h" />
     <ClInclude Include="Core\Scene\MainScene.h" />
     <ClInclude Include="Core\Scene\Scene Elements\SceneElement.h" />
+    <ClInclude Include="Core\Scene\Scene.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Loaders\ModelLoader.h" />
     <ClInclude Include="resource.h" />
