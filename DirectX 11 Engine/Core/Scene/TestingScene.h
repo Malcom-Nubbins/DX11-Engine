@@ -4,11 +4,13 @@
 #include "Graphical Effects/BasicLight.h"
 #include "Graphical Effects/RenderToFullscreenQuad.h"
 #include "Graphical Effects/SkyColourGradient.h"
+#include "../Loaders/Terrain Generation/FlatTerrain.h"
 
 class TestingScene : public Scene
 {
 private:
 	std::vector<SceneElement*> _sceneElements;
+	FlatTerrain* _flatPlane;
 
 	DirectionalLight _sceneLight;
 

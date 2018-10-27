@@ -1,14 +1,22 @@
 #include "TestingScene.h"
+#include "../Loaders/ModelLoader.h"
 
 TestingScene::TestingScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass,
 	BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer)
 	: Scene(d3dClass, shaderClass, renderClass, bufferClass, windowClass, textureHandler, timer)
 {
+	_shadows = nullptr;
+	_skyGradient = nullptr;
+	_renderToQuad = nullptr;
+	_planeVertexBuffer = nullptr;
+	_planeIndexBuffer = nullptr;
+
+	_buttonCooldown = 1.0f;
+	_currentCooldown = 0.0f;
 }
 
 TestingScene::~TestingScene()
 {
-	
 }
 
 void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
@@ -35,11 +43,11 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	_sceneLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_sceneLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_sceneLight.lightDirection = XMFLOAT3(5.0f, 0.0f, 0.0f);
+	_sceneLight.lightDirection = XMFLOAT3(5.0f, 5.0f, 0.0f);
 
-	_spotLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_spotLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	_spotLight.ambient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	_spotLight.diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	_spotLight.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 	_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
 	_spotLight.spot = 20.0f;
 	_spotLight.range = 1000.0f;
@@ -49,10 +57,15 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	aircraftMat.diffuse = XMFLOAT4(1.000, 0.766, 0.336, 1.0f);
 	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 
+	ObjectMaterial concrete;
+	concrete.ambient = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
+	concrete.diffuse = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
+	concrete.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.6f);
+
 	ObjectMaterial shiny;
 	shiny.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	shiny.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	shiny.specular = XMFLOAT4(0.560f, 0.570f, 0.580f, 0.8f);
+	shiny.specular = XMFLOAT4(0.560f, 0.570f, 0.580f, 0.3f);
 
 	ObjectMaterial charcoal;
 	charcoal.ambient = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
@@ -64,32 +77,52 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	matte.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.3f);
 
+	_flatPlane = new FlatTerrain(_d3dClass);
+	_flatPlane->SetTerrainValues(50, 50, 64);
+	_flatPlane->GenerateTerrain();
+
 	_bufferClass->CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
 
 	ObjectMesh planeMesh;
-	planeMesh.vertexBuffer = _planeVertexBuffer;
-	planeMesh.indexBuffer = _planeIndexBuffer;
-	planeMesh.numberOfIndices = 6;
+	planeMesh.vertexBuffer = _flatPlane->GetVertexBuffer();
+	planeMesh.indexBuffer = _flatPlane->GetIndexBuffer();
+	planeMesh.numberOfIndices = static_cast<int>(_flatPlane->GetMeshData()->Indices.size());
 	planeMesh.vertexBufferOffset = 0;
 	planeMesh.vertexBufferStride = sizeof(SimpleVertex);
 
+	NewObjectMesh sphere;
+	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
+
 	auto* groundTransform = new Transform();
 	groundTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	groundTransform->SetScale(XMFLOAT3(10.0f, 1.0f, 10.0f));
+	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	auto* groundAppearance = new Appearance(planeMesh, shiny);
-	groundAppearance->SetColourTexture(_textureHandler->GetMetalFloorColourTexture());
-	groundAppearance->SetNormalMap(_textureHandler->GetMetalFloorNormalMap());
+	groundAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
+	groundAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
 	//groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
-	//groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
+	groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
+
+	auto* sphereTransform = new Transform();
+	sphereTransform->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	sphereTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	sphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
+	auto* sphereAppearance = new Appearance(sphere, matte);
 
 	//Scene elements
 	{
 		auto* groundPlaneElement = new SceneElement("Ground Plane", groundTransform, groundAppearance);
 		groundPlaneElement->SetCastShadows(true);
 		groundPlaneElement->SetAffectedByLight(true);
+		_flatPlane->SetGameObject(groundPlaneElement);
 		_sceneElements.push_back(groundPlaneElement);
+
+		auto* sphereElement = new SceneElement("Sphere", sphereTransform, sphereAppearance);
+		sphereElement->SetCastShadows(true);
+		sphereElement->SetAffectedByLight(true);
+		_sceneElements.push_back(sphereElement);
 	}
 }
 

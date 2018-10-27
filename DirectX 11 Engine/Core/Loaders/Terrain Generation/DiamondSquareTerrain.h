@@ -25,6 +25,45 @@ class DiamondSquareTerrain
 		float cellSpacing;
 	};
 
+private:
+	D3DClass * _d3dClass;
+
+	ID3D11Buffer * _vertexBuffer;
+	ID3D11Buffer* _indexBuffer;
+
+	GridMeshData* _gridMesh;
+
+	std::vector<SimpleVertex> _gridVertices;
+	std::vector<LONG> _gridIndices;
+
+	double* _heightMap;
+	std::vector<float> _heights;
+	InitInfo _info;
+
+	SceneElement *_terrainGO;
+
+	bool _finishedBuilding;
+
+	static const int _cellsPerPatch = 64;
+
+private:
+
+	void GenerateHeightmap(int sampleSize, double scale);
+
+	void SampleSquare(int x, int y, int size, double value);
+
+	void SampleDiamond(int x, int y, int size, double value);
+
+	double Sample(int x, int y);
+
+	void SetSample(int x, int y, double value);
+
+	void SmoothTerrain(float smoothnessAmount);
+
+	HRESULT CreateBuffers();
+
+	void GetNormals(UINT faceCount, UINT vertexCount);
+
 public:
 	DiamondSquareTerrain(D3DClass* d3dClass);
 	~DiamondSquareTerrain();
@@ -52,45 +91,6 @@ public:
 	void SetTerrainFinishedBuilding(bool state) { _finishedBuilding = state; }
 	bool HasTerrainFinishedBuilding() const { return _finishedBuilding; }
 	void UpdateMeshData();
-
-private:
-
-	void GenerateHeightmap(int sampleSize, double scale);
-
-	void SampleSquare(int x, int y, int size, double value);
-
-	void SampleDiamond(int x, int y, int size, double value);
-
-	double Sample(int x, int y);
-
-	void SetSample(int x, int y, double value);
-
-	void SmoothTerrain(float smoothnessAmount);
-
-	HRESULT CreateBuffers();
-
-	void GetNormals(UINT faceCount, UINT vertexCount);
-
-private:
-	D3DClass * _d3dClass;
-
-	ID3D11Buffer * _vertexBuffer;
-	ID3D11Buffer* _indexBuffer;
-
-	GridMeshData* _gridMesh;
-
-	std::vector<SimpleVertex> _gridVertices;
-	std::vector<LONG> _gridIndices;
-
-	double* _heightMap;
-	std::vector<float> _heights;
-	InitInfo _info;
-
-	SceneElement *_terrainGO;
-
-	bool _finishedBuilding;
-
-	static const int _cellsPerPatch = 64;
 
 };
 

@@ -93,6 +93,9 @@
     <ClCompile Include="Core\Scene\TestingScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Loaders\Terrain Generation\FlatTerrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h">
@@ -180,6 +183,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Scene\TestingScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

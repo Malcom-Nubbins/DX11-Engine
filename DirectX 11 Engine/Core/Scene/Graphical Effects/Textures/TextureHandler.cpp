@@ -27,8 +27,8 @@ void TextureHandler::LoadAllTextures()
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/grassyStone_DISP.dds", nullptr, &_groundDisplacementMap);
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/grassyStone_SPEC.dds", nullptr, &_groundSpecularMap);
 
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/tile_colour_tex.dds", nullptr, &_stoneTex);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/tile_bump_map.dds", nullptr, &_stoneBumpMap);
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/concrete_floor.dds", nullptr, &_stoneTex);
+	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/concrete_floor_NRM.dds", nullptr, &_stoneBumpMap);
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/stone_DISP.dds", nullptr, &_stoneDisplacementMap);
 
 	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/distortionMap.dds", nullptr, &_distortionMap);
