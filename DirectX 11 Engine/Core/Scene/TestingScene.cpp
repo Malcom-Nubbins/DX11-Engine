@@ -84,11 +84,11 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* groundAppearance = new Appearance(planeMesh, matte);
+	auto* groundAppearance = new Appearance(planeMesh, shiny);
 	groundAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
 	groundAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
 	groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
-	//groundAppearance->SetSpecularMap(_textureHandler->GetStoneSpecularMap());
+	groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
 
 	auto* sphereTransform = new Transform();
 	sphereTransform->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -198,8 +198,8 @@ void TestingScene::Draw()
 {
 	_basicLight->SetAsCurrentRenderTarget();
 	_basicLight->SetAsCurrentViewport();
-	_renderClass->EnableRtvClearing();
-	//_skyGradient->Render(*_camera, XMFLOAT3(0.0f, 50.0f, 0.0f));
+	_renderClass->DisableRtvClearing();
+	_skyGradient->Render(*_player->GetCamera(), XMFLOAT3(0.0f, 50.0f, 0.0f));
 
 	_renderClass->EnableZBuffer();
 	_shadows->Render(_sceneElements);
