@@ -28,6 +28,8 @@ public:
 	float GetWindowWidth() { return _windowWidth; }
 	float GetWindowHeight() { return _windowHeight; }
 
+	POINT GetScreenCentre() { return _screenCentre; }
+
 private:
 	HWND _hWnd;
 	HINSTANCE _hInstance;
@@ -40,5 +42,7 @@ private:
 
 	float _windowWidth;
 	float _windowHeight;
+
+	POINT _screenCentre;
 };
 

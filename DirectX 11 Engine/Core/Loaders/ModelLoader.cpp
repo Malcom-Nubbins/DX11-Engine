@@ -87,7 +87,8 @@ void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int indices[
 	XMStoreFloat3(&v0.binormal, vOutput[1]);
 }
 
-bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, NewObjectMesh& modelMesh, bool invertFaces)
+bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, 
+							NewObjectMesh& modelMesh, bool invertFaces)
 {
 	std::ifstream in;
 	in.open(filename);
@@ -178,6 +179,13 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, NewObje
 			norm.y = static_cast<float>(atof(tokens[2].c_str()));
 			norm.z = static_cast<float>(atof(tokens[3].c_str()));
 
+			if(invertFaces)
+			{
+				norm.x = -norm.x;
+				norm.y = -norm.y;
+				norm.z = -norm.z;
+			}
+
 			normals.push_back(norm);
 
 		}
@@ -192,6 +200,11 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, NewObje
 
 			texCoord.x = static_cast<float>(atof(tokens[1].c_str()));
 			texCoord.y = static_cast<float>(atof(tokens[2].c_str()));
+
+			if(invertFaces)
+			{
+				texCoord.y = 1.0f - texCoord.y;
+			}
 
 			texCoords.push_back(texCoord);
 		}
@@ -224,76 +237,153 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, NewObje
 
 		indicesForThisFace.reserve(3);
 
-		for (size_t i = 1; i < tokens.size(); ++i)
+		if(invertFaces)
 		{
-			const std::string& face = tokens[i];
-			if (face.empty())
-				continue;
-
-			faceVals.clear();
-
-			faceVals = split(face, "/");
-
-			if (faceVals.size() != 3)
+			for (size_t i = tokens.size() - 1; i > 0; --i)
 			{
-				return false;
-			}
+				const std::string& face = tokens[i];
+				if (face.empty())
+					continue;
 
-			int idPos = -1, idTex = -1, idNorm = -1;
+				faceVals.clear();
 
-			idPos = static_cast<int>(atoi(faceVals[0].c_str()));
-			if (!faceVals[1].empty())
-				idTex = static_cast<int>(atoi(faceVals[1].c_str()));
+				faceVals = split(face, "/");
 
-			idNorm = static_cast<int>(atoi(faceVals[2].c_str()));
-
-			--idPos; --idTex; --idNorm;
-
-			int vertexIndex = -1;
-			const auto ids = std::make_tuple(idPos, idTex, idNorm);
-			const auto avit = availableVertices.find(ids);
-			if (avit != availableVertices.end())
-			{
-				vertexIndex = avit->second;
-			}
-			else
-			{
-				SimpleVertex v{};
-
-				v.pos = verts[idPos];
-				if (idTex >= 0)
+				if (faceVals.size() != 3)
 				{
-					v.texCoord = texCoords[idTex];
+					return false;
+				}
+
+				int idPos = -1, idTex = -1, idNorm = -1;
+
+				idPos = static_cast<int>(atoi(faceVals[0].c_str()));
+				if (!faceVals[1].empty())
+					idTex = static_cast<int>(atoi(faceVals[1].c_str()));
+
+				idNorm = static_cast<int>(atoi(faceVals[2].c_str()));
+
+				--idPos; --idTex; --idNorm;
+
+				int vertexIndex = -1;
+				const auto ids = std::make_tuple(idPos, idTex, idNorm);
+				const auto avit = availableVertices.find(ids);
+				if (avit != availableVertices.end())
+				{
+					vertexIndex = avit->second;
 				}
 				else
 				{
-					v.texCoord = XMFLOAT2(0.0f, 0.0f);
+					SimpleVertex v{};
+
+					v.pos = verts[idPos];
+					if (idTex >= 0)
+					{
+						v.texCoord = texCoords[idTex];
+					}
+					else
+					{
+						v.texCoord = XMFLOAT2(0.0f, 0.0f);
+					}
+
+					v.normal = normals[idNorm];
+
+					vertices.push_back(v);
+					vertexIndex = vertices.size() - 1;
+					availableVertices.insert(std::make_pair(std::make_tuple(idPos, idTex, idNorm), vertexIndex));
 				}
 
-				v.normal = normals[idNorm];
+				if (i < 4)
+				{
+					indices.push_back(vertexIndex);
+					indicesForThisFace.push_back(vertexIndex);
+				}
+				else
+				{
+					indices.push_back(vertexIndex);
+					indices.push_back(indicesForThisFace[0]);
+					indices.push_back(indicesForThisFace[2]);
 
-				vertices.push_back(v);
-				vertexIndex = vertices.size() - 1;
-				availableVertices.insert(std::make_pair(std::make_tuple(idPos, idTex, idNorm), vertexIndex));
+					int lIndices[] = { vertexIndex, indicesForThisFace[0], indicesForThisFace[2] };
+					int inds[] = { 0, 1, 2 };
+					CalculateTBN(vertices, lIndices, inds);
+				}
 			}
-
-			if (i < 4)
-			{
-				indices.push_back(vertexIndex);
-				indicesForThisFace.push_back(vertexIndex);
-			}
-			else
-			{
-				indices.push_back(vertexIndex);
-				indices.push_back(indicesForThisFace[0]);
-				indices.push_back(indicesForThisFace[2]);
-
-				int lIndices[] = { vertexIndex, indicesForThisFace[0], indicesForThisFace[2] };
-				int inds[] = { 0, 1, 2 };
-				CalculateTBN(vertices, lIndices, inds);
-			}
-
 		}
+		else
+		{
+			for (size_t i = 1; i < tokens.size(); ++i)
+			{
+				const std::string& face = tokens[i];
+				if (face.empty())
+					continue;
+
+				faceVals.clear();
+
+				faceVals = split(face, "/");
+
+				if (faceVals.size() != 3)
+				{
+					return false;
+				}
+
+				int idPos = -1, idTex = -1, idNorm = -1;
+
+				idPos = static_cast<int>(atoi(faceVals[0].c_str()));
+				if (!faceVals[1].empty())
+					idTex = static_cast<int>(atoi(faceVals[1].c_str()));
+
+				idNorm = static_cast<int>(atoi(faceVals[2].c_str()));
+
+				--idPos; --idTex; --idNorm;
+
+				int vertexIndex = -1;
+				const auto ids = std::make_tuple(idPos, idTex, idNorm);
+				const auto avit = availableVertices.find(ids);
+				if (avit != availableVertices.end())
+				{
+					vertexIndex = avit->second;
+				}
+				else
+				{
+					SimpleVertex v{};
+
+					v.pos = verts[idPos];
+					if (idTex >= 0)
+					{
+						v.texCoord = texCoords[idTex];
+					}
+					else
+					{
+						v.texCoord = XMFLOAT2(0.0f, 0.0f);
+					}
+
+					v.normal = normals[idNorm];
+
+					vertices.push_back(v);
+					vertexIndex = vertices.size() - 1;
+					availableVertices.insert(std::make_pair(std::make_tuple(idPos, idTex, idNorm), vertexIndex));
+				}
+
+				if (i < 4)
+				{
+					indices.push_back(vertexIndex);
+					indicesForThisFace.push_back(vertexIndex);
+				}
+				else
+				{
+					indices.push_back(vertexIndex);
+					indices.push_back(indicesForThisFace[0]);
+					indices.push_back(indicesForThisFace[2]);
+
+					int lIndices[] = { vertexIndex, indicesForThisFace[0], indicesForThisFace[2] };
+					int inds[] = { 0, 1, 2 };
+					CalculateTBN(vertices, lIndices, inds);
+				}
+
+			}
+		}
+
+		
 
 		int lIndices[] = { 2, 0, 1 };
 

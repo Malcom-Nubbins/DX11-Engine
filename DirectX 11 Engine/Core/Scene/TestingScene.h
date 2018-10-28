@@ -31,14 +31,14 @@ private:
 
 public:
 	TestingScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass,
-		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer);
+		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, 
+		Timer* timer, Player* player);
 	~TestingScene();
 
 	void Cleanup() override;
 	void ResizeViews(float windowWidth, float windowHeight) override;
 	void InitialiseScene(float windowWidth, float windowHeight) override;
 	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;
-	void HandleMouse() override;
 	void Update(float delta) override;
 	void Draw() override;
 };

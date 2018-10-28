@@ -20,6 +20,7 @@ Application::Application(Timer* timer) : _timer(timer)
 
 	_mainScene = nullptr;
 	_testingScene = nullptr;
+	_player = nullptr;
 
 	_windowWidth = WINDOW_WIDTH;
 	_windowHeight = WINDOW_HEIGHT;
@@ -44,6 +45,13 @@ void Application::Cleanup()
 		_mainScene->Cleanup();
 		delete _mainScene;
 		_mainScene = nullptr;
+	}
+
+	if(_player != nullptr)
+	{
+		_player->Cleanup();
+		delete _player;
+		_player = nullptr;
 	}
 
 	delete _bufferClass;
@@ -83,7 +91,7 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	}
 
 	HWND hwnd = _windowClass->GetHWND();
-	hr = _d3dClass->InitialiseDirectX(hwnd, (float)_windowWidth, (float)_windowHeight);
+	hr = _d3dClass->InitialiseDirectX(hwnd, static_cast<float>(_windowWidth), static_cast<float>(_windowHeight));
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, L"Failed to initialise DirectX", L"Error", MB_OK);
@@ -111,14 +119,21 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	if (FAILED(hr))
 		return hr;*/
 
+	_player = new Player(_windowClass);
+	_player->Initialise();
+
 	_textureHandler = new TextureHandler(_d3dClass);
 	_textureHandler->LoadAllTextures();
 
-	_testingScene = new TestingScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _textureHandler, _timer);
-	_testingScene->InitialiseScene(_windowWidth, _windowHeight);
+	/*_testingScene = new TestingScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
+		_windowClass, _textureHandler, _timer, _player);
 
-	//_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _textureHandler, _timer);
-	//_mainScene->InitialiseScene(_windowWidth, _windowHeight);
+	_testingScene->InitialiseScene(_windowWidth, _windowHeight);*/
+
+	_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
+		_windowClass, _textureHandler, _timer, _player);
+
+	_mainScene->InitialiseScene(_windowWidth, _windowHeight);
 
 	return S_OK;
 }
@@ -194,17 +209,6 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_MENUCHAR:
 		return MAKELRESULT(0, MNC_CLOSE);
 
-	case WM_MOUSEMOVE:
-		if (_mainScene != nullptr)
-		{
-			_mainScene->HandleMouse();
-		}
-
-		if (_testingScene != nullptr)
-		{
-			_testingScene->HandleMouse();
-		}
-		return true;
 	}
 
 	return DefWindowProc(hwnd, message, wParam, lParam);
@@ -223,10 +227,15 @@ void Application::Resize(float newWidth, float newHeight)
 	{
 		_testingScene->ResizeViews(newWidth, newHeight);
 	}
+
+	if(_player != nullptr)
+		_player->ResetPlayerCamera(newWidth, newHeight);
 }
 
 void Application::Update(float deltaTime)
 {
+	_player->Update(deltaTime);
+
 	if(_testingScene != nullptr)
 	{
 		_testingScene->Update(deltaTime);
@@ -239,6 +248,7 @@ void Application::Update(float deltaTime)
 
 	if(InputHandler::IsKeyDown(Esc))
 	{
+		ShowCursor(true);
 		PostQuitMessage(0);
 	}
 }

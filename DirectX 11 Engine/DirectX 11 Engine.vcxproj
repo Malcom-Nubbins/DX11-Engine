@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="Core\Handlers\InputHandler.cpp" />
     <ClCompile Include="Core\Loaders\Terrain Generation\FlatTerrain.cpp" />
+    <ClCompile Include="Core\Scene\Player.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Appearance.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Handlers\BufferClass.cpp" />
@@ -171,6 +172,7 @@
   <ItemGroup>
     <ClInclude Include="Core\Handlers\InputHandler.h" />
     <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h" />
+    <ClInclude Include="Core\Scene\Player.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Globals\AppValues.h" />

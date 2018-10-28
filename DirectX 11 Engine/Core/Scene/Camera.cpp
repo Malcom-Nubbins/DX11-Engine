@@ -88,29 +88,7 @@ void Camera::Yaw(const float angle)
 
 void Camera::Update(const float deltaTime)
 {
-	const float movementSpeed = 3.0f;
-
-	if (InputHandler::IsKeyDown(A))
-	{
-		Strafe(-movementSpeed * deltaTime);
-	}
-
-	if (InputHandler::IsKeyDown(D))
-	{
-		Strafe(movementSpeed * deltaTime);
-	}
-	if (InputHandler::IsKeyDown(W))
-	{
-		Walk(movementSpeed * deltaTime);
-	}
-
-	if (InputHandler::IsKeyDown(S))
-	{
-		Walk(-movementSpeed * deltaTime);
-	}
-
 	UpdateViewMatrix();
-
 }
 
 void Camera::UpdateViewMatrix()

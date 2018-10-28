@@ -2,8 +2,9 @@
 #include "../Loaders/ModelLoader.h"
 
 TestingScene::TestingScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass,
-	BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer)
-	: Scene(d3dClass, shaderClass, renderClass, bufferClass, windowClass, textureHandler, timer)
+	BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, 
+	Timer* timer, Player* player)
+	: Scene(d3dClass, shaderClass, renderClass, bufferClass, windowClass, textureHandler, timer, player)
 {
 	_shadows = nullptr;
 	_skyGradient = nullptr;
@@ -157,20 +158,15 @@ void TestingScene::ResizeViews(float windowWidth, float windowHeight)
 	_renderToQuad->Resize(windowWidth, windowHeight);
 }
 
-void TestingScene::HandleMouse()
-{
-	Scene::HandleMouse();
-}
-
 void TestingScene::Update(float delta)
 {
 	Scene::Update(delta);
 
-	_spotLight.position = _camera->GetPosition();
-	_spotLight.direction = _camera->GetLookDirection();
+	_spotLight.position = _player->GetPlayerPosition();
+	_spotLight.direction = _player->GetPlayerLookDirection();
 
 	_shadows->UpdateLightDirection(_sceneLight.lightDirection);
-	_shadows->SetSceneCentre(_camera->GetPosition());
+	_shadows->SetSceneCentre(_player->GetPlayerPosition());
 	_shadows->BuildShadowTransform();
 
 	if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('R'))
@@ -182,7 +178,7 @@ void TestingScene::Update(float delta)
 		}
 	}
 
-	_skyGradient->SetSceneCentre(_camera->GetPosition());
+	_skyGradient->SetSceneCentre(_player->GetPlayerPosition());
 	_skyGradient->Update(delta);
 
 	for (auto element : _sceneElements)
@@ -208,7 +204,7 @@ void TestingScene::Draw()
 	_renderClass->EnableZBuffer();
 	_shadows->Render(_sceneElements);
 
-	_basicLight->Render(*_camera, _sceneLight, _spotLight, _sceneElements, *_shadows);
+	_basicLight->Render(*_player->GetCamera(), _sceneLight, _spotLight, _sceneElements, *_shadows);
 
 	_renderToQuad->SetAsCurrentVertexShader();
 	_renderToQuad->Render(_basicLight->GetRenderTargetSRV());

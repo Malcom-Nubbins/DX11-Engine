@@ -8,6 +8,7 @@
 #include "../Handlers/RenderClass.h"
 #include "../Handlers/ShaderClass.h"
 #include "../Handlers/BufferClass.h"
+#include "Player.h"
 
 class Scene
 {
@@ -18,17 +19,16 @@ protected:
 	BufferClass* _bufferClass;
 	WindowClass* _windowClass;
 	TextureHandler* _textureHandler;
+	Player* _player;
 
 	Timer* _timer;
-
-	Camera * _camera;
 	DirectionalLight _sceneLight;
 	XMFLOAT2 _lastMousePos;
 
 public:
 	Scene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
 		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler,
-		Timer* timer);
+		Timer* timer, Player* player);
 	virtual ~Scene();
 	virtual void Cleanup();
 
@@ -36,8 +36,6 @@ public:
 
 	virtual void InitialiseScene(float windowWidth, float windowHeight);
 	virtual void InitialiseSceneGraphics(float windowWidth, float windowHeight);
-
-	virtual void HandleMouse();
 
 	virtual void Update(float delta);
 	virtual void Draw();

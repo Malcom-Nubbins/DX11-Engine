@@ -15,6 +15,7 @@
 #include "../Loaders/OBJLoader.h"
 #include "../Loaders/Terrain Generation/DiamondSquareTerrain.h"
 #include "Scene.h"
+#include "Player.h"
 
 class MainScene : Scene
 {
@@ -56,7 +57,7 @@ private:
 public:
 	MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
 		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, 
-		Timer* timer);
+		Timer* timer, Player* player);
 	~MainScene() override;
 	void Cleanup() override;
 
@@ -64,8 +65,6 @@ public:
 
 	void InitialiseScene(float windowWidth, float windowHeight) override;
 	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;
-
-	void HandleMouse() override;
 
 	void Update(float deltaTime) override;
 	void Draw() override;

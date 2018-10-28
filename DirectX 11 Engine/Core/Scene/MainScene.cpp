@@ -2,8 +2,9 @@
 #include "../Loaders/ModelLoader.h"
 
 MainScene::MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
-	BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer) 
-	: Scene(d3dClass, shaderClass, renderClass, bufferClass, windowClass, textureHandler, timer)
+	BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer,
+	Player* player) 
+	: Scene(d3dClass, shaderClass, renderClass, bufferClass, windowClass, textureHandler, timer, player)
 {
 	_shadows = nullptr;
 	_skyGradient = nullptr;
@@ -113,10 +114,15 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	aircraftMat.diffuse = XMFLOAT4(1.000, 0.766, 0.336, 1.0f);
 	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 
+	ObjectMaterial concrete;
+	concrete.ambient = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
+	concrete.diffuse = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
+	concrete.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.6f);
+
 	ObjectMaterial shiny;
 	shiny.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	shiny.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	shiny.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.01f);
+	shiny.specular = XMFLOAT4(0.560f, 0.570f, 0.580f, 0.3f);
 
 	ObjectMaterial charcoal;
 	charcoal.ambient = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
@@ -145,14 +151,14 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	NewObjectMesh aircraftMesh, sphere, plant0, plant1;
 	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
 	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
-	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
-	//ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
+	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
+	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
 
 	_diamondSquareTerrain = new DiamondSquareTerrain(_d3dClass);
 	_diamondSquareTerrain->SetTerrainValues(256, 256, 512);
 	_diamondSquareTerrain->GenerateTerrain();
 
-	_camera->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0.0f, -2.0f) + 2.0f, -2.0f));
+	_player->SetPlayerPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0.0f, -2.0f) + 2.0f, -2.0f));
 
 	ObjectMesh diamondSquareMesh;
 	diamondSquareMesh.vertexBuffer = _diamondSquareTerrain->GetVertexBuffer();
@@ -184,11 +190,11 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 
 	// Appearances
-	Appearance* groundAppearance = new Appearance(diamondSquareMesh, matte);
+	Appearance* groundAppearance = new Appearance(diamondSquareMesh, concrete);
 	groundAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
 	groundAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
 	groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
-	groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
+	//groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
 
 	Appearance* underworldAppearance = new Appearance(planeMesh, shiny);
 	underworldAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
@@ -207,7 +213,6 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	//aircraftAppearance->SetDisplacementMap(_textureHandler->GetAircraftDisplacementMap());
 
 	Appearance* sunSphereAppearance = new Appearance(sphere, shiny);
-	sunSphereAppearance->SetColourTexture(nullptr);
 
 	// Scene Elements
 	{
@@ -253,43 +258,50 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		light.specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 		light.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
 		light.range = 25.0f;
-		light.position = _camera->GetPosition();
+		light.position = _player->GetPlayerPosition();
 		//_pointLights.push_back(light);
 
-		/*for (int i = 0; i < 60; ++i)
+
+		auto* plantAppearance = new Appearance(plant0, matte);
+		auto* plant2Appearance = new Appearance(plant1, matte);
+
+		for (int i = 0; i < 60; ++i)
 		{
+			auto* plantTransform = new Transform();
+			plantTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+			plantTransform->SetScale(XMFLOAT3(5.0f, 5.0f, 5.0f));
+			plantTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
 			float randomX = MathsHandler::RandomFloat(-90, 90);
 			float randomZ = MathsHandler::RandomFloat(-90, 90);
 
-			element = new SceneElement("Plant " + i, plant0, shiny);
-			element->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
-			element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-			element->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(rand()), 0.0f));
-			element->SetColourTexture(nullptr);
+			element = new SceneElement("Plant " + i, plantTransform, plantAppearance);
+			element->GetTransform()->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
+			element->GetTransform()->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+			element->GetTransform()->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(rand()), 0.0f));
 			element->SetCastShadows(true);
 			element->SetAffectedByLight(true);
 
-			light.Position = element->GetPosition();
-			_pointLights.push_back(light);
+			/*light.Position = element->GetPosition();
+			_pointLights.push_back(light);*/
 
 			_sceneElements.push_back(element);
 
 			randomX = MathsHandler::RandomFloat(-90, 90);
 			randomZ = MathsHandler::RandomFloat(-90, 90);
 
-			element = new SceneElement("Plant " + i, plant1, shiny);
-			element->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
-			element->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-			element->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(rand()), 0.0f));
-			element->SetColourTexture(nullptr);
+			element = new SceneElement("Plant " + i, plantTransform, plant2Appearance);
+			element->GetTransform()->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
+			element->GetTransform()->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+			element->GetTransform()->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(rand()), 0.0f));
 			element->SetCastShadows(true);
 			element->SetAffectedByLight(true);
 
-			light.Position = element->GetPosition();
-			_pointLights.push_back(light);
+			/*light.Position = element->GetPosition();
+			_pointLights.push_back(light);*/
 
 			_sceneElements.push_back(element);
-		}*/
+		}
 
 		element = new SceneElement("Light Source Sphere", sunSphereTransform, sunSphereAppearance);
 		element->SetCastShadows(false);
@@ -316,17 +328,12 @@ void MainScene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 	_heatHaze->Initialise(windowWidth, windowHeight);
 }
 
-void MainScene::HandleMouse()
-{
-	Scene::HandleMouse();
-}
-
 void MainScene::Update(float deltaTime)
 {	
 	Scene::Update(deltaTime);
 
-	_spotLight.position = _camera->GetPosition();
-	_spotLight.direction = _camera->GetLookDirection();
+	_spotLight.position = _player->GetPlayerPosition();
+	_spotLight.direction = _player->GetPlayerLookDirection();
 	//_pointLights.at(0).Position = _camera->GetPosition();
 	
 
@@ -443,7 +450,7 @@ void MainScene::Update(float deltaTime)
 
 	_sceneLight.lightDirection = lightDir;
 	_shadows->UpdateLightDirection(_sceneLight.lightDirection);
-	_shadows->SetSceneCentre(_camera->GetPosition());
+	_shadows->SetSceneCentre(_player->GetPlayerPosition());
 	_shadows->BuildShadowTransform();
 
 	for (SceneElement* element : _sceneElements)
@@ -455,7 +462,7 @@ void MainScene::Update(float deltaTime)
 		element->Update(deltaTime);
 	}
 
-	_skyGradient->SetSceneCentre(_camera->GetPosition());
+	_skyGradient->SetSceneCentre(_player->GetPlayerPosition());
 	_skyGradient->Update(deltaTime);
 
 	_basicLight->CalculateLightColour(_sceneLight, _shadows->GetLightPosition().y, _sceneFog);
@@ -490,12 +497,12 @@ void MainScene::Draw()
 	_basicLight->SetAsCurrentRenderTarget();
 	_basicLight->SetAsCurrentViewport();
 	_renderClass->DisableRtvClearing();
-	_skyGradient->Render(*_camera, sunPos);
+	_skyGradient->Render(*_player->GetCamera(), sunPos);
 
 	_renderClass->EnableZBuffer();
 	_shadows->Render(_sceneElements);
 
-	_basicLight->Render(*_camera, _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_shadows);
+	_basicLight->Render(*_player->GetCamera(), _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_shadows);
 	
 	_renderToQuad->SetAsCurrentVertexShader();
 
