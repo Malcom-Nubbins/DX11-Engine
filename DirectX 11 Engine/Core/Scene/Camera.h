@@ -1,11 +1,14 @@
 #pragma once
 #include "../Globals/stdafx.h"
+#include "../Handlers/WindowClass.h"
 
 using namespace DirectX;
 
 class Camera
 {
 private:
+	WindowClass* _windowClass;
+
 	XMFLOAT3 _eye;
 
 	XMFLOAT3 _right;
@@ -26,7 +29,7 @@ private:
 
 	bool _orthographicMode;
 public:
-	Camera();
+	Camera(WindowClass* windowClass);
 	Camera(const Camera& copy);
 	~Camera();
 

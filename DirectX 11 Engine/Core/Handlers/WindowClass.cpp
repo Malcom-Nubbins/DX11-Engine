@@ -45,6 +45,9 @@ HRESULT WindowClass::InitWindow(WNDCLASSEX& wcex, HINSTANCE hinst, int cmdShow, 
 
 	ShowWindow(_hWnd, cmdShow);
 
+	_windowWidth = windowWidth;
+	_windowHeight = windowHeight;
+
 	return S_OK;
 }
 

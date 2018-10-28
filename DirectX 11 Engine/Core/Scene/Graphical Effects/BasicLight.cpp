@@ -37,6 +37,9 @@ void BasicLight::Cleanup()
 	_depthStencilView->Release();
 
 	_fogValuesBuffer->Release();
+
+	_matrixBuffer->Release();
+	_objectValueBuffer->Release();
 }
 
 void BasicLight::Resize(float newWidth, float newHeight)
@@ -65,6 +68,21 @@ HRESULT BasicLight::Initialise(float windowWidth, float windowHeight)
 		MessageBox(nullptr, L"Failed to Create Basic Light RTV & DSV", L"Error", MB_OK);
 		return hr;
 	}
+
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(MatrixBuffer);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_matrixBuffer);
+
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(ObjectValuesBuffer);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_objectValueBuffer);
 
 	InitialiseViewport(windowWidth, windowHeight);
 
@@ -271,14 +289,13 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 }
 
 void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight, const std::vector<PointLight>& pointLights, const SpotLight& spotLight, 
-						const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, 
-						ID3D11Buffer* matrixBuffer, ID3D11Buffer* objectValueBuffer, Shadows& shadowClass)
+						const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, Shadows& shadowClass)
 {
 	_renderClass->EnableZBuffer();
 
-	_bufferClass->SetVertexShaderBuffers(&matrixBuffer, 0);
+	_bufferClass->SetVertexShaderBuffers(&_matrixBuffer, 0);
 
-	_bufferClass->SetPixelShaderBuffers(&objectValueBuffer, 0);
+	_bufferClass->SetPixelShaderBuffers(&_objectValueBuffer, 0);
 	_bufferClass->SetPixelShaderBuffers(&_fogValuesBuffer, 1);
 
 	if (_renderWireframe)
@@ -390,7 +407,7 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 			_bufferClass->SetVertexShaderBuffers(&_tesselationBuffer, 1);
 			_bufferClass->SetVertexShaderBuffers(&_camLightBuffer, 2);
 
-			_bufferClass->SetDomainShaderBuffers(&matrixBuffer, 0);
+			_bufferClass->SetDomainShaderBuffers(&_matrixBuffer, 0);
 			_bufferClass->SetDomainShaderBuffers(&_tesselationBuffer, 1);
 			_bufferClass->SetDomainShaderBuffers(&_camLightBuffer, 2);
 		}
@@ -420,8 +437,8 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 			objValBuffer.affectedByLight = 0.0f;
 		}
 
-		_d3dClass->GetContext()->UpdateSubresource(matrixBuffer, 0, nullptr, &matBuffer, 0, 0);
-		_d3dClass->GetContext()->UpdateSubresource(objectValueBuffer, 0, nullptr, &objValBuffer, 0, 0);
+		_d3dClass->GetContext()->UpdateSubresource(_matrixBuffer, 0, nullptr, &matBuffer, 0, 0);
+		_d3dClass->GetContext()->UpdateSubresource(_objectValueBuffer, 0, nullptr, &objValBuffer, 0, 0);
 		_d3dClass->GetContext()->UpdateSubresource(_tesselationBuffer, 0, nullptr, &tessValues, 0, 0);
 		_d3dClass->GetContext()->UpdateSubresource(_fogValuesBuffer, 0, nullptr, &fogValuesBuffer, 0, 0);
 		_d3dClass->GetContext()->UpdateSubresource(_camLightBuffer, 0, nullptr, &camLightValues, 0, 0);
@@ -433,12 +450,11 @@ void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight
 }
 
 void BasicLight::Render(const Camera& camera, const DirectionalLight& sceneLight, const SpotLight& spotLight,
-	const ::std::vector<SceneElement*>& sceneElements, ID3D11Buffer* matrixBuffer, ID3D11Buffer* objectValueBuffer,
-	Shadows& shadowClass)
+	const ::std::vector<SceneElement*>& sceneElements, Shadows& shadowClass)
 {
 	const auto emptyPointLightsVector = std::vector<PointLight>();
 	auto fogVals = FogValuesBuffer();
 	fogVals.UseFog = 0.0f;
 
-	Render(camera, sceneLight, emptyPointLightsVector, spotLight, fogVals, sceneElements, matrixBuffer, objectValueBuffer, shadowClass);
+	Render(camera, sceneLight, emptyPointLightsVector, spotLight, fogVals, sceneElements, shadowClass);
 }

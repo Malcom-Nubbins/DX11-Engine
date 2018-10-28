@@ -25,6 +25,9 @@ public:
 	bool GetWindowMinimised() { return _minimised; }
 	bool GetWindowMaximised() { return _maximised; }
 
+	float GetWindowWidth() { return _windowWidth; }
+	float GetWindowHeight() { return _windowHeight; }
+
 private:
 	HWND _hWnd;
 	HINSTANCE _hInstance;
@@ -34,5 +37,8 @@ private:
 	bool _minimised;
 	bool _maximised;
 	bool _resizing;
+
+	float _windowWidth;
+	float _windowHeight;
 };
 

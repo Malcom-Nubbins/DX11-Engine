@@ -1,7 +1,8 @@
 #include "Camera.h"
+#include "../Handlers/InputHandler.h"
 
-Camera::Camera()
-		: _nearZ(0), _farZ(0), _aspect(0), _fovY(0), _nearWindowHeight(0), _nearWindowWidth(0),
+Camera::Camera(WindowClass* windowClass)
+		:_windowClass(windowClass), _nearZ(0), _farZ(0), _aspect(0), _fovY(0), _nearWindowHeight(0), _nearWindowWidth(0),
          _orthographicMode(false)
 {
 }
@@ -88,26 +89,28 @@ void Camera::Yaw(const float angle)
 void Camera::Update(const float deltaTime)
 {
 	const float movementSpeed = 3.0f;
-	if (GetAsyncKeyState('A'))
+
+	if (InputHandler::IsKeyDown(A))
 	{
 		Strafe(-movementSpeed * deltaTime);
 	}
 
-	if (GetAsyncKeyState('D'))
+	if (InputHandler::IsKeyDown(D))
 	{
 		Strafe(movementSpeed * deltaTime);
 	}
-	if (GetAsyncKeyState('W'))
+	if (InputHandler::IsKeyDown(W))
 	{
 		Walk(movementSpeed * deltaTime);
 	}
 
-	if (GetAsyncKeyState('S'))
+	if (InputHandler::IsKeyDown(S))
 	{
 		Walk(-movementSpeed * deltaTime);
 	}
 
 	UpdateViewMatrix();
+
 }
 
 void Camera::UpdateViewMatrix()

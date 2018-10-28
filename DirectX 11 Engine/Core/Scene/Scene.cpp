@@ -1,4 +1,5 @@
 ﻿#include "Scene.h"
+#include "../Handlers/InputHandler.h"
 
 Scene::Scene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass,
 	WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer)
@@ -26,7 +27,7 @@ void Scene::ResizeViews(float windowWidth, float windowHeight)
 
 void Scene::InitialiseScene(float windowWidth, float windowHeight)
 {
-	_camera = new Camera();
+	_camera = new Camera(_windowClass);
 	_camera->SetLens(XM_PIDIV4, windowWidth, windowHeight, 0.01f, 1000.0f);
 	_camera->LookAt(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
 	_camera->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -36,18 +37,21 @@ void Scene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 {
 }
 
-void Scene::HandleMouse(WPARAM btnState, int x, int y)
+void Scene::HandleMouse()
 {
-	float dx = XMConvertToRadians(0.25f *static_cast<float>(x - _lastMousePos.x));
-	float dy = XMConvertToRadians(0.25f * static_cast<float>(y - _lastMousePos.y));
+	const float lookSpeed = 0.0025f;
+	POINT state = InputHandler::GetMousePos(_windowClass->GetHWND());
+	POINT screenCentre;
+	screenCentre.x = _windowClass->GetWindowWidth() / 2;
+	screenCentre.y = _windowClass->GetWindowHeight() / 2;
 
-	if ((btnState & MK_LBUTTON) != 0)
-	{
-		_camera->Pitch(dy);
-		_camera->Yaw(dx);
-	}
+	auto yaw = (state.x - screenCentre.x) * lookSpeed;
+	auto pitch = (state.y - screenCentre.y) * lookSpeed;
 
-	_lastMousePos = XMFLOAT2(x, y);
+	_camera->Pitch(pitch);
+	_camera->Yaw(yaw);
+
+	InputHandler::SetMousePos(_windowClass->GetHWND(), screenCentre);
 }
 
 void Scene::Update(float delta)

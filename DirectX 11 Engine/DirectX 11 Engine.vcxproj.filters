@@ -96,6 +96,9 @@
     <ClCompile Include="Core\Loaders\Terrain Generation\FlatTerrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Handlers\InputHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h">
@@ -186,6 +189,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\InputHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

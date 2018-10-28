@@ -15,6 +15,7 @@ private:
 	ID3D11ShaderResourceView* _stoneTex;
 	ID3D11ShaderResourceView* _stoneBumpMap;
 	ID3D11ShaderResourceView* _stoneDisplacementMap;
+	ID3D11ShaderResourceView* _stoneSpecularMap;
 
 	ID3D11ShaderResourceView* _distortionMap;
 	ID3D11ShaderResourceView* _snowTexture;
@@ -42,6 +43,7 @@ public:
 	ID3D11ShaderResourceView* GetStoneTexture() const { return _stoneTex; }
 	ID3D11ShaderResourceView* GetStoneNormalMap() const { return _stoneBumpMap; }
 	ID3D11ShaderResourceView* GetStoneDisplacementMap() const { return _stoneDisplacementMap; }
+	ID3D11ShaderResourceView* GetStoneSpecularMap() const { return _stoneSpecularMap; }
 
 	ID3D11ShaderResourceView* GetDistortionMap() const { return _distortionMap; }
 	ID3D11ShaderResourceView* GetSnowTexture() const { return _snowTexture; }

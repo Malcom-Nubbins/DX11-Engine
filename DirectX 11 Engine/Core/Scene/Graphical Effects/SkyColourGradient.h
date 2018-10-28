@@ -26,6 +26,7 @@ private:
 	SceneElement* _skyDomeElement;
 
 	ID3D11Buffer* _gradientValuesBuffer;
+	ID3D11Buffer* _matrixBuffer;
 
 public:
 	SkyColourGradient(D3DClass * d3dClass, RenderClass * renderClass, ShaderClass * shaderClass, BufferClass * bufferClass);
@@ -39,7 +40,7 @@ public:
 	void SetAsCurrentShader();
 
 	void Update(float deltaTime);
-	void Render(ID3D11Buffer* matrixBuffer, const Camera& camera, const XMFLOAT3& sunPos);
+	void Render(const Camera& camera, const XMFLOAT3& sunPos);
 
 private:
 	HRESULT InitialiseShaders();

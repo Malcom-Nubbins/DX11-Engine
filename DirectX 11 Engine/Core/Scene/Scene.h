@@ -37,7 +37,7 @@ public:
 	virtual void InitialiseScene(float windowWidth, float windowHeight);
 	virtual void InitialiseSceneGraphics(float windowWidth, float windowHeight);
 
-	virtual void HandleMouse(WPARAM btnState, int x, int y);
+	virtual void HandleMouse();
 
 	virtual void Update(float delta);
 	virtual void Draw();

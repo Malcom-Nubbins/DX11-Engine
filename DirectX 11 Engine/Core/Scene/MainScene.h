@@ -25,9 +25,6 @@ private:
 	ID3D11Buffer* _planeVertexBuffer;
 	ID3D11Buffer* _planeIndexBuffer;
 
-	ID3D11Buffer* _matrixBuffer;
-	ID3D11Buffer* _objectValueBuffer;
-
 	std::vector<SceneElement*> _sceneElements;
 
 	BasicLight* _basicLight;
@@ -68,7 +65,7 @@ public:
 	void InitialiseScene(float windowWidth, float windowHeight) override;
 	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;
 
-	void HandleMouse(WPARAM btnState, int x, int y) override;
+	void HandleMouse() override;
 
 	void Update(float deltaTime) override;
 	void Draw() override;

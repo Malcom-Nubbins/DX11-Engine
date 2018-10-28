@@ -107,6 +107,16 @@ void RenderClass::EnableZBuffer()
 	_d3dClass->GetContext()->OMSetDepthStencilState(_depthEnabled, 0);
 }
 
+void RenderClass::EnableRtvClearing()
+{
+	_disableRTVClearing = false;
+}
+
+void RenderClass::DisableRtvClearing()
+{
+	_disableRTVClearing = true;
+}
+
 void RenderClass::SetRasterizerState(RASTERIZER_TYPE rasterizer)
 {
 	switch (rasterizer)
@@ -192,8 +202,8 @@ void RenderClass::SetRenderTargetAndDepthStencil(ID3D11RenderTargetView * render
 	else if (depthStencilView == nullptr && renderTarget != nullptr)
 		_d3dClass->GetContext()->OMSetRenderTargets(1, &renderTarget, nullptr);
 
-	//if (renderTarget != nullptr)
-		//_d3dClass->GetContext()->ClearRenderTargetView(renderTarget, clearColour);
+	if (renderTarget != nullptr && _disableRTVClearing == false)
+		_d3dClass->GetContext()->ClearRenderTargetView(renderTarget, clearColour);
 
 	if (depthStencilView != nullptr)
 		_d3dClass->GetContext()->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);

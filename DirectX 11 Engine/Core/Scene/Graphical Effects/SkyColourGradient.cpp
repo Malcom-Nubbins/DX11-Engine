@@ -79,6 +79,13 @@ HRESULT SkyColourGradient::InitialiseBuffers()
 	if (FAILED(hr))
 		return hr;
 
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(MatrixBuffer);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_matrixBuffer);
+
 	return S_OK;
 }
 
@@ -116,12 +123,12 @@ void SkyColourGradient::Update(float deltaTime)
 	_skyDomeElement->Update(deltaTime);
 }
 
-void SkyColourGradient::Render(ID3D11Buffer * matrixBuffer, const Camera& camera, const XMFLOAT3& sunPos)
+void SkyColourGradient::Render(const Camera& camera, const XMFLOAT3& sunPos)
 {
 	_renderClass->DisableZBuffer();
 	_renderClass->SetRasterizerState(NO_CULL);
 
-	_bufferClass->SetVertexShaderBuffers(&matrixBuffer);
+	_bufferClass->SetVertexShaderBuffers(&_matrixBuffer);
 	_bufferClass->SetPixelShaderBuffers(&_gradientValuesBuffer);
 
 	SetAsCurrentShader();
@@ -148,7 +155,7 @@ void SkyColourGradient::Render(ID3D11Buffer * matrixBuffer, const Camera& camera
 	XMMATRIX world = XMLoadFloat4x4(&_skyDomeElement->GetTransform()->GetWorld());
 	matrixBufferValues.World = XMMatrixTranspose(world);
 
-	_d3dClass->GetContext()->UpdateSubresource(matrixBuffer, 0, nullptr, &matrixBufferValues, 0, 0);
+	_d3dClass->GetContext()->UpdateSubresource(_matrixBuffer, 0, nullptr, &matrixBufferValues, 0, 0);
 	_d3dClass->GetContext()->UpdateSubresource(_gradientValuesBuffer, 0, nullptr, &colourValues, 0, 0);
 
 	_skyDomeElement->Draw(_d3dClass->GetContext());

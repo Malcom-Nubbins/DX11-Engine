@@ -42,6 +42,9 @@ private:
 	ID3D11Buffer* _tesselationBuffer;
 	ID3D11Buffer* _camLightBuffer;
 
+	ID3D11Buffer* _matrixBuffer;
+	ID3D11Buffer* _objectValueBuffer;
+
 	XMFLOAT4 _lightColourDayDiffuse;
 	XMFLOAT4 _lightColourDayAmbient;
 	XMFLOAT4 _lightColourDaySpecular;
@@ -77,9 +80,9 @@ public:
 
 	void Render(const Camera& camera, 
 		const DirectionalLight& sceneLight, const std::vector<PointLight>& pointLights, const SpotLight& spotLight, 
-		const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, ID3D11Buffer* matrixBuffer, ID3D11Buffer* objectValueBuffer, Shadows& shadowClass);
+		const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
 
-	void Render(const Camera&, const DirectionalLight& sceneLight, const SpotLight& spotLight, const::std::vector<SceneElement*>& sceneElements, ID3D11Buffer* matrixBuffer, ID3D11Buffer* objectValueBuffer, Shadows& shadowClass);
+	void Render(const Camera&, const DirectionalLight& sceneLight, const SpotLight& spotLight, const::std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
 
 private:
 	HRESULT InitialiseShaders();

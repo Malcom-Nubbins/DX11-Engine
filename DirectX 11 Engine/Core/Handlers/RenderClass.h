@@ -13,6 +13,8 @@ private:
 	ID3D11RasterizerState* _wireframe;
 	ID3D11RasterizerState* _shadow;
 
+	bool _disableRTVClearing;
+
 public:
 	RenderClass(D3DClass* d3dClass);
 	~RenderClass();
@@ -23,6 +25,9 @@ public:
 
 	void DisableZBuffer();
 	void EnableZBuffer();
+
+	void EnableRtvClearing();
+	void DisableRtvClearing();
 
 	void SetRasterizerState(RASTERIZER_TYPE rasterizer);
 

@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Handlers\InputHandler.cpp" />
     <ClCompile Include="Core\Loaders\Terrain Generation\FlatTerrain.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Appearance.cpp" />
     <ClCompile Include="Core\Application.cpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="Core\Scene\TestingScene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Handlers\InputHandler.h" />
     <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
     <ClInclude Include="Core\Application.h" />

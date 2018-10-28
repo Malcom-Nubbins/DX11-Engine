@@ -68,8 +68,6 @@ void MainScene::Cleanup()
 
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
-	_matrixBuffer->Release();
-	_objectValueBuffer->Release();
 
 	_sceneElements.clear();
 }
@@ -88,21 +86,6 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	Scene::InitialiseScene(windowWidth, windowHeight);
 
 	InitialiseSceneGraphics(windowWidth, windowHeight);
-
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(MatrixBuffer);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_matrixBuffer);
-
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(ObjectValuesBuffer);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_objectValueBuffer);
 
 	_sceneLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	_sceneLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -333,9 +316,9 @@ void MainScene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 	_heatHaze->Initialise(windowWidth, windowHeight);
 }
 
-void MainScene::HandleMouse(WPARAM btnState, int x, int y)
+void MainScene::HandleMouse()
 {
-	Scene::HandleMouse(btnState, x, y);
+	Scene::HandleMouse();
 }
 
 void MainScene::Update(float deltaTime)
@@ -506,12 +489,13 @@ void MainScene::Draw()
 
 	_basicLight->SetAsCurrentRenderTarget();
 	_basicLight->SetAsCurrentViewport();
-	_skyGradient->Render(_matrixBuffer, *_camera, sunPos);
+	_renderClass->DisableRtvClearing();
+	_skyGradient->Render(*_camera, sunPos);
 
 	_renderClass->EnableZBuffer();
 	_shadows->Render(_sceneElements);
 
-	_basicLight->Render(*_camera, _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, _matrixBuffer, _objectValueBuffer, *_shadows);
+	_basicLight->Render(*_camera, _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_shadows);
 	
 	_renderToQuad->SetAsCurrentVertexShader();
 

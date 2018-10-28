@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "Handlers/InputHandler.h"
 
 namespace
 {
@@ -196,12 +197,12 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_MOUSEMOVE:
 		if (_mainScene != nullptr)
 		{
-			_mainScene->HandleMouse(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			_mainScene->HandleMouse();
 		}
 
 		if (_testingScene != nullptr)
 		{
-			_testingScene->HandleMouse(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			_testingScene->HandleMouse();
 		}
 		return true;
 	}
@@ -234,6 +235,11 @@ void Application::Update(float deltaTime)
 	if (_mainScene != nullptr)
 	{
 		_mainScene->Update(deltaTime);
+	}
+
+	if(InputHandler::IsKeyDown(Esc))
+	{
+		PostQuitMessage(0);
 	}
 }
 

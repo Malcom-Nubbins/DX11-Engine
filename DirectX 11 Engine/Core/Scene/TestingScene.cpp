@@ -25,21 +25,6 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 
 	InitialiseSceneGraphics(windowWidth, windowHeight);
 
-	D3D11_BUFFER_DESC bd;
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(MatrixBuffer);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_matrixBuffer);
-
-	ZeroMemory(&bd, sizeof(bd));
-	bd.Usage = D3D11_USAGE_DEFAULT;
-	bd.ByteWidth = sizeof(ObjectValuesBuffer);
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = 0;
-	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_objectValueBuffer);
-
 	_sceneLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	_sceneLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	_sceneLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -98,11 +83,11 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* groundAppearance = new Appearance(planeMesh, shiny);
+	auto* groundAppearance = new Appearance(planeMesh, matte);
 	groundAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
 	groundAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
-	//groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
-	groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
+	groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
+	//groundAppearance->SetSpecularMap(_textureHandler->GetStoneSpecularMap());
 
 	auto* sphereTransform = new Transform();
 	sphereTransform->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
@@ -161,8 +146,6 @@ void TestingScene::Cleanup()
 
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
-	_matrixBuffer->Release();
-	_objectValueBuffer->Release();
 
 	_sceneElements.clear();
 }
@@ -174,9 +157,9 @@ void TestingScene::ResizeViews(float windowWidth, float windowHeight)
 	_renderToQuad->Resize(windowWidth, windowHeight);
 }
 
-void TestingScene::HandleMouse(WPARAM btnState, int x, int y)
+void TestingScene::HandleMouse()
 {
-	Scene::HandleMouse(btnState, x, y);
+	Scene::HandleMouse();
 }
 
 void TestingScene::Update(float delta)
@@ -219,12 +202,13 @@ void TestingScene::Draw()
 {
 	_basicLight->SetAsCurrentRenderTarget();
 	_basicLight->SetAsCurrentViewport();
-	_skyGradient->Render(_matrixBuffer, *_camera, XMFLOAT3(0.0f, 50.0f, 0.0f));
+	_renderClass->EnableRtvClearing();
+	//_skyGradient->Render(*_camera, XMFLOAT3(0.0f, 50.0f, 0.0f));
 
 	_renderClass->EnableZBuffer();
 	_shadows->Render(_sceneElements);
 
-	_basicLight->Render(*_camera, _sceneLight, _spotLight, _sceneElements, _matrixBuffer, _objectValueBuffer, *_shadows);
+	_basicLight->Render(*_camera, _sceneLight, _spotLight, _sceneElements, *_shadows);
 
 	_renderToQuad->SetAsCurrentVertexShader();
 	_renderToQuad->Render(_basicLight->GetRenderTargetSRV());
