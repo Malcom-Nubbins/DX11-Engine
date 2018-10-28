@@ -71,6 +71,17 @@ void Camera::Walk(float amount)
 
 void Camera::Pitch(const float angle)
 {
+	if(_up.y < 0)
+	{
+		if(_at.y < 0 && angle > 0)
+			return;
+	}
+	else if(_up.y > 0)
+	{
+		if(_at.y > 0.95f && angle < 0)
+			return;
+	}
+
 	const auto pitch = XMMatrixRotationAxis(XMLoadFloat3(&_right), angle);
 
 	XMStoreFloat3(&_up, XMVector3TransformNormal(XMLoadFloat3(&_up), pitch));

@@ -125,15 +125,15 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	_textureHandler = new TextureHandler(_d3dClass);
 	_textureHandler->LoadAllTextures();
 
-	/*_testingScene = new TestingScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
+	_testingScene = new TestingScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
 		_windowClass, _textureHandler, _timer, _player);
 
-	_testingScene->InitialiseScene(_windowWidth, _windowHeight);*/
+	_testingScene->InitialiseScene(_windowWidth, _windowHeight);
 
-	_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
+	/*_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
 		_windowClass, _textureHandler, _timer, _player);
 
-	_mainScene->InitialiseScene(_windowWidth, _windowHeight);
+	_mainScene->InitialiseScene(_windowWidth, _windowHeight);*/
 
 	return S_OK;
 }
