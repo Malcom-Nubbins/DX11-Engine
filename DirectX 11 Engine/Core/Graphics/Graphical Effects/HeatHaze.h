@@ -4,11 +4,9 @@
 #include "../../Handlers/RenderClass.h"
 #include "../../Handlers/ShaderClass.h"
 #include "../../Handlers/BufferClass.h"
-#include "../../Handlers/WindowClass.h"
-
 #include "../../Globals/Structs.h"
+#include "../../Handlers/TextureHandler.h"
 
-#include "Textures\TextureHandler.h"
 class HeatHaze
 {
 private:

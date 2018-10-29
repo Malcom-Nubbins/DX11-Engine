@@ -3,12 +3,9 @@
 #include "../../Handlers/RenderClass.h"
 #include "../../Handlers/ShaderClass.h"
 #include "../../Handlers/BufferClass.h"
-#include "../../Handlers/WindowClass.h"
-
-#include "../../Globals/Structs.h"
-#include "../Scene Elements\SceneElement.h"
-#include "../Camera.h"
 #include "../../Loaders/OBJLoader.h"
+#include "../../Scene/Scene Elements/SceneElement.h"
+#include "../../Scene/Camera.h"
 
 class SkyColourGradient
 {

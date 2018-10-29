@@ -1,21 +1,17 @@
 #pragma once
 #include <vector>
 #include <map>
-
 #include "../Globals/Structs.h"
-#include "Scene Elements\SceneElement.h"
-
-#include "Graphical Effects\BasicLight.h"
-#include "Graphical Effects\Shadows.h"
-#include "Graphical Effects\SkyColourGradient.h"
-#include "Graphical Effects\RenderToFullscreenQuad.h"
-#include "Graphical Effects\HeatHaze.h"
-
-#include "Graphical Effects\Textures\TextureHandler.h"
+#include "Scene Elements/SceneElement.h"
 #include "../Loaders/OBJLoader.h"
 #include "../Loaders/Terrain Generation/DiamondSquareTerrain.h"
 #include "Scene.h"
 #include "Player.h"
+#include "../Graphics/Graphical Effects/BasicLight.h"
+#include "../Graphics/Graphical Effects/SkyColourGradient.h"
+#include "../Graphics/Graphical Effects/RenderToFullscreenQuad.h"
+#include "../Graphics/Graphical Effects/HeatHaze.h"
+#include "../Handlers/TextureHandler.h"
 
 class MainScene : Scene
 {

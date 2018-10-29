@@ -33,24 +33,6 @@
     <ClCompile Include="Core\Scene\Scene Elements\SceneElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Scene\Graphical Effects\SkyColourGradient.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Scene\Graphical Effects\Shadows.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Scene\Graphical Effects\RenderToFullscreenQuad.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Scene\Graphical Effects\HeatHaze.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Scene\Graphical Effects\BasicLight.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Scene\Graphical Effects\Textures\TextureHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,6 +84,24 @@
     <ClCompile Include="Core\Scene\Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Graphics\Graphical Effects\BasicLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Graphics\Graphical Effects\HeatHaze.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Graphics\Graphical Effects\RenderToFullscreenQuad.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Graphics\Graphical Effects\Shadows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Graphics\Graphical Effects\SkyColourGradient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\TextureHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h">
@@ -117,24 +117,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Scene\Scene Elements\SceneElement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Scene\Graphical Effects\SkyColourGradient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Scene\Graphical Effects\Shadows.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Scene\Graphical Effects\RenderToFullscreenQuad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Scene\Graphical Effects\HeatHaze.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Scene\Graphical Effects\BasicLight.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Scene\Graphical Effects\Textures\TextureHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.h">
@@ -198,6 +180,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Scene\Player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\Graphical Effects\BasicLight.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\Graphical Effects\HeatHaze.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\Graphical Effects\RenderToFullscreenQuad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\Graphical Effects\Shadows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\Graphical Effects\SkyColourGradient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\TextureHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

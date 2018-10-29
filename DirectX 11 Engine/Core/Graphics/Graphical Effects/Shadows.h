@@ -5,12 +5,7 @@
 #include "../../Handlers/RenderClass.h"
 #include "../../Handlers/ShaderClass.h"
 #include "../../Handlers/BufferClass.h"
-#include "../../Handlers/WindowClass.h"
-
-#include "../../Globals/Structs.h"
-#include "../Scene Elements\SceneElement.h"
-#include "../Camera.h"
-
+#include "../../Scene/Scene Elements/SceneElement.h"
 #include "../../Loaders/Terrain Generation/DiamondSquareTerrain.h"
 
 class Shadows

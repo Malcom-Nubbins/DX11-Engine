@@ -84,11 +84,11 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* groundAppearance = new Appearance(planeMesh, shiny);
-	groundAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
-	groundAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
-	groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
-	groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
+	auto* groundAppearance = new Appearance(planeMesh, concrete);
+	groundAppearance->SetColourTexture(_textureHandler->GetStoneTexture());
+	groundAppearance->SetNormalMap(_textureHandler->GetStoneNormalMap());
+	//groundAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+	//groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
 
 	auto* sphereTransform = new Transform();
 	sphereTransform->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));

@@ -7,7 +7,8 @@ Camera::Camera(WindowClass* windowClass)
 {
 }
 
-Camera::Camera(const Camera& copy): _nearZ(0), _farZ(0), _aspect(0), _fovY(0), _nearWindowHeight(0),
+Camera::Camera(const Camera& copy): _windowClass(nullptr), _nearZ(0), _farZ(0), _aspect(0), _fovY(0),
+                                    _nearWindowHeight(0),
                                     _nearWindowWidth(0), _orthographicMode(false)
 {
 }
@@ -78,7 +79,7 @@ void Camera::Pitch(const float angle)
 	}
 	else if(_up.y > 0)
 	{
-		if(_at.y > 0.95f && angle < 0)
+		if(_at.y > 0.98f && angle < 0)
 			return;
 	}
 

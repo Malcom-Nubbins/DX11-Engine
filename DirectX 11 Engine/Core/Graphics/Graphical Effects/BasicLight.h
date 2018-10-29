@@ -1,20 +1,14 @@
 #pragma once
 #include <vector>
 #include <algorithm>
-
 #include "../../Handlers/D3DClass.h"
-#include "../../Handlers/RenderClass.h"
 #include "../../Handlers/ShaderClass.h"
+#include "../../Handlers/RenderClass.h"
 #include "../../Handlers/BufferClass.h"
-#include "../../Handlers/WindowClass.h"
-
+#include "../../Scene/Camera.h"
+#include "../../Scene/Scene Elements/SceneElement.h"
 #include "Shadows.h"
 
-#include "../../Globals/Structs.h"
-#include "../Scene Elements\SceneElement.h"
-#include "../Camera.h"
-
-#include "../../Loaders/Terrain Generation/DiamondSquareTerrain.h"
 
 class BasicLight
 {

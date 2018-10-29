@@ -1,9 +1,8 @@
 ﻿#pragma once
 #include "../Handlers/D3DClass.h"
 #include "../Globals/Structs.h"
-#include "Camera.h"
 #include "../Timer.h"
-#include "Graphical Effects/Textures/TextureHandler.h"
+#include "../Handlers/TextureHandler.h"
 #include "../Handlers/WindowClass.h"
 #include "../Handlers/RenderClass.h"
 #include "../Handlers/ShaderClass.h"

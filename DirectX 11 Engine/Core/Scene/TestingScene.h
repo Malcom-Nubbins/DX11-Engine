@@ -1,10 +1,11 @@
 #pragma once
-#include "e:/Projects/DirectX 11 Engine/DirectX 11 Engine/Core/Scene/Scene.h"
-#include "Graphical Effects/Shadows.h"
-#include "Graphical Effects/BasicLight.h"
-#include "Graphical Effects/RenderToFullscreenQuad.h"
-#include "Graphical Effects/SkyColourGradient.h"
+#include "Scene.h"
 #include "../Loaders/Terrain Generation/FlatTerrain.h"
+#include "../Graphics/Graphical Effects/SkyColourGradient.h"
+#include "../Graphics/Graphical Effects/RenderToFullscreenQuad.h"
+#include "../Graphics/Graphical Effects/Shadows.h"
+#include "../Graphics/Graphical Effects/BasicLight.h"
+#include "../Handlers/TextureHandler.h"
 
 class TestingScene : public Scene
 {
