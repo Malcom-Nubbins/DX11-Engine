@@ -102,6 +102,12 @@
     <ClCompile Include="Core\Handlers\TextureHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Graphics\UI\UserInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Graphics\UI\UIBitmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h">
@@ -200,6 +206,12 @@
     <ClInclude Include="Core\Handlers\TextureHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Graphics\UI\UserInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Graphics\UI\UIBitmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FYP - Seasonal Day Night Cycle.rc">
@@ -221,5 +233,6 @@
     <FxCompile Include="Core\Shaders\ShadowDepthVS.hlsl" />
     <FxCompile Include="Core\Shaders\TesselationHS.hlsl" />
     <FxCompile Include="Core\Shaders\TesselationDS.hlsl" />
+    <FxCompile Include="Core\Shaders\UIVertexShader.hlsl" />
   </ItemGroup>
 </Project>

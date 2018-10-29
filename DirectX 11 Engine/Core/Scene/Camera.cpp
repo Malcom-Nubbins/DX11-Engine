@@ -32,8 +32,13 @@ void Camera::SetLens(const float fov, const float width, const float height, con
 	auto proj = XMMatrixOrthographicLH(width, height, _nearZ, _farZ);
 	XMStoreFloat4x4(&_othographicProj, proj);
 
+	const auto camRight = XMLoadFloat3(&_right);
+	const auto camAt = XMLoadFloat3(&_at);
+	const auto camUp = XMLoadFloat3(&_up);
+
 	proj = XMMatrixPerspectiveFovLH(_fovY, _aspect, _nearZ, _farZ);
 	XMStoreFloat4x4(&_perspectiveProj, proj);
+	//XMStoreFloat4x4(&_defaultView, XMMatrixLookAtLH(camRight, camAt, camUp));
 }
 
 void Camera::LookAt(const XMFLOAT3 right, const XMFLOAT3 at, const XMFLOAT3 up)
@@ -47,6 +52,7 @@ void Camera::LookAt(const XMFLOAT3 right, const XMFLOAT3 at, const XMFLOAT3 up)
 	const auto camUp = XMLoadFloat3(&_up);
 
 	XMStoreFloat4x4(&_view, XMMatrixLookAtLH(camRight, camAt, camUp));
+	XMStoreFloat4x4(&_defaultView, XMMatrixLookAtLH(camRight, camAt, camUp));
 }
 
 void Camera::SetPosition(const XMFLOAT3 position)

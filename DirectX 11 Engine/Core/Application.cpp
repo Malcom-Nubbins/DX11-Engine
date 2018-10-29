@@ -21,6 +21,7 @@ Application::Application(Timer* timer) : _timer(timer)
 	_mainScene = nullptr;
 	_testingScene = nullptr;
 	_player = nullptr;
+	_ui = nullptr;
 
 	_windowWidth = WINDOW_WIDTH;
 	_windowHeight = WINDOW_HEIGHT;
@@ -52,6 +53,12 @@ void Application::Cleanup()
 		_player->Cleanup();
 		delete _player;
 		_player = nullptr;
+	}
+
+	if(_ui != nullptr)
+	{
+		delete _ui;
+		_ui = nullptr;
 	}
 
 	delete _bufferClass;
@@ -107,6 +114,10 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	if (FAILED(hr))
 		return hr;
 
+	_textureHandler = new TextureHandler(_d3dClass);
+	_textureHandler->LoadAllTextures();
+
+
 	_d3dClass->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	/*D3D11_DEPTH_STENCIL_DESC equalDSDesc;
@@ -122,9 +133,6 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	_player = new Player(_windowClass);
 	_player->Initialise();
 
-	_textureHandler = new TextureHandler(_d3dClass);
-	_textureHandler->LoadAllTextures();
-
 	_testingScene = new TestingScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
 		_windowClass, _textureHandler, _timer, _player);
 
@@ -133,7 +141,13 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	/*_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
 		_windowClass, _textureHandler, _timer, _player);
 
-	_mainScene->InitialiseScene(_windowWidth, _windowHeight);*/
+		_mainScene->InitialiseScene(_windowWidth, _windowHeight);*/
+
+	_ui = new UserInterface(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _player->GetCamera());
+	_ui->Initialise();
+
+	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 5), _textureHandler->GetStoneTexture());
+	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), _textureHandler->GetGroundColourTexture());
 
 	return S_OK;
 }
@@ -246,6 +260,11 @@ void Application::Update(float deltaTime)
 		_mainScene->Update(deltaTime);
 	}
 
+	if(_ui != nullptr)
+	{
+		_ui->Update(deltaTime);
+	}
+
 	if(InputHandler::IsKeyDown(Esc))
 	{
 		ShowCursor(true);
@@ -264,6 +283,12 @@ void Application::Draw()
 	{
 		_mainScene->Draw();
 	}
+
+	_renderClass->SetRasterizerState(NO_CULL);
+	_renderClass->DisableZBuffer();
+	_ui->Draw();
+	_renderClass->EnableZBuffer();
+	_renderClass->SetRasterizerState(BACK_CULL);
 
 	_d3dClass->GetSwapChain()->Present(1, 0);
 }

@@ -12,6 +12,7 @@
 #include "Scene/MainScene.h"
 #include "Scene/TestingScene.h"
 #include "Scene/Player.h"
+#include "Graphics/UI/UserInterface.h"
 
 class Application
 {
@@ -43,6 +44,8 @@ private:
 	TestingScene* _testingScene;
 
 	Player* _player;
+
+	UserInterface* _ui;
 
 	ID3D11InputLayout* _simpleQuadInputLayout;
 

@@ -12,6 +12,7 @@ public:
 	~BufferClass();
 
 	HRESULT CreateGroundPlane(ID3D11Buffer ** vertexBuffer, ID3D11Buffer ** indexBuffer);
+	HRESULT CreateQuadDynamic(ID3D11Buffer** vertexBuffer, ID3D11Buffer** indexBuffer);
 	HRESULT CreateQuad(ID3D11Buffer** vertexBuffer, ID3D11Buffer** indexBuffer);
 
 	void SetIABuffers(ObjectMesh mesh);

@@ -23,6 +23,7 @@ private:
 	float _nearWindowWidth;
 
 	XMFLOAT4X4 _view;
+	XMFLOAT4X4 _defaultView;
 
 	XMFLOAT4X4 _perspectiveProj;
 	XMFLOAT4X4 _othographicProj;
@@ -34,6 +35,7 @@ public:
 	~Camera();
 
 	XMFLOAT4X4 GetView() const { return _view; }
+	XMFLOAT4X4 GetDefaultView() const { return _defaultView; }
 	XMFLOAT4X4 GetPerspectiveProj() const { return _perspectiveProj; }
 	XMFLOAT4X4 GetOthographicProj() const { return _othographicProj; }
 	XMFLOAT3 GetPosition() const { return _eye; }
