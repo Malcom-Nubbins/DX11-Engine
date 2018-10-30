@@ -1,5 +1,4 @@
 #include "ModelLoader.h"
-#include "../Handlers/MathsHandler.h"
 #include <iterator>
 #include <map>
 
@@ -90,11 +89,23 @@ void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int indices[
 bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, 
 							NewObjectMesh& modelMesh, bool invertFaces)
 {
-	std::ifstream in;
-	in.open(filename);
-
 	modelMesh = NewObjectMesh();
 	modelMesh.numOfSubsets = 0;
+
+	/*std::wstring binaryFilename = filename;
+	binaryFilename.append(L"Binary");
+
+	std::ifstream binaryInFile;
+	binaryInFile.open(binaryFilename, std::ios::in | std::ios::binary);
+	if(binaryInFile.good())
+	{
+		
+		return true;
+	}*/
+
+
+	std::ifstream in;
+	in.open(filename);
 
 	if(!in.good())
 	{

@@ -6,6 +6,7 @@
 #include <istream>
 
 #include "../Globals/Structs.h"
+#include "../Handlers/System Handlers/MathsHandler.h"
 
 class ModelLoader
 {

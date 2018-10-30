@@ -2,7 +2,7 @@
 #include <d3d11_1.h>
 #include <DirectXMath.h>
 #include <time.h>
-#include "../Globals/Structs.h"
+#include "../../Globals/Structs.h"
 
 using namespace DirectX;
 class MathsHandler

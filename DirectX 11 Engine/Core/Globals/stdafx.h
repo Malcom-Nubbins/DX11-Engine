@@ -27,5 +27,16 @@ enum RASTERIZER_TYPE
 	SHADOWDEPTH
 };
 
+enum SYSTEM_HANDLER
+{
+	D3D,
+	SHADER,
+	RENDER,
+	BUFFER,
+	WINDOW,
+	INP,
+	TEXTURE
+};
+
 typedef ID3D11Buffer VertexBuffer;
 typedef ID3D11Buffer IndexBuffer;

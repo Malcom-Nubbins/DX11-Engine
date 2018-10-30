@@ -1,5 +1,4 @@
 #include "Application.h"
-#include "Handlers/InputHandler.h"
 
 namespace
 {
@@ -61,24 +60,7 @@ void Application::Cleanup()
 		_ui = nullptr;
 	}
 
-	delete _bufferClass;
-	_bufferClass = nullptr;
-
-	_shaderClass->Cleanup();
-	delete _shaderClass;
-	_shaderClass = nullptr;
-
-	_renderClass->Cleanup();
-	delete _renderClass;
-	_renderClass = nullptr;
-
-	_d3dClass->Cleanup();
-	delete _d3dClass;
-	_d3dClass = nullptr;
-
-	_windowClass->Cleanup();
-	delete _windowClass;
-	_windowClass = nullptr;
+	_systemHandlers->Cleanup();
 }
 
 HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
@@ -117,6 +99,7 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	_textureHandler = new TextureHandler(_d3dClass);
 	_textureHandler->LoadAllTextures();
 
+	_systemHandlers = new SystemHandlers(_d3dClass, _renderClass, _shaderClass, _bufferClass, _windowClass, _textureHandler);
 
 	_d3dClass->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -133,17 +116,15 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	_player = new Player(_windowClass);
 	_player->Initialise();
 
-	_testingScene = new TestingScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
-		_windowClass, _textureHandler, _timer, _player);
+	_testingScene = new TestingScene(_systemHandlers, _timer, _player);
 
 	_testingScene->InitialiseScene(_windowWidth, _windowHeight);
 
-	/*_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
-		_windowClass, _textureHandler, _timer, _player);
+	/*_mainScene = new MainScene(_systemHandlers, _timer, _player);
 
 	_mainScene->InitialiseScene(_windowWidth, _windowHeight);*/
 
-	_ui = new UserInterface(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _player->GetCamera());
+	_ui = new UserInterface(_systemHandlers, _player->GetCamera());
 	_ui->Initialise();
 
 	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 5), _textureHandler->GetSnowTexture());

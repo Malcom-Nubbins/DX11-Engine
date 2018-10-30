@@ -1,19 +1,12 @@
 #pragma once
 
-#include "../../Handlers/D3DClass.h"
-#include "../../Handlers/RenderClass.h"
-#include "../../Handlers/ShaderClass.h"
-#include "../../Handlers/BufferClass.h"
 #include "../../Globals/Structs.h"
-#include "../../Handlers/TextureHandler.h"
+#include "../../Handlers/SystemHandlers.h"
 
 class HeatHaze
 {
 private:
-	D3DClass * _d3dClass;
-	ShaderClass* _shaderClass;
-	RenderClass* _renderClass;
-	BufferClass* _bufferClass;
+	SystemHandlers* _systemHandlers;
 
 	ID3D11PixelShader*	_heatHazePS;
 	ID3D11InputLayout*	_inputLayout;
@@ -28,7 +21,7 @@ private:
 	HeatHazeValues _values;
 
 public:
-	HeatHaze(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass);
+	HeatHaze(SystemHandlers* systemHandlers);
 	~HeatHaze();
 	void Cleanup();
 

@@ -1,8 +1,8 @@
 #include "SkyColourGradient.h"
 #include "../../Loaders/ModelLoader.h"
 
-SkyColourGradient::SkyColourGradient(D3DClass * d3dClass, RenderClass * renderClass, ShaderClass * shaderClass, BufferClass * bufferClass)
-	: _d3dClass(d3dClass), _shaderClass(shaderClass), _renderClass(renderClass), _bufferClass(bufferClass)
+SkyColourGradient::SkyColourGradient(SystemHandlers* system)
+	: _systemHandlers(system)
 {
 	_sceneCentre = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	_colourGradientVS = nullptr;
@@ -55,10 +55,10 @@ HRESULT SkyColourGradient::InitialiseShaders()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	hr = _shaderClass->CreateVertexShader((WCHAR*)L"Core/Shaders/ColourGradientVS.hlsl", &_colourGradientVS , &_inputLayout, layout, ARRAYSIZE(layout));
+	hr = _systemHandlers->GetShaderClass()->CreateVertexShader((WCHAR*)L"Core/Shaders/ColourGradientVS.hlsl", &_colourGradientVS , &_inputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
-	hr = _shaderClass->CreatePixelShader((WCHAR*)L"Core/Shaders/ColourGradientPS.hlsl", &_colourGradientPS);
+	hr = _systemHandlers->GetShaderClass()->CreatePixelShader((WCHAR*)L"Core/Shaders/ColourGradientPS.hlsl", &_colourGradientPS);
 	if (FAILED(hr))
 		return hr;
 
@@ -75,7 +75,7 @@ HRESULT SkyColourGradient::InitialiseBuffers()
 	bd.ByteWidth = sizeof(GradientValuesBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	hr = _d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_gradientValuesBuffer);
+	hr = _systemHandlers->GetD3DClass()->GetDevice()->CreateBuffer(&bd, nullptr, &_gradientValuesBuffer);
 	if (FAILED(hr))
 		return hr;
 
@@ -84,7 +84,7 @@ HRESULT SkyColourGradient::InitialiseBuffers()
 	bd.ByteWidth = sizeof(MatrixBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	_d3dClass->GetDevice()->CreateBuffer(&bd, nullptr, &_matrixBuffer);
+	_systemHandlers->GetD3DClass()->GetDevice()->CreateBuffer(&bd, nullptr, &_matrixBuffer);
 
 	return S_OK;
 }
@@ -102,7 +102,7 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	skyDomeTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	NewObjectMesh sphere;
-	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex1.obj", sphere, false);
+	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/spherex1.obj", sphere, false);
 
 	auto appearance = new Appearance(sphere, matte);
 	appearance->SetColourTexture(nullptr);
@@ -114,7 +114,7 @@ void SkyColourGradient::InitialiseSkydomeElement()
 
 void SkyColourGradient::SetAsCurrentShader()
 {
-	_shaderClass->SetShadersAndInputLayout(_colourGradientVS, _colourGradientPS, _inputLayout);
+	_systemHandlers->GetShaderClass()->SetShadersAndInputLayout(_colourGradientVS, _colourGradientPS, _inputLayout);
 }
 
 void SkyColourGradient::Update(float deltaTime)
@@ -125,11 +125,11 @@ void SkyColourGradient::Update(float deltaTime)
 
 void SkyColourGradient::Render(const Camera& camera, const XMFLOAT3& sunPos)
 {
-	_renderClass->DisableZBuffer();
-	_renderClass->SetRasterizerState(NO_CULL);
+	_systemHandlers->GetRenderClass()->DisableZBuffer();
+	_systemHandlers->GetRenderClass()->SetRasterizerState(NO_CULL);
 
-	_bufferClass->SetVertexShaderBuffers(&_matrixBuffer);
-	_bufferClass->SetPixelShaderBuffers(&_gradientValuesBuffer);
+	_systemHandlers->GetBufferClass()->SetVertexShaderBuffers(&_matrixBuffer);
+	_systemHandlers->GetBufferClass()->SetPixelShaderBuffers(&_gradientValuesBuffer);
 
 	SetAsCurrentShader();
 
@@ -155,8 +155,8 @@ void SkyColourGradient::Render(const Camera& camera, const XMFLOAT3& sunPos)
 	XMMATRIX world = XMLoadFloat4x4(&_skyDomeElement->GetTransform()->GetWorld());
 	matrixBufferValues.World = XMMatrixTranspose(world);
 
-	_d3dClass->GetContext()->UpdateSubresource(_matrixBuffer, 0, nullptr, &matrixBufferValues, 0, 0);
-	_d3dClass->GetContext()->UpdateSubresource(_gradientValuesBuffer, 0, nullptr, &colourValues, 0, 0);
+	_systemHandlers->GetD3DClass()->GetContext()->UpdateSubresource(_matrixBuffer, 0, nullptr, &matrixBufferValues, 0, 0);
+	_systemHandlers->GetD3DClass()->GetContext()->UpdateSubresource(_gradientValuesBuffer, 0, nullptr, &colourValues, 0, 0);
 
-	_skyDomeElement->Draw(_d3dClass->GetContext());
+	_skyDomeElement->Draw(_systemHandlers->GetD3DClass()->GetContext());
 }

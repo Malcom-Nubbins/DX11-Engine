@@ -1,8 +1,9 @@
 #pragma once
 #include <vector>
-#include "../../Handlers/D3DClass.h"
+#include "../../Handlers/System Handlers/D3DClass.h"
 #include "../../Globals/Structs.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
+#include "../../Handlers/System Handlers/MathsHandler.h"
 
 class FlatTerrain
 {

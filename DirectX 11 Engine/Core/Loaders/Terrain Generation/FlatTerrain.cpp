@@ -1,5 +1,4 @@
 #include "FlatTerrain.h"
-#include "../../Handlers/MathsHandler.h"
 
 FlatTerrain::FlatTerrain(D3DClass* d3dClass) : _d3dClass(d3dClass)
 {

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "../../Globals/Structs.h"
-#include "../../Handlers/D3DClass.h"
-#include "../../Handlers/BufferClass.h"
+#include "../../Handlers/System Handlers/D3DClass.h"
+#include "../../Handlers/System Handlers/BufferClass.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
 
 class UIBitmap

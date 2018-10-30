@@ -1,19 +1,12 @@
 #pragma once
-#include "../../Handlers/D3DClass.h"
-#include "../../Handlers/RenderClass.h"
-#include "../../Handlers/ShaderClass.h"
-#include "../../Handlers/BufferClass.h"
-#include "../../Handlers/WindowClass.h"
 
 #include "../../Globals/Structs.h"
+#include "../../Handlers/SystemHandlers.h"
+
 class RenderToFullscreenQuad
 {
 private:
-	D3DClass * _d3dClass;
-	ShaderClass* _shaderClass;
-	RenderClass* _renderClass;
-	BufferClass* _bufferClass;
-
+	SystemHandlers* _systemHandlers;
 	ID3D11RenderTargetView* _backBuffer;
 
 	ID3D11VertexShader* _quadVS;
@@ -25,7 +18,7 @@ private:
 	ID3D11Buffer*	_quadIndexBuffer;
 
 public:
-	RenderToFullscreenQuad(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass);
+	RenderToFullscreenQuad(SystemHandlers* systemHandlers);
 	~RenderToFullscreenQuad();
 	void Cleanup();
 

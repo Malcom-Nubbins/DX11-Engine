@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "Camera.h"
+#include "../Handlers/System Handlers/WindowClass.h"
+#include "../Handlers/System Handlers/InputHandler.h"
 
 class Player
 {

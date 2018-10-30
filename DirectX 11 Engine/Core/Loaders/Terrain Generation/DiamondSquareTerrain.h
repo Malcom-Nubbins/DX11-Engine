@@ -1,7 +1,7 @@
 #pragma once
-#include "../../Handlers/D3DClass.h"
+#include "../../Handlers/System Handlers/D3DClass.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
-#include "../../Handlers/MathsHandler.h"
+#include "../../Handlers/System Handlers/MathsHandler.h"
 #include <vector>
 #include <fstream>
 class DiamondSquareTerrain

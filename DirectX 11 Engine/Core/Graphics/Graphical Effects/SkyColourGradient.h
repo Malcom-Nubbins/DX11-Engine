@@ -1,20 +1,12 @@
 #pragma once
-#include "../../Handlers/D3DClass.h"
-#include "../../Handlers/RenderClass.h"
-#include "../../Handlers/ShaderClass.h"
-#include "../../Handlers/BufferClass.h"
-#include "../../Loaders/OBJLoader.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
 #include "../../Scene/Camera.h"
+#include "../../Handlers/SystemHandlers.h"
 
 class SkyColourGradient
 {
 private:
-	D3DClass * _d3dClass;
-	ShaderClass* _shaderClass;
-	RenderClass* _renderClass;
-	BufferClass* _bufferClass;
-
+	SystemHandlers* _systemHandlers;
 	ID3D11VertexShader* _colourGradientVS;
 	ID3D11PixelShader* _colourGradientPS;
 	ID3D11InputLayout* _inputLayout;
@@ -26,7 +18,7 @@ private:
 	ID3D11Buffer* _matrixBuffer;
 
 public:
-	SkyColourGradient(D3DClass * d3dClass, RenderClass * renderClass, ShaderClass * shaderClass, BufferClass * bufferClass);
+	SkyColourGradient(SystemHandlers* system);
 	~SkyColourGradient();
 	void Cleanup();
 

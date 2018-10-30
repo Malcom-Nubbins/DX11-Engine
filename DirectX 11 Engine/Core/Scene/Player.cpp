@@ -1,5 +1,4 @@
 ﻿#include "Player.h"
-#include "../Handlers/InputHandler.h"
 
 Player::Player(WindowClass* windowClass) : _camera(nullptr), _windowClass(windowClass)
 {

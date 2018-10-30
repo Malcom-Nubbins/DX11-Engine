@@ -6,7 +6,7 @@
 #include <vector>		//For storing the XMFLOAT3/2 variables
 #include <map>			//For fast searching when re-creating the index buffer
 #include "../Globals/Structs.h"
-#include "../Handlers/MathsHandler.h"
+#include "../Handlers/System Handlers/MathsHandler.h"
 #include <sstream>
 
 class [[deprecated("Use 'ModelLoader' for any model loading. That one supports multi-part objects")]] OBJLoader

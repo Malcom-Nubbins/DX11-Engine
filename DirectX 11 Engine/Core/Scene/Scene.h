@@ -1,23 +1,13 @@
 ﻿#pragma once
-#include "../Handlers/D3DClass.h"
 #include "../Globals/Structs.h"
 #include "../Timer.h"
-#include "../Handlers/TextureHandler.h"
-#include "../Handlers/WindowClass.h"
-#include "../Handlers/RenderClass.h"
-#include "../Handlers/ShaderClass.h"
-#include "../Handlers/BufferClass.h"
 #include "Player.h"
+#include "../Handlers/SystemHandlers.h"
 
 class Scene
 {
 protected:
-	D3DClass * _d3dClass;
-	ShaderClass* _shaderClass;
-	RenderClass* _renderClass;
-	BufferClass* _bufferClass;
-	WindowClass* _windowClass;
-	TextureHandler* _textureHandler;
+	SystemHandlers* _systemHandlers;
 	Player* _player;
 
 	Timer* _timer;
@@ -25,9 +15,7 @@ protected:
 	XMFLOAT2 _lastMousePos;
 
 public:
-	Scene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
-		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler,
-		Timer* timer, Player* player);
+	Scene(SystemHandlers* systemHandlers, Timer* timer, Player* player);
 	virtual ~Scene();
 	virtual void Cleanup();
 

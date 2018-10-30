@@ -3,7 +3,8 @@
 #include <map>
 #include "../Globals/Structs.h"
 #include "Scene Elements/SceneElement.h"
-#include "../Loaders/OBJLoader.h"
+#include "../Loaders/ModelLoader.h"
+#include "../Handlers/System Handlers/MathsHandler.h"
 #include "../Loaders/Terrain Generation/DiamondSquareTerrain.h"
 #include "Scene.h"
 #include "Player.h"
@@ -11,7 +12,6 @@
 #include "../Graphics/Graphical Effects/SkyColourGradient.h"
 #include "../Graphics/Graphical Effects/RenderToFullscreenQuad.h"
 #include "../Graphics/Graphical Effects/HeatHaze.h"
-#include "../Handlers/TextureHandler.h"
 
 class MainScene : Scene
 {
@@ -51,9 +51,7 @@ private:
 	float _currentCooldown;
 
 public:
-	MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
-		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, 
-		Timer* timer, Player* player);
+	MainScene(SystemHandlers* systemHandlers, Timer* timer, Player* player);
 	~MainScene() override;
 	void Cleanup() override;
 

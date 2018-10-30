@@ -1,6 +1,6 @@
 #pragma once
-#include "../Globals/stdafx.h"
-#include "../../resource.h"
+#include "../../Globals/stdafx.h"
+#include "../../../resource.h"
 class WindowClass
 {
 public:

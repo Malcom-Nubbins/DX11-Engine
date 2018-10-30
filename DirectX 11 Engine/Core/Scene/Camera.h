@@ -1,6 +1,7 @@
 #pragma once
 #include "../Globals/stdafx.h"
-#include "../Handlers/WindowClass.h"
+#include "../Handlers/System Handlers/WindowClass.h"
+#include "../Handlers/System Handlers/InputHandler.h"
 
 using namespace DirectX;
 

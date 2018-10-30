@@ -1,20 +1,12 @@
 ﻿#pragma once
-#include "../../Handlers/D3DClass.h"
-#include "../../Handlers/WindowClass.h"
-#include "../../Handlers/RenderClass.h"
-#include "../../Handlers/ShaderClass.h"
-#include "../../Handlers/BufferClass.h"
 #include "../../Scene/Camera.h"
 #include "UIBitmap.h"
+#include "../../Handlers/SystemHandlers.h"
 
 class UserInterface
 {
 private:
-	D3DClass* _d3dClass;
-	RenderClass* _renderClass;
-	ShaderClass* _shaderClass;
-	BufferClass* _bufferClass;
-	WindowClass* _windowClass;
+	SystemHandlers* _systemHandlers;
 
 	Camera* _camera;
 	std::vector<UIBitmap*> _bitmaps;
@@ -27,8 +19,7 @@ private:
 	XMFLOAT4X4 _worldMatrix;
 
 public:
-	UserInterface(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass,
-		BufferClass* bufferClass, WindowClass* windowClass, Camera* camera);
+	UserInterface(SystemHandlers* systemHandlers, Camera* camera);
 	~UserInterface();
 
 	void Initialise();

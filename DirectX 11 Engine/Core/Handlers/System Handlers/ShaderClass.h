@@ -1,7 +1,7 @@
 #pragma once
 #include "D3DClass.h"
-#include "../Globals/stdafx.h"
-#include "../Globals/AppValues.h"
+#include "../../Globals/stdafx.h"
+#include "../../Globals/AppValues.h"
 class ShaderClass
 {
 private:

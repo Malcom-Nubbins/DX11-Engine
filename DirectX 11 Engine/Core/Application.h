@@ -2,17 +2,20 @@
 #include "Globals\stdafx.h"
 //#include "Globals\AppValues.h"
 
-#include "Handlers/WindowClass.h"
-#include "Handlers/D3DClass.h"
-#include "Handlers/RenderClass.h"
-#include "Handlers/ShaderClass.h"
-#include "Handlers/BufferClass.h"
+#include "Handlers/System Handlers/WindowClass.h"
+#include "Handlers/System Handlers/D3DClass.h"
+#include "Handlers/System Handlers/RenderClass.h"
+#include "Handlers/System Handlers/ShaderClass.h"
+#include "Handlers/System Handlers/BufferClass.h"
+#include "Handlers/System Handlers/InputHandler.h"
 #include "Timer.h"
 
 #include "Scene/MainScene.h"
 #include "Scene/TestingScene.h"
 #include "Scene/Player.h"
 #include "Graphics/UI/UserInterface.h"
+#include "Handlers/System Handlers/TextureHandler.h"
+#include "Handlers/SystemHandlers.h"
 
 class Application
 {
@@ -38,6 +41,9 @@ private:
 	ShaderClass* _shaderClass;
 	BufferClass* _bufferClass;	
 	TextureHandler* _textureHandler;
+
+	SystemHandlers* _systemHandlers;
+
 	Timer* _timer;
 
 	MainScene* _mainScene;

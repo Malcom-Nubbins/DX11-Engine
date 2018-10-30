@@ -1,6 +1,6 @@
 #pragma once
 #include "D3DClass.h"
-#include "../Globals/stdafx.h"
+#include "../../Globals/stdafx.h"
 class RenderClass
 {
 private:

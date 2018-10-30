@@ -1,5 +1,4 @@
 #include "Camera.h"
-#include "../Handlers/InputHandler.h"
 
 Camera::Camera(WindowClass* windowClass)
 		:_windowClass(windowClass), _nearZ(0), _farZ(0), _aspect(0), _fovY(0), _nearWindowHeight(0), _nearWindowWidth(0),

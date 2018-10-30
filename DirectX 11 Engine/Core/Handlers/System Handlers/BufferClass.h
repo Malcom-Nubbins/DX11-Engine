@@ -1,6 +1,6 @@
 #pragma once
 #include "D3DClass.h"
-#include "../Globals/Structs.h"
+#include "../../Globals/Structs.h"
 #include <vector>
 class BufferClass
 {

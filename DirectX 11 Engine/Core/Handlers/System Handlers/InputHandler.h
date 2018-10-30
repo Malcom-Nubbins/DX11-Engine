@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "../Globals/stdafx.h"
+#include "../../Globals/stdafx.h"
 
 enum Keys
 {

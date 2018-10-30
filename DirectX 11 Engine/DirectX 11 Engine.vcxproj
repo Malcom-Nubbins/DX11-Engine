@@ -141,17 +141,18 @@
   <ItemGroup>
     <ClCompile Include="Core\Graphics\UI\UIBitmap.cpp" />
     <ClCompile Include="Core\Graphics\UI\UserInterface.cpp" />
-    <ClCompile Include="Core\Handlers\InputHandler.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\InputHandler.cpp" />
+    <ClCompile Include="Core\Handlers\SystemHandlers.cpp" />
     <ClCompile Include="Core\Loaders\Terrain Generation\FlatTerrain.cpp" />
     <ClCompile Include="Core\Scene\Player.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Appearance.cpp" />
     <ClCompile Include="Core\Application.cpp" />
-    <ClCompile Include="Core\Handlers\BufferClass.cpp" />
-    <ClCompile Include="Core\Handlers\D3DClass.cpp" />
-    <ClCompile Include="Core\Handlers\MathsHandler.cpp" />
-    <ClCompile Include="Core\Handlers\RenderClass.cpp" />
-    <ClCompile Include="Core\Handlers\ShaderClass.cpp" />
-    <ClCompile Include="Core\Handlers\WindowClass.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\BufferClass.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\D3DClass.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\MathsHandler.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\RenderClass.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\ShaderClass.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\WindowClass.cpp" />
     <ClCompile Include="Core\Loaders\DDSTextureLoader.cpp" />
     <ClCompile Include="Core\Loaders\OBJLoader.cpp" />
     <ClCompile Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.cpp" />
@@ -162,7 +163,7 @@
     <ClCompile Include="Core\Graphics\Graphical Effects\RenderToFullscreenQuad.cpp" />
     <ClCompile Include="Core\Graphics\Graphical Effects\Shadows.cpp" />
     <ClCompile Include="Core\Graphics\Graphical Effects\SkyColourGradient.cpp" />
-    <ClCompile Include="Core\Handlers\TextureHandler.cpp" />
+    <ClCompile Include="Core\Handlers\System Handlers\TextureHandler.cpp" />
     <ClCompile Include="Core\Scene\MainScene.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\SceneElement.cpp" />
     <ClCompile Include="Core\Scene\Scene.cpp" />
@@ -174,7 +175,8 @@
   <ItemGroup>
     <ClInclude Include="Core\Graphics\UI\UIBitmap.h" />
     <ClInclude Include="Core\Graphics\UI\UserInterface.h" />
-    <ClInclude Include="Core\Handlers\InputHandler.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\InputHandler.h" />
+    <ClInclude Include="Core\Handlers\SystemHandlers.h" />
     <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h" />
     <ClInclude Include="Core\Scene\Player.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
@@ -182,12 +184,12 @@
     <ClInclude Include="Core\Globals\AppValues.h" />
     <ClInclude Include="Core\Globals\stdafx.h" />
     <ClInclude Include="Core\Globals\Structs.h" />
-    <ClInclude Include="Core\Handlers\BufferClass.h" />
-    <ClInclude Include="Core\Handlers\D3DClass.h" />
-    <ClInclude Include="Core\Handlers\MathsHandler.h" />
-    <ClInclude Include="Core\Handlers\RenderClass.h" />
-    <ClInclude Include="Core\Handlers\ShaderClass.h" />
-    <ClInclude Include="Core\Handlers\WindowClass.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\BufferClass.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\D3DClass.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\MathsHandler.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\RenderClass.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\ShaderClass.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\WindowClass.h" />
     <ClInclude Include="Core\Loaders\DDSTextureLoader.h" />
     <ClInclude Include="Core\Loaders\OBJLoader.h" />
     <ClInclude Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.h" />
@@ -197,7 +199,7 @@
     <ClInclude Include="Core\Graphics\Graphical Effects\RenderToFullscreenQuad.h" />
     <ClInclude Include="Core\Graphics\Graphical Effects\Shadows.h" />
     <ClInclude Include="Core\Graphics\Graphical Effects\SkyColourGradient.h" />
-    <ClInclude Include="Core\Handlers\TextureHandler.h" />
+    <ClInclude Include="Core\Handlers\System Handlers\TextureHandler.h" />
     <ClInclude Include="Core\Scene\MainScene.h" />
     <ClInclude Include="Core\Scene\Scene Elements\SceneElement.h" />
     <ClInclude Include="Core\Scene\Scene.h" />

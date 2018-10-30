@@ -5,7 +5,6 @@
 #include "../Graphics/Graphical Effects/RenderToFullscreenQuad.h"
 #include "../Graphics/Graphical Effects/Shadows.h"
 #include "../Graphics/Graphical Effects/BasicLight.h"
-#include "../Handlers/TextureHandler.h"
 
 class TestingScene : public Scene
 {
@@ -31,9 +30,7 @@ private:
 	float _currentCooldown;
 
 public:
-	TestingScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass,
-		BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, 
-		Timer* timer, Player* player);
+	TestingScene(SystemHandlers* systemHandlers, Timer* timer, Player* player);
 	~TestingScene();
 
 	void Cleanup() override;

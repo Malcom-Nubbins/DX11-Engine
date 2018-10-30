@@ -1,6 +1,6 @@
 #pragma once
 #include "D3DClass.h"
-#include "../Loaders/DDSTextureLoader.h"
+#include "../../Loaders/DDSTextureLoader.h"
 
 class TextureHandler
 {

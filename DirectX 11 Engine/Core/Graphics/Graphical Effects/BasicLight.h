@@ -1,22 +1,16 @@
 #pragma once
 #include <vector>
 #include <algorithm>
-#include "../../Handlers/D3DClass.h"
-#include "../../Handlers/ShaderClass.h"
-#include "../../Handlers/RenderClass.h"
-#include "../../Handlers/BufferClass.h"
 #include "../../Scene/Camera.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
 #include "Shadows.h"
+#include "../../Handlers/SystemHandlers.h"
 
 
 class BasicLight
 {
 private:
-	D3DClass * _d3dClass;
-	ShaderClass* _shaderClass;
-	RenderClass* _renderClass;
-	BufferClass* _bufferClass;
+	SystemHandlers* _systemHandlers;
 
 	ID3D11VertexShader* _lightVS;
 	ID3D11HullShader* _tesselationHS;
@@ -54,7 +48,7 @@ private:
 	bool _renderWireframe;
 
 public:
-	BasicLight(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, BufferClass* bufferClass);
+	BasicLight(SystemHandlers* systemHandlers);
 	~BasicLight();
 	void Cleanup();
 

@@ -1,10 +1,8 @@
 #include "MainScene.h"
-#include "../Loaders/ModelLoader.h"
 
-MainScene::MainScene(D3DClass* d3dClass, ShaderClass* shaderClass, RenderClass* renderClass, 
-	BufferClass* bufferClass, WindowClass* windowClass, TextureHandler* textureHandler, Timer* timer,
+MainScene::MainScene(SystemHandlers* system, Timer* timer,
 	Player* player) 
-	: Scene(d3dClass, shaderClass, renderClass, bufferClass, windowClass, textureHandler, timer, player)
+	: Scene(system, timer, player)
 {
 	_shadows = nullptr;
 	_skyGradient = nullptr;
@@ -134,7 +132,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	matte.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.3f);
 
-	_bufferClass->CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
+	_systemHandlers->GetBufferClass()->CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
 
 	ObjectMesh planeMesh;
 	planeMesh.vertexBuffer = _planeVertexBuffer;
@@ -149,12 +147,12 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	//ObjectMesh plant1 = OBJLoader::Load(L"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice());
 
 	NewObjectMesh aircraftMesh, sphere, plant0, plant1;
-	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
-	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
-	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
-	ModelLoader::LoadModel(_d3dClass->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
+	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
+	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
+	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
+	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
 
-	_diamondSquareTerrain = new DiamondSquareTerrain(_d3dClass);
+	_diamondSquareTerrain = new DiamondSquareTerrain(_systemHandlers->GetD3DClass());
 	_diamondSquareTerrain->SetTerrainValues(256, 256, 512);
 	_diamondSquareTerrain->GenerateTerrain();
 
@@ -191,26 +189,26 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 	// Appearances
 	Appearance* groundAppearance = new Appearance(diamondSquareMesh, concrete);
-	groundAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
-	groundAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
-	groundAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
-	//groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
+	groundAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetGroundColourTexture());
+	groundAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetGroundNormalMap());
+	groundAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetGroundDisplacementMap());
+	//groundAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetGroundSpecularMap());
 
 	Appearance* underworldAppearance = new Appearance(planeMesh, shiny);
-	underworldAppearance->SetColourTexture(_textureHandler->GetGroundColourTexture());
-	underworldAppearance->SetNormalMap(_textureHandler->GetGroundNormalMap());
-	underworldAppearance->SetDisplacementMap(_textureHandler->GetGroundDisplacementMap());
+	underworldAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetGroundColourTexture());
+	underworldAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetGroundNormalMap());
+	underworldAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetGroundDisplacementMap());
 
 	Appearance* sphereAppearance = new Appearance(sphere, charcoal);
-	//sphereAppearance->SetColourTexture(_textureHandler->GetStoneTexture());
-	//sphereAppearance->SetNormalMap(_textureHandler->GetStoneNormalMap());
-	//sphereAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
+	//sphereAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetStoneTexture());
+	//sphereAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetStoneNormalMap());
+	//sphereAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetStoneDisplacementMap());
 
 	Appearance* aircraftAppearance = new Appearance(aircraftMesh, aircraftMat);
-	aircraftAppearance->SetColourTexture(_textureHandler->GetAircraftTexture());
-	aircraftAppearance->SetNormalMap(_textureHandler->GetAircraftNormalMap());
-	//aircraftAppearance->SetSpecularMap(_textureHandler->GetAircraftSpecularMap());
-	//aircraftAppearance->SetDisplacementMap(_textureHandler->GetAircraftDisplacementMap());
+	aircraftAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetAircraftTexture());
+	aircraftAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetAircraftNormalMap());
+	//aircraftAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetAircraftSpecularMap());
+	//aircraftAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetAircraftDisplacementMap());
 
 	Appearance* sunSphereAppearance = new Appearance(sphere, shiny);
 
@@ -312,19 +310,19 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 void MainScene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 {
-	_basicLight = new BasicLight(_d3dClass, _shaderClass, _renderClass, _bufferClass);
+	_basicLight = new BasicLight(_systemHandlers);
 	_basicLight->Initialise(windowWidth, windowHeight);
 
-	_shadows = new Shadows(_d3dClass, _renderClass, _shaderClass, _bufferClass);
+	_shadows = new Shadows(_systemHandlers);
 	_shadows->Initialise(8192, 8192);
 
-	_skyGradient = new SkyColourGradient(_d3dClass, _renderClass, _shaderClass, _bufferClass);
+	_skyGradient = new SkyColourGradient(_systemHandlers);
 	_skyGradient->Initialise();
 
-	_renderToQuad = new RenderToFullscreenQuad(_d3dClass, _shaderClass, _renderClass, _bufferClass);
+	_renderToQuad = new RenderToFullscreenQuad(_systemHandlers);
 	_renderToQuad->Initialise(windowWidth, windowHeight);
 
-	_heatHaze = new HeatHaze(_d3dClass, _shaderClass, _renderClass, _bufferClass);
+	_heatHaze = new HeatHaze(_systemHandlers);
 	_heatHaze->Initialise(windowWidth, windowHeight);
 }
 
@@ -486,7 +484,7 @@ void MainScene::Update(float deltaTime)
 	std::wostringstream out;
 	out.precision(6);
 	out << L"Day: " << _currentDay << L" - Season: " << _seasonNames.find(_currentSeason)->second.c_str() << L" Time speed: " << _lightRotationAmount;
-	_windowClass->SetWindowCaption(out.str().c_str());
+	_systemHandlers->GetWindowClass()->SetWindowCaption(out.str().c_str());
 }
 
 void MainScene::Draw()
@@ -496,10 +494,10 @@ void MainScene::Draw()
 
 	_basicLight->SetAsCurrentRenderTarget();
 	_basicLight->SetAsCurrentViewport();
-	_renderClass->DisableRtvClearing();
+	_systemHandlers->GetRenderClass()->DisableRtvClearing();
 	_skyGradient->Render(*_player->GetCamera(), sunPos);
 
-	_renderClass->EnableZBuffer();
+	_systemHandlers->GetRenderClass()->EnableZBuffer();
 	_shadows->Render(_sceneElements);
 
 	_basicLight->Render(*_player->GetCamera(), _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_shadows);
@@ -508,7 +506,7 @@ void MainScene::Draw()
 
 	if (_seasonNames.find(_currentSeason)->second == "Summer" || _seasonNames.find(_currentSeason)->second == "Winter")
 	{
-		_heatHaze->Render(_basicLight->GetRenderTargetSRV(), _textureHandler, _seasonNames.find(_currentSeason)->second);
+		_heatHaze->Render(_basicLight->GetRenderTargetSRV(), _systemHandlers->GetTextureHandler(), _seasonNames.find(_currentSeason)->second);
 		_renderToQuad->Render(_heatHaze->GetTexture());
 	}
 	else

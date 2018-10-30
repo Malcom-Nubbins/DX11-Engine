@@ -42,24 +42,6 @@
     <ClCompile Include="Core\Loaders\OBJLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Handlers\BufferClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Handlers\D3DClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Handlers\MathsHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Handlers\RenderClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Handlers\ShaderClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Handlers\WindowClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,9 +58,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Loaders\Terrain Generation\FlatTerrain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Handlers\InputHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Scene\Player.cpp">
@@ -99,13 +78,37 @@
     <ClCompile Include="Core\Graphics\Graphical Effects\SkyColourGradient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Handlers\TextureHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Graphics\UI\UserInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Graphics\UI\UIBitmap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\SystemHandlers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\BufferClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\D3DClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\InputHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\MathsHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\RenderClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\ShaderClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\TextureHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Handlers\System Handlers\WindowClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -132,24 +135,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loaders\OBJLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Handlers\BufferClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Handlers\D3DClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Handlers\MathsHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Handlers\RenderClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Handlers\ShaderClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Handlers\WindowClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Globals\AppValues.h">
@@ -182,9 +167,6 @@
     <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Handlers\InputHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Scene\Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -203,13 +185,37 @@
     <ClInclude Include="Core\Graphics\Graphical Effects\SkyColourGradient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Handlers\TextureHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Graphics\UI\UserInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Graphics\UI\UIBitmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\SystemHandlers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\BufferClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\D3DClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\InputHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\MathsHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\RenderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\ShaderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\TextureHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handlers\System Handlers\WindowClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
