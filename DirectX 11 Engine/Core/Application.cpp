@@ -141,12 +141,12 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	/*_mainScene = new MainScene(_d3dClass, _shaderClass, _renderClass, _bufferClass, 
 		_windowClass, _textureHandler, _timer, _player);
 
-		_mainScene->InitialiseScene(_windowWidth, _windowHeight);*/
+	_mainScene->InitialiseScene(_windowWidth, _windowHeight);*/
 
 	_ui = new UserInterface(_d3dClass, _shaderClass, _renderClass, _bufferClass, _windowClass, _player->GetCamera());
 	_ui->Initialise();
 
-	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 5), _textureHandler->GetStoneTexture());
+	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 5), _textureHandler->GetSnowTexture());
 	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), _textureHandler->GetGroundColourTexture());
 
 	return S_OK;
@@ -284,11 +284,7 @@ void Application::Draw()
 		_mainScene->Draw();
 	}
 
-	_renderClass->SetRasterizerState(NO_CULL);
-	_renderClass->DisableZBuffer();
 	_ui->Draw();
-	_renderClass->EnableZBuffer();
-	_renderClass->SetRasterizerState(BACK_CULL);
 
 	_d3dClass->GetSwapChain()->Present(1, 0);
 }

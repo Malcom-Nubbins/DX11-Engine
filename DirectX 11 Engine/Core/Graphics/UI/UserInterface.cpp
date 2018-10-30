@@ -52,6 +52,9 @@ void UserInterface::Update(float delta)
 
 void UserInterface::Draw()
 {
+	_renderClass->DisableZBuffer();
+	_renderClass->EnableAlphaBlending();
+
 	_d3dClass->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	_shaderClass->SetShadersAndInputLayout(_vertexShader, _pixelShader, _inputLayout);
 
@@ -71,4 +74,7 @@ void UserInterface::Draw()
 		_d3dClass->GetContext()->UpdateSubresource(_matrixBuffer, 0, nullptr, &matBuffer, 0, 0);
 		bitmap->Draw();
 	}
+
+	_renderClass->EnableZBuffer();
+	_renderClass->DisableAlphaBlending();
 }

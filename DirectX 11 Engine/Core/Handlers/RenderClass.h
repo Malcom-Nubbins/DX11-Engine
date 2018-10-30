@@ -13,6 +13,9 @@ private:
 	ID3D11RasterizerState* _wireframe;
 	ID3D11RasterizerState* _shadow;
 
+	ID3D11BlendState* _alphaBlendState;
+	ID3D11BlendState* _alphaBlendStateDisabled;
+
 	bool _disableRTVClearing;
 
 public:
@@ -25,6 +28,9 @@ public:
 
 	void DisableZBuffer();
 	void EnableZBuffer();
+
+	void EnableAlphaBlending();
+	void DisableAlphaBlending();
 
 	void EnableRtvClearing();
 	void DisableRtvClearing();

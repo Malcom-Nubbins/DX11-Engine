@@ -9,6 +9,9 @@ RenderClass::RenderClass(D3DClass* d3dClass) : _d3dClass(d3dClass)
 	_backCull = nullptr;
 	_wireframe = nullptr;
 	_shadow = nullptr;
+
+	_alphaBlendState = nullptr;
+	_alphaBlendStateDisabled = nullptr;
 }
 
 RenderClass::~RenderClass()
@@ -45,6 +48,18 @@ void RenderClass::Cleanup()
 	{
 		_shadow->Release();
 		_shadow = nullptr;
+	}
+
+	if(_alphaBlendState)
+	{
+		_alphaBlendState->Release();
+		_alphaBlendState = nullptr;
+	}
+
+	if (_alphaBlendStateDisabled)
+	{
+		_alphaBlendStateDisabled->Release();
+		_alphaBlendStateDisabled = nullptr;
 	}
 }
 
@@ -91,6 +106,24 @@ void RenderClass::Initialise()
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
 	_d3dClass->GetDevice()->CreateDepthStencilState(&depthStencilDesc, &_depthEnabled);
+
+	D3D11_BLEND_DESC blendDesc;
+	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+	blendDesc.RenderTarget[0].BlendEnable = true;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
+
+	_d3dClass->GetDevice()->CreateBlendState(&blendDesc, &_alphaBlendState);
+
+	blendDesc.RenderTarget[0].BlendEnable = false;
+
+	_d3dClass->GetDevice()->CreateBlendState(&blendDesc, &_alphaBlendStateDisabled);
+
 }
 
 void RenderClass::ResizeViews()
@@ -105,6 +138,28 @@ void RenderClass::DisableZBuffer()
 void RenderClass::EnableZBuffer()
 {
 	_d3dClass->GetContext()->OMSetDepthStencilState(_depthEnabled, 0);
+}
+
+void RenderClass::EnableAlphaBlending()
+{
+	float blendFactor[4];
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+
+	_d3dClass->GetContext()->OMSetBlendState(_alphaBlendState, blendFactor, 0xffffffff);
+}
+
+void RenderClass::DisableAlphaBlending()
+{
+	float blendFactor[4];
+	blendFactor[0] = 0.0f;
+	blendFactor[1] = 0.0f;
+	blendFactor[2] = 0.0f;
+	blendFactor[3] = 0.0f;
+
+	_d3dClass->GetContext()->OMSetBlendState(_alphaBlendStateDisabled, blendFactor, 0xffffffff);
 }
 
 void RenderClass::EnableRtvClearing()
