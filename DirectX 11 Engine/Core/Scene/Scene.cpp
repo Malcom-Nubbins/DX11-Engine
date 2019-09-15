@@ -1,6 +1,6 @@
 ﻿#include "Scene.h"
 
-Scene::Scene(SystemHandlers* systemHandler, Timer* timer, Player* player)
+Scene::Scene(const SystemHandlers& systemHandler, const Timer& timer, const Player& player)
 	: _systemHandlers(systemHandler), _player(player), _timer(timer), _sceneLight()
 {
 }

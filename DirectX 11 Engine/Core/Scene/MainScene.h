@@ -51,7 +51,7 @@ private:
 	float _currentCooldown;
 
 public:
-	MainScene(SystemHandlers* systemHandlers, Timer* timer, Player* player);
+	MainScene(SystemHandlers& systemHandlers, Timer& timer, Player& player);
 	~MainScene() override;
 	void Cleanup() override;
 

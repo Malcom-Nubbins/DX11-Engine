@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <algorithm>
 #include "../../Scene/Camera.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
 #include "Shadows.h"
@@ -10,7 +9,7 @@
 class BasicLight
 {
 private:
-	SystemHandlers* _systemHandlers;
+	const SystemHandlers& _systemHandlers;
 
 	ID3D11VertexShader* _lightVS;
 	ID3D11HullShader* _tesselationHS;
@@ -48,9 +47,9 @@ private:
 	bool _renderWireframe;
 
 public:
-	BasicLight(SystemHandlers* systemHandlers);
+	BasicLight(const SystemHandlers& systemHandlers);
 	~BasicLight();
-	void Cleanup();
+	void Cleanup() const;
 
 	void Resize(float newWidth, float newHeight);
 
@@ -63,7 +62,7 @@ public:
 	void SetWireframeMode(bool state) { _renderWireframe = state; }
 	bool GetWireframeState() const { return _renderWireframe; }
 
-	void CalculateLightColour(DirectionalLight & sceneLight, float sunHeight, FogValuesBuffer & sceneFog);
+	void CalculateLightColour(DirectionalLight& sceneLight, float sunHeight, FogValuesBuffer& sceneFog);
 	ID3D11ShaderResourceView* GetRenderTargetSRV() const { return _renderTargetSRV; }
 
 	void Render(const Camera& camera, 

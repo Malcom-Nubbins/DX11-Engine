@@ -1,7 +1,7 @@
 #include "HeatHaze.h"
 
-HeatHaze::HeatHaze(SystemHandlers* systemHandlers)
-	: _systemHandlers(systemHandlers)
+HeatHaze::HeatHaze(const SystemHandlers& systemHandlers)
+	: _systemHandlers(systemHandlers), _quad(), _values()
 {
 	_heatHazePS = nullptr;
 	_inputLayout = nullptr;
@@ -17,7 +17,7 @@ HeatHaze::~HeatHaze()
 {
 }
 
-void HeatHaze::Cleanup()
+void HeatHaze::Cleanup() const
 {
 	_heatHazePS->Release();
 	//_inputLayout->Release();
@@ -29,7 +29,7 @@ void HeatHaze::Cleanup()
 	_heatHazeValues->Release();
 }
 
-HRESULT HeatHaze::Initialise(float width, float height)
+HRESULT HeatHaze::Initialise(const float width, const float height)
 {
 	HRESULT hr;
 	hr = InitialiseRenderTarget(width, height);
@@ -54,12 +54,12 @@ HRESULT HeatHaze::Initialise(float width, float height)
 	bd.ByteWidth = sizeof(HeatHazeValues);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	_systemHandlers->GetD3DClass()->GetDevice()->CreateBuffer(&bd, nullptr, &_heatHazeValues);
+	_systemHandlers.GetD3DClass()->GetDevice()->CreateBuffer(&bd, nullptr, &_heatHazeValues);
 
 	return S_OK;
 }
 
-void HeatHaze::Resize(float width, float height)
+void HeatHaze::Resize(const float width, const float height)
 {
 	_renderTargetTex2D->Release();
 	_renderTargetView->Release();
@@ -68,7 +68,7 @@ void HeatHaze::Resize(float width, float height)
 	InitialiseRenderTarget(width, height);
 }
 
-HRESULT HeatHaze::InitialiseRenderTarget(float width, float height)
+HRESULT HeatHaze::InitialiseRenderTarget(const float width, const float height)
 {
 	HRESULT hr;
 	D3D11_TEXTURE2D_DESC renderTargetTexDesc;
@@ -84,14 +84,14 @@ HRESULT HeatHaze::InitialiseRenderTarget(float width, float height)
 	renderTargetTexDesc.CPUAccessFlags = 0;
 	renderTargetTexDesc.MiscFlags = 0;
 
-	_systemHandlers->GetD3DClass()->GetDevice()->CreateTexture2D(&renderTargetTexDesc, nullptr, &_renderTargetTex2D);
+	_systemHandlers.GetD3DClass()->GetDevice()->CreateTexture2D(&renderTargetTexDesc, nullptr, &_renderTargetTex2D);
 
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc;
 	renderTargetDesc.Format = renderTargetTexDesc.Format;
 	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	renderTargetDesc.Texture2D.MipSlice = 0;
 
-	hr = _systemHandlers->GetD3DClass()->GetDevice()->CreateRenderTargetView(_renderTargetTex2D, &renderTargetDesc, &_renderTargetView);
+	hr = _systemHandlers.GetD3DClass()->GetDevice()->CreateRenderTargetView(_renderTargetTex2D, &renderTargetDesc, &_renderTargetView);
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, L"Failed to create Render Target View (BasicLight)", L"Error", MB_OK);
@@ -104,16 +104,14 @@ HRESULT HeatHaze::InitialiseRenderTarget(float width, float height)
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	_systemHandlers->GetD3DClass()->GetDevice()->CreateShaderResourceView(_renderTargetTex2D, &srvDesc, &_renderTargetSRV);
+	_systemHandlers.GetD3DClass()->GetDevice()->CreateShaderResourceView(_renderTargetTex2D, &srvDesc, &_renderTargetSRV);
 
 	return S_OK;
 }
 
 HRESULT HeatHaze::InitialiseShaders()
 {
-	HRESULT hr;
-
-	hr = _systemHandlers->GetShaderClass()->CreatePixelShader((WCHAR*)L"Core/Shaders/HeatHazePS.hlsl", &_heatHazePS);
+	HRESULT hr = _systemHandlers.GetShaderClass()->CreatePixelShader((WCHAR*)L"Core/Shaders/HeatHazePS.hlsl", &_heatHazePS);
 	if (FAILED(hr))
 		return hr;
 
@@ -122,8 +120,7 @@ HRESULT HeatHaze::InitialiseShaders()
 
 void HeatHaze::BuildQuad()
 {
-	HRESULT hr;
-	hr = _systemHandlers->GetBufferClass()->CreateQuad(&_quad.vertexBuffer, &_quad.indexBuffer);
+	HRESULT hr = _systemHandlers.GetBufferClass()->CreateQuad(&_quad.vertexBuffer, &_quad.indexBuffer);
 	if (FAILED(hr))
 	{
 		return;
@@ -134,31 +131,30 @@ void HeatHaze::BuildQuad()
 	_quad.vertexBufferStride = sizeof(SimpleQuad);
 }
 
-void HeatHaze::SetAsCurrentRenderTarget()
+void HeatHaze::SetAsCurrentRenderTarget() const
 {
-	_systemHandlers->GetRenderClass()->SetRenderTargetAndDepthStencil(_renderTargetView, nullptr);
+	_systemHandlers.GetRenderClass()->SetRenderTargetAndDepthStencil(_renderTargetView, nullptr);
 }
 
-void HeatHaze::SetAsCurrentPixelShader()
+void HeatHaze::SetAsCurrentPixelShader() const
 {
-	_systemHandlers->GetShaderClass()->SetShadersAndInputLayout(nullptr, _heatHazePS, nullptr);
+	_systemHandlers.GetShaderClass()->SetShadersAndInputLayout(nullptr, _heatHazePS, nullptr);
 }
 
-void HeatHaze::Update(float deltaTime)
+void HeatHaze::Update(const float deltaTime)
 {
 	_values.time = deltaTime;
 }
 
 void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, TextureHandler* texHandler, std::string season)
 {
-
 	if (season == "Winter")
 	{
 		_values.blizzard = 1.0f;
 		_values.heatwave = 0.0f;
 
 		ID3D11ShaderResourceView* snowTex = texHandler->GetSnowTexture();
-		_systemHandlers->GetD3DClass()->GetContext()->PSSetShaderResources(1, 1, &snowTex);
+		_systemHandlers.GetD3DClass()->GetContext()->PSSetShaderResources(1, 1, &snowTex);
 	}
 	else if (season == "Summer")
 	{
@@ -166,21 +162,21 @@ void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, TextureHandle
 		_values.heatwave = 1.0f;
 
 		ID3D11ShaderResourceView* distortionMap = texHandler->GetDistortionMap();
-		_systemHandlers->GetD3DClass()->GetContext()->PSSetShaderResources(1, 1, &distortionMap);
+		_systemHandlers.GetD3DClass()->GetContext()->PSSetShaderResources(1, 1, &distortionMap);
 	}
 
-	_systemHandlers->GetBufferClass()->SetPixelShaderBuffers(&_heatHazeValues);
+	_systemHandlers.GetBufferClass()->SetPixelShaderBuffers(&_heatHazeValues);
 
-	_systemHandlers->GetD3DClass()->GetContext()->PSSetSamplers(0, 1, _systemHandlers->GetShaderClass()->GetSamplerState(LINEAR));
+	_systemHandlers.GetD3DClass()->GetContext()->PSSetSamplers(0, 1, _systemHandlers.GetShaderClass()->GetSamplerState(LINEAR));
 	SetAsCurrentRenderTarget();
 	SetAsCurrentPixelShader();
 
-	_systemHandlers->GetD3DClass()->GetContext()->IASetVertexBuffers(0, 1, &_quad.vertexBuffer, &_quad.vertexBufferStride, &_quad.vertexBufferOffset);
-	_systemHandlers->GetD3DClass()->GetContext()->IASetIndexBuffer(_quad.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	_systemHandlers.GetD3DClass()->GetContext()->IASetVertexBuffers(0, 1, &_quad.vertexBuffer, &_quad.vertexBufferStride, &_quad.vertexBufferOffset);
+	_systemHandlers.GetD3DClass()->GetContext()->IASetIndexBuffer(_quad.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-	_systemHandlers->GetD3DClass()->GetContext()->PSSetShaderResources(0, 1, &textureToProcess);
+	_systemHandlers.GetD3DClass()->GetContext()->PSSetShaderResources(0, 1, &textureToProcess);
 
-	_systemHandlers->GetD3DClass()->GetContext()->UpdateSubresource(_heatHazeValues, 0, nullptr, &_values, 0, 0);
+	_systemHandlers.GetD3DClass()->GetContext()->UpdateSubresource(_heatHazeValues, 0, nullptr, &_values, 0, 0);
 
-	_systemHandlers->GetD3DClass()->GetContext()->DrawIndexed(_quad.numberOfIndices, 0, 0);
+	_systemHandlers.GetD3DClass()->GetContext()->DrawIndexed(_quad.numberOfIndices, 0, 0);
 }

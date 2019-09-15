@@ -14,7 +14,7 @@ public:
 	void Stop();
 	void Tick();
 
-	bool IsScenePaused() { return _paused; }
+	bool IsScenePaused() const { return _paused; }
 
 private:
 	double _secondsPerCount;

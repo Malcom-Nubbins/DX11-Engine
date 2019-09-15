@@ -26,6 +26,8 @@ public:
 	~UIBitmap();
 
 	void Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11ShaderResourceView* texture);
+
+	void UpdateScreenSize(XMFLOAT2 newScreenSize);
 	void MoveBitmap(XMFLOAT2 newPos);
 
 	SceneElement* GetUIElement() { return _uiElement; }

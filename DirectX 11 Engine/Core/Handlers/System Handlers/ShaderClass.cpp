@@ -13,9 +13,10 @@ void ShaderClass::Cleanup()
 {
 	if (_linear) _linear->Release();
 	if (_anisotropic) _anisotropic->Release();
+	if (_shadowSamplerComparison) _shadowSamplerComparison->Release();
 }
 
-HRESULT ShaderClass::CreateVertexShader(WCHAR * shaderFilename, ID3D11VertexShader ** vertexShader, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements)
+HRESULT ShaderClass::CreateVertexShader(WCHAR * shaderFilename, ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements)
 {
 	HRESULT hr;
 	ID3DBlob* vsBlob;
@@ -172,7 +173,7 @@ HRESULT ShaderClass::CompileShaderFromFile(WCHAR * filename, LPCSTR entrypoint, 
 	if (FAILED(hr))
 	{
 		if (pErrorBlob != nullptr)
-			OutputDebugStringA((char*)pErrorBlob->GetBufferPointer());
+			OutputDebugStringA(static_cast<char*>(pErrorBlob->GetBufferPointer()));
 
 		if (pErrorBlob) pErrorBlob->Release();
 

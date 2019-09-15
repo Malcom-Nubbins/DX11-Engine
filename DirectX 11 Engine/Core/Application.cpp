@@ -10,7 +10,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return app->HandleInput(hWnd, message, wParam, lParam);
 }
 
-Application::Application(Timer* timer) : _timer(timer)
+Application::Application(Timer& timer) : _windowClass(nullptr), 
+_textureHandler(nullptr), 
+_systemHandlers(nullptr), 
+_timer(timer),
+_simpleQuadInputLayout(nullptr)
 {
 	_d3dClass = nullptr;
 	_renderClass = nullptr;
@@ -56,6 +60,7 @@ void Application::Cleanup()
 
 	if(_ui != nullptr)
 	{
+		_ui->Cleanup();
 		delete _ui;
 		_ui = nullptr;
 	}
@@ -116,15 +121,15 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	_player = new Player(_windowClass);
 	_player->Initialise();
 
-	_testingScene = new TestingScene(_systemHandlers, _timer, _player);
+	/*_testingScene = new TestingScene(*_systemHandlers, _timer, *_player);
 
-	_testingScene->InitialiseScene(_windowWidth, _windowHeight);
+	_testingScene->InitialiseScene(_windowWidth, _windowHeight);*/
 
-	/*_mainScene = new MainScene(_systemHandlers, _timer, _player);
+	_mainScene = new MainScene(*_systemHandlers, _timer, *_player);
 
-	_mainScene->InitialiseScene(_windowWidth, _windowHeight);*/
+	_mainScene->InitialiseScene(_windowWidth, _windowHeight);
 
-	_ui = new UserInterface(_systemHandlers, _player->GetCamera());
+	_ui = new UserInterface(*_systemHandlers, _player->GetCamera());
 	_ui->Initialise();
 
 	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 5), _textureHandler->GetSnowTexture());
@@ -157,13 +162,13 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 			{
 				_windowClass->SetWindowMinimised(true);
 				_windowClass->SetWindowMaximised(false);
-				_timer->Stop();
+				_timer.Stop();
 			}
 			else if (wParam == SIZE_MAXIMIZED)
 			{
 				_windowClass->SetWindowMinimised(false);
 				_windowClass->SetWindowMaximised(true);
-				_timer->Start();
+				_timer.Start();
 				Resize(_windowWidth, _windowHeight);
 			}
 			else if (wParam == SIZE_RESTORED)
@@ -192,12 +197,12 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 	case WM_ENTERSIZEMOVE:
 		_windowClass->SetWindowResizing(true);
-		_timer->Stop();
+		_timer.Stop();
 		return true;
 
 	case WM_EXITSIZEMOVE:
 		_windowClass->SetWindowResizing(false);
-		_timer->Start();
+		_timer.Start();
 		Resize(_windowWidth, _windowHeight);
 		return true;
 
@@ -225,6 +230,11 @@ void Application::Resize(float newWidth, float newHeight)
 
 	if(_player != nullptr)
 		_player->ResetPlayerCamera(newWidth, newHeight);
+
+	if(_ui != nullptr)
+	{
+		_ui->Resize(newWidth, newHeight);
+	}
 }
 
 void Application::Update(float deltaTime)

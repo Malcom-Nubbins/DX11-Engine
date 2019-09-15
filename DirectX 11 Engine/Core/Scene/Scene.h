@@ -7,23 +7,23 @@
 class Scene
 {
 protected:
-	SystemHandlers* _systemHandlers;
-	Player* _player;
+	const SystemHandlers& _systemHandlers;
+	const Player& _player;
 
-	Timer* _timer;
+	const Timer& _timer;
 	DirectionalLight _sceneLight;
 	XMFLOAT2 _lastMousePos;
 
 public:
-	Scene(SystemHandlers* systemHandlers, Timer* timer, Player* player);
+	Scene(const SystemHandlers& systemHandlers, const Timer& timer, const Player& player);
 	virtual ~Scene();
-	virtual void Cleanup();
+	virtual void Cleanup() = 0;
 
-	virtual void ResizeViews(float windowWidth, float windowHeight);
+	virtual void ResizeViews(float windowWidth, float windowHeight) = 0;
 
-	virtual void InitialiseScene(float windowWidth, float windowHeight);
-	virtual void InitialiseSceneGraphics(float windowWidth, float windowHeight);
+	virtual void InitialiseScene(float windowWidth, float windowHeight) = 0;
+	virtual void InitialiseSceneGraphics(float windowWidth, float windowHeight) = 0;
 
-	virtual void Update(float delta);
-	virtual void Draw();
+	virtual void Update(float delta) = 0;
+	virtual void Draw() = 0;
 };

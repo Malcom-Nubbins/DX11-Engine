@@ -7,11 +7,28 @@
 
 #include "../Globals/Structs.h"
 #include "../Handlers/System Handlers/MathsHandler.h"
+#include <map>
 
 class ModelLoader
 {
 private:
-	static void CalculateTBN(std::vector<SimpleVertex>& vertices, int indices[], int ids[3]);
+	static std::map<std::wstring, NewObjectMesh> _modelCache;
+
+	struct Tokens
+	{
+		char** tokensList;
+		size_t count;
+	};
+
+	struct IntegerTokens
+	{
+		int** tokensList;
+		size_t count;
+	};
+
+private:
+	static std::vector<std::string> Split(const std::string& text, const std::string& delims);
+	static void CalculateTBN(std::vector<SimpleVertex>& vertices, int** indices, int ids[3]);
 public:
 	static bool LoadModel(ID3D11Device* device, std::wstring filename, NewObjectMesh& modelMesh, bool invertFaces);
 };

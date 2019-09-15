@@ -6,7 +6,7 @@
 class SkyColourGradient
 {
 private:
-	SystemHandlers* _systemHandlers;
+	const SystemHandlers& _systemHandlers;
 	ID3D11VertexShader* _colourGradientVS;
 	ID3D11PixelShader* _colourGradientPS;
 	ID3D11InputLayout* _inputLayout;
@@ -18,9 +18,9 @@ private:
 	ID3D11Buffer* _matrixBuffer;
 
 public:
-	SkyColourGradient(SystemHandlers* system);
+	SkyColourGradient(const SystemHandlers& system);
 	~SkyColourGradient();
-	void Cleanup();
+	void Cleanup() const;
 
 	HRESULT Initialise();
 

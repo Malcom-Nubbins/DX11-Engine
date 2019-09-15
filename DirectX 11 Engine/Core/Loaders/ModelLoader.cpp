@@ -2,29 +2,19 @@
 #include <iterator>
 #include <map>
 
-std::vector<std::string> split(const std::string& text, const std::string& delims)
+std::map<std::wstring, NewObjectMesh> ModelLoader::_modelCache;
+
+std::vector<std::string> ModelLoader::Split(const std::string& text, const std::string& delims)
 {
-	std::vector<std::string> tokens;
-	std::size_t start = text.find_first_not_of(delims), end = 0;
-
-	while((end = text.find_first_of(delims, start)) != std::string::npos)
-	{
-		tokens.push_back(text.substr(start, end - start));
-		start = text.find_first_not_of(delims, end);
-	}
-
-	if (start != std::string::npos)
-		tokens.push_back(text.substr(start));
-
-	return tokens;
+	return std::vector<std::string>();
 }
 
 
-void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int indices[], int ids[3])
+void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int** indices, int ids[3])
 {
-	SimpleVertex& v0 = vertices[indices[ids[0]]];
-	SimpleVertex& v1 = vertices[indices[ids[1]]];
-	SimpleVertex& v2 = vertices[indices[ids[2]]];
+	SimpleVertex& v0 = vertices[*indices[ids[0]]];
+	SimpleVertex& v1 = vertices[*indices[ids[1]]];
+	SimpleVertex& v2 = vertices[*indices[ids[2]]];
 
 	XMVECTOR A = XMLoadFloat3(&v1.pos) - XMLoadFloat3(&v0.pos);
 	XMVECTOR B = XMLoadFloat3(&v2.pos) - XMLoadFloat3(&v0.pos);
@@ -89,6 +79,14 @@ void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int indices[
 bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, 
 							NewObjectMesh& modelMesh, bool invertFaces)
 {
+	if(_modelCache.find(filename) != _modelCache.end())
+	{
+		modelMesh.vertexBuffer = _modelCache[filename].vertexBuffer;
+		modelMesh.numOfSubsets = _modelCache[filename].numOfSubsets;
+		modelMesh.subsets = _modelCache[filename].subsets;
+		return true;
+	}
+
 	modelMesh = NewObjectMesh();
 	modelMesh.numOfSubsets = 0;
 
@@ -175,7 +173,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 		return true;
 	};
 
-	auto parseVertex = [&](std::vector<std::string> tokens) -> bool
+	auto parseVertex = [&](char** tokens, size_t size) -> bool
 	{
 		if (currLine[1] == 'n')
 		{
@@ -183,12 +181,12 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 			if (!buildSubset())
 				return false;
 
-			if (tokens.size() != 4)
+			if (size != 4)
 				return false;
 
-			norm.x = static_cast<float>(atof(tokens[1].c_str()));
-			norm.y = static_cast<float>(atof(tokens[2].c_str()));
-			norm.z = static_cast<float>(atof(tokens[3].c_str()));
+			norm.x = static_cast<float>(atof(tokens[1]));
+			norm.y = static_cast<float>(atof(tokens[2]));
+			norm.z = static_cast<float>(atof(tokens[3]));
 
 			if(invertFaces)
 			{
@@ -206,11 +204,11 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 			if (!buildSubset())
 				return false;
 
-			if (tokens.size() < 3)
+			if (size < 3)
 				return false;
 
-			texCoord.x = static_cast<float>(atof(tokens[1].c_str()));
-			texCoord.y = static_cast<float>(atof(tokens[2].c_str()));
+			texCoord.x = static_cast<float>(atof(tokens[1]));
+			texCoord.y = static_cast<float>(atof(tokens[2]));
 
 			if(invertFaces)
 			{
@@ -225,53 +223,84 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 			if (!buildSubset())
 				return false;
 
-			if (tokens.size() != 4)
+			if (size != 4)
 				return false;
 
-			vert.x = static_cast<float>(atof(tokens[1].c_str()));
-			vert.y = static_cast<float>(atof(tokens[2].c_str()));
-			vert.z = static_cast<float>(atof(tokens[3].c_str()));
+			vert.x = static_cast<float>(atof(tokens[1]));
+			vert.y = static_cast<float>(atof(tokens[2]));
+			vert.z = static_cast<float>(atof(tokens[3]));
 
 			verts.push_back(vert);
 		}
 		return true;
 	};
 
-	auto parseFace = [&](std::vector<std::string> tokens, 
-		std::vector<int> indicesForThisFace,
-		std::vector<std::string> faceVals) -> bool
+	auto parseFace = [&](char** tokens,
+		size_t size) -> bool
 	{
-		if (tokens.size() < 4)
+		if (size < 4)
 		{
 			return false;
 		}
 
-		indicesForThisFace.reserve(3);
+		IntegerTokens intTokens;
+		intTokens.tokensList = static_cast<int**>(malloc(size * sizeof(*intTokens.tokensList)));
+		if(!intTokens.tokensList)
+		{
+			return false;
+		}
+
+		intTokens.count = 0;
+
+		Tokens faceTokens;
+		faceTokens.tokensList = static_cast<char**>(malloc(size * sizeof(*faceTokens.tokensList)));
+		if(!faceTokens.tokensList)
+		{
+			return false;
+		}
+
+		faceTokens.count = 0;
 
 		if(invertFaces)
 		{
-			for (size_t i = tokens.size() - 1; i > 0; --i)
+			for (size_t i = size - 1; i > 0; --i)
 			{
 				const std::string& face = tokens[i];
 				if (face.empty())
 					continue;
 
-				faceVals.clear();
+				char* cstr = new char[face.length() + 1];
+				strcpy(cstr, face.c_str());
 
-				faceVals = split(face, "/");
+				char* p = std::strtok(cstr, "/");
 
-				if (faceVals.size() != 3)
+				size_t count = 0;
+				for (UINT ui = 0; p != nullptr; ++ui)
 				{
-					return false;
+					faceTokens.tokensList[ui] = static_cast<char*>(malloc(strlen(p) + 1));
+					if (faceTokens.tokensList[ui])
+					{
+						strcpy(faceTokens.tokensList[ui], p);
+						p = std::strtok(nullptr, "/");
+						count++;
+					}
+					else
+					{
+						return false;
+					}
 				}
+
+				faceTokens.count = count;
+
+				delete[] cstr;
 
 				int idPos = -1, idTex = -1, idNorm = -1;
 
-				idPos = static_cast<int>(atoi(faceVals[0].c_str()));
-				if (!faceVals[1].empty())
-					idTex = static_cast<int>(atoi(faceVals[1].c_str()));
+				idPos = static_cast<int>(atoi(faceTokens.tokensList[0]));
+				if (faceTokens.tokensList[1] != nullptr)
+					idTex = static_cast<int>(atoi(faceTokens.tokensList[1]));
 
-				idNorm = static_cast<int>(atoi(faceVals[2].c_str()));
+				idNorm = static_cast<int>(atoi(faceTokens.tokensList[2]));
 
 				--idPos; --idTex; --idNorm;
 
@@ -306,44 +335,70 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 				if (i < 4)
 				{
 					indices.push_back(vertexIndex);
-					indicesForThisFace.push_back(vertexIndex);
+
+					intTokens.tokensList[i - 1] = static_cast<int*>(malloc(sizeof(vertexIndex)));
+					if (!intTokens.tokensList[i - 1])
+					{
+						return false;
+					}
+
+					*intTokens.tokensList[i - 1] = vertexIndex;
+					intTokens.count++;
 				}
 				else
 				{
 					indices.push_back(vertexIndex);
-					indices.push_back(indicesForThisFace[0]);
-					indices.push_back(indicesForThisFace[2]);
+					indices.push_back(*intTokens.tokensList[0]);
+					indices.push_back(*intTokens.tokensList[2]);
 
-					int lIndices[] = { vertexIndex, indicesForThisFace[0], indicesForThisFace[2] };
+					int* lIndices = new int[3]{ vertexIndex, *intTokens.tokensList[0], *intTokens.tokensList[2] };
 					int inds[] = { 0, 1, 2 };
-					CalculateTBN(vertices, lIndices, inds);
+					CalculateTBN(vertices, &lIndices, inds);
+
+					delete[] lIndices;
 				}
 			}
 		}
 		else
 		{
-			for (size_t i = 1; i < tokens.size(); ++i)
+			for (size_t i = 1; i < size; ++i)
 			{
 				const std::string& face = tokens[i];
 				if (face.empty())
 					continue;
 
-				faceVals.clear();
+				char* cstr = new char[face.length() + 1];
+				strcpy(cstr, face.c_str());
 
-				faceVals = split(face, "/");
+				char* p = std::strtok(cstr, "/");
 
-				if (faceVals.size() != 3)
+				size_t count = 0;
+				for (UINT ui = 0; p != nullptr; ++ui)
 				{
-					return false;
+					faceTokens.tokensList[ui] = static_cast<char*>(malloc(strlen(p) + 1));
+					if (faceTokens.tokensList[ui])
+					{
+						strcpy(faceTokens.tokensList[ui], p);
+						p = std::strtok(nullptr, "/");
+						count++;
+					}
+					else
+					{
+						return false;
+					}
 				}
+
+				faceTokens.count = count;
+
+				delete[] cstr;
 
 				int idPos = -1, idTex = -1, idNorm = -1;
 
-				idPos = static_cast<int>(atoi(faceVals[0].c_str()));
-				if (!faceVals[1].empty())
-					idTex = static_cast<int>(atoi(faceVals[1].c_str()));
+				idPos = static_cast<int>(atoi(faceTokens.tokensList[0]));
+				if (faceTokens.tokensList[1] != nullptr)
+					idTex = static_cast<int>(atoi(faceTokens.tokensList[1]));
 
-				idNorm = static_cast<int>(atoi(faceVals[2].c_str()));
+				idNorm = static_cast<int>(atoi(faceTokens.tokensList[2]));
 
 				--idPos; --idTex; --idNorm;
 
@@ -378,43 +433,100 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 				if (i < 4)
 				{
 					indices.push_back(vertexIndex);
-					indicesForThisFace.push_back(vertexIndex);
+					intTokens.tokensList[i - 1] = static_cast<int*>(malloc(sizeof(vertexIndex)));
+					if (!intTokens.tokensList[i - 1])
+					{
+						return false;
+					}
+
+					//memcpy(&intTokens.tokensList[i - 1], &vertexIndex, sizeof(int));
+
+					*intTokens.tokensList[i - 1] = vertexIndex;
+					intTokens.count++;
 				}
 				else
 				{
 					indices.push_back(vertexIndex);
-					indices.push_back(indicesForThisFace[0]);
-					indices.push_back(indicesForThisFace[2]);
+					indices.push_back(*intTokens.tokensList[0]);
+					indices.push_back(*intTokens.tokensList[2]);
 
-					int lIndices[] = { vertexIndex, indicesForThisFace[0], indicesForThisFace[2] };
+					//int lIndices[] = { vertexIndex, *intTokens.tokensList[0], *intTokens.tokensList[2] };
+
+					int* lIndices = new int[3]{vertexIndex, *intTokens.tokensList[0], *intTokens.tokensList[2] };
+
 					int inds[] = { 0, 1, 2 };
-					CalculateTBN(vertices, lIndices, inds);
+					CalculateTBN(vertices, &lIndices, inds);
+
+					delete[] lIndices;
 				}
 
 			}
 		}
 
-		
+		for (UINT i = 0; i < faceTokens.count; ++i)
+		{
+			free(faceTokens.tokensList[i]);
+		}
+
+		free(faceTokens.tokensList);
 
 		int lIndices[] = { 2, 0, 1 };
 
 		for (int i = 0; i < 3; ++i)
 		{
 			int first = lIndices[0]; lIndices[0] = lIndices[1]; lIndices[1] = lIndices[2]; lIndices[2] = first;
-			CalculateTBN(vertices, &indicesForThisFace[0], lIndices);
+			CalculateTBN(vertices, intTokens.tokensList, lIndices);
 		}
+
+		for (UINT i = 0; i < intTokens.count; ++i)
+		{
+			free(intTokens.tokensList[i]);
+		}
+
+		free(intTokens.tokensList);
 		return true;
 	};
 
 	while(!in.eof())
 	{
-		std::getline(in, currLine);
-		std::istringstream iss(currLine);
-		const std::vector<std::string> tokens{ std::istream_iterator<std::string>{iss},
-			std::istream_iterator<std::string>{} };
+		size_t tokensCount = 0;
 
-		const std::vector<int> indicesForThisFace;
-		const std::vector<std::string> faceVals;
+		std::getline(in, currLine);
+
+		char* cstr = new char[currLine.length() + 1];
+		strcpy(cstr, currLine.c_str());
+
+		char* p = std::strtok(cstr, " ");
+		while(p != nullptr)
+		{
+			tokensCount++;
+			p = std::strtok(nullptr, " ");
+		}
+
+		delete[] cstr;
+
+		Tokens tokens;
+		tokens.tokensList = static_cast<char**>(malloc(tokensCount * sizeof(*tokens.tokensList)));
+
+		if(tokens.tokensList)
+		{
+			cstr = new char[currLine.length() + 1];
+			strcpy(cstr, currLine.c_str());
+
+			p = std::strtok(cstr, " ");
+
+			for (UINT i = 0; p != nullptr; ++i)
+			{
+				tokens.tokensList[i] = static_cast<char*>(malloc(strlen(p) + 1));
+				if(tokens.tokensList[i])
+				{
+					strcpy(tokens.tokensList[i], p);
+					p = std::strtok(nullptr, " ");
+				}
+			}
+
+			delete[] cstr;
+		}
 
 		switch(currLine[0])
 		{
@@ -426,33 +538,80 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 		case '\n':
 		case '\r':
 		case '\0':
+
+			for (UINT i = 0; i < tokensCount; ++i)
+			{
+				free(tokens.tokensList[i]);
+			}
+
+			free(tokens.tokensList);
 			continue;
 
 		case 'v':
-			if(!parseVertex(tokens))
+			if(!parseVertex(tokens.tokensList, tokensCount))
 			{
+
+				for(UINT i = 0; i < tokensCount; ++i)
+				{
+					free(tokens.tokensList[i]);
+				}
+
+				free(tokens.tokensList);
+
 				return false;
 			}
 			break;
 
 		case 'f':
 			// parse face
-			if(!parseFace(tokens, indicesForThisFace, faceVals))
+
+			if(!parseFace(tokens.tokensList, tokensCount))
 			{
+				for (UINT i = 0; i < tokensCount; ++i)
+				{
+					free(tokens.tokensList[i]);
+				}
+
+				free(tokens.tokensList);
+
 				return false;
 			}
+
 			break;
 
 		case 'g':
 		case 'o':
 			if (!buildSubset())
+			{
+				for (UINT i = 0; i < tokensCount; ++i)
+				{
+					free(tokens.tokensList[i]);
+				}
+
+				free(tokens.tokensList);
+
 				return false;
+			}
 			break;
 
 		default:
 
+			for (UINT i = 0; i < tokensCount; ++i)
+			{
+				free(tokens.tokensList[i]);
+			}
+
+			free(tokens.tokensList);
+
 			return false;
 		}
+
+		for (UINT i = 0; i < tokensCount; ++i)
+		{
+			free(tokens.tokensList[i]);
+		}
+
+		free(tokens.tokensList);
 	}
 
 	if (!buildSubset())
@@ -473,6 +632,8 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 	auto hr = device->CreateBuffer(&vbd, &vInitData, &modelMesh.vertexBuffer);
 	if (FAILED(hr))
 		return false;
+
+	_modelCache.insert(std::make_pair(filename, modelMesh));
 
 	return true;
 }

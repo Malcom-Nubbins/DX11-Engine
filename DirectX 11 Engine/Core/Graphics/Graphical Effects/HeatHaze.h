@@ -6,7 +6,7 @@
 class HeatHaze
 {
 private:
-	SystemHandlers* _systemHandlers;
+	const SystemHandlers& _systemHandlers;
 
 	ID3D11PixelShader*	_heatHazePS;
 	ID3D11InputLayout*	_inputLayout;
@@ -21,16 +21,16 @@ private:
 	HeatHazeValues _values;
 
 public:
-	HeatHaze(SystemHandlers* systemHandlers);
+	HeatHaze(const SystemHandlers& systemHandlers);
 	~HeatHaze();
-	void Cleanup();
+	void Cleanup() const;
 
 	HRESULT Initialise(float width, float height);
 	void Resize(float width, float height);
 
-	void SetAsCurrentRenderTarget();
+	void SetAsCurrentRenderTarget() const;
 
-	void SetAsCurrentPixelShader();
+	void SetAsCurrentPixelShader() const;
 	ID3D11ShaderResourceView* GetTexture() const { return _renderTargetSRV; }
 
 	void Update(float deltaTime);

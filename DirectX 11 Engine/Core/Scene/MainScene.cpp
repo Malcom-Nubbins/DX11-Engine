@@ -1,8 +1,12 @@
 #include "MainScene.h"
 
-MainScene::MainScene(SystemHandlers* system, Timer* timer,
-	Player* player) 
+MainScene::MainScene(SystemHandlers& system, Timer& timer,
+	Player& player)
 	: Scene(system, timer, player)
+	, _sceneLight()
+	, _sceneFog()
+	, _basicLight(nullptr)
+	, _spotLight()
 {
 	_shadows = nullptr;
 	_skyGradient = nullptr;
@@ -68,7 +72,7 @@ void MainScene::Cleanup()
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
 
-	_sceneElements.clear();
+	_sceneElements.shrink_to_fit();
 }
 
 void MainScene::ResizeViews(float windowWidth, float windowHeight)
@@ -132,7 +136,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	matte.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.3f);
 
-	_systemHandlers->GetBufferClass()->CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
+	_systemHandlers.GetBufferClass()->CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
 
 	ObjectMesh planeMesh;
 	planeMesh.vertexBuffer = _planeVertexBuffer;
@@ -147,16 +151,16 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	//ObjectMesh plant1 = OBJLoader::Load(L"Core/Resources/Objects/plant1.obj", _d3dClass->GetDevice());
 
 	NewObjectMesh aircraftMesh, sphere, plant0, plant1;
-	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
-	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
-	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
-	ModelLoader::LoadModel(_systemHandlers->GetD3DClass()->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
+	ModelLoader::LoadModel(_systemHandlers.GetD3DClass()->GetDevice(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
+	ModelLoader::LoadModel(_systemHandlers.GetD3DClass()->GetDevice(), L"Core/Resources/Objects/spherex.obj", sphere, false);
+	ModelLoader::LoadModel(_systemHandlers.GetD3DClass()->GetDevice(), L"Core/Resources/Objects/plant0.obj", plant0, true);
+	ModelLoader::LoadModel(_systemHandlers.GetD3DClass()->GetDevice(), L"Core/Resources/Objects/plant1.obj", plant1, true);
 
-	_diamondSquareTerrain = new DiamondSquareTerrain(_systemHandlers->GetD3DClass());
+	_diamondSquareTerrain = new DiamondSquareTerrain(_systemHandlers.GetD3DClass());
 	_diamondSquareTerrain->SetTerrainValues(256, 256, 512);
 	_diamondSquareTerrain->GenerateTerrain();
 
-	_player->SetPlayerPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0.0f, -2.0f) + 2.0f, -2.0f));
+	_player.SetPlayerPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0.0f, -2.0f) + 2.0f, -2.0f));
 
 	ObjectMesh diamondSquareMesh;
 	diamondSquareMesh.vertexBuffer = _diamondSquareTerrain->GetVertexBuffer();
@@ -189,15 +193,15 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 	// Appearances
 	Appearance* groundAppearance = new Appearance(diamondSquareMesh, concrete);
-	groundAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetGroundColourTexture());
-	groundAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetGroundNormalMap());
-	groundAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetGroundDisplacementMap());
+	groundAppearance->SetColourTexture(_systemHandlers.GetTextureHandler()->GetGroundColourTexture());
+	groundAppearance->SetNormalMap(_systemHandlers.GetTextureHandler()->GetGroundNormalMap());
+	groundAppearance->SetDisplacementMap(_systemHandlers.GetTextureHandler()->GetGroundDisplacementMap());
 	//groundAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetGroundSpecularMap());
 
 	Appearance* underworldAppearance = new Appearance(planeMesh, shiny);
-	underworldAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetGroundColourTexture());
-	underworldAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetGroundNormalMap());
-	underworldAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetGroundDisplacementMap());
+	underworldAppearance->SetColourTexture(_systemHandlers.GetTextureHandler()->GetGroundColourTexture());
+	underworldAppearance->SetNormalMap(_systemHandlers.GetTextureHandler()->GetGroundNormalMap());
+	underworldAppearance->SetDisplacementMap(_systemHandlers.GetTextureHandler()->GetGroundDisplacementMap());
 
 	Appearance* sphereAppearance = new Appearance(sphere, charcoal);
 	//sphereAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetStoneTexture());
@@ -205,8 +209,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	//sphereAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetStoneDisplacementMap());
 
 	Appearance* aircraftAppearance = new Appearance(aircraftMesh, aircraftMat);
-	aircraftAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetAircraftTexture());
-	aircraftAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetAircraftNormalMap());
+	aircraftAppearance->SetColourTexture(_systemHandlers.GetTextureHandler()->GetAircraftTexture());
+	aircraftAppearance->SetNormalMap(_systemHandlers.GetTextureHandler()->GetAircraftNormalMap());
 	//aircraftAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetAircraftSpecularMap());
 	//aircraftAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetAircraftDisplacementMap());
 
@@ -235,8 +239,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			sphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 			element = new SceneElement("Spheres", sphereTransform, sphereAppearance);
-			float randomX = MathsHandler::RandomFloat(-128, 128);
-			float randomZ = MathsHandler::RandomFloat(-128, 128);
+			const float randomX = MathsHandler::RandomFloat(-128, 128);
+			const float randomZ = MathsHandler::RandomFloat(-128, 128);
 
 			element->GetTransform()->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ) + 2.0f, randomZ));
 			element->SetCastShadows(true);
@@ -256,7 +260,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		light.specular = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 		light.attenuation = XMFLOAT3(0.0f, 0.1f, 0.0f);
 		light.range = 25.0f;
-		light.position = _player->GetPlayerPosition();
+		light.position = _player.GetPlayerPosition();
 		//_pointLights.push_back(light);
 
 
@@ -330,8 +334,8 @@ void MainScene::Update(float deltaTime)
 {	
 	Scene::Update(deltaTime);
 
-	_spotLight.position = _player->GetPlayerPosition();
-	_spotLight.direction = _player->GetPlayerLookDirection();
+	_spotLight.position = _player.GetPlayerPosition();
+	_spotLight.direction = _player.GetPlayerLookDirection();
 	//_pointLights.at(0).Position = _camera->GetPosition();
 	
 
@@ -448,7 +452,7 @@ void MainScene::Update(float deltaTime)
 
 	_sceneLight.lightDirection = lightDir;
 	_shadows->UpdateLightDirection(_sceneLight.lightDirection);
-	_shadows->SetSceneCentre(_player->GetPlayerPosition());
+	_shadows->SetSceneCentre(_player.GetPlayerPosition());
 	_shadows->BuildShadowTransform();
 
 	for (SceneElement* element : _sceneElements)
@@ -460,12 +464,12 @@ void MainScene::Update(float deltaTime)
 		element->Update(deltaTime);
 	}
 
-	_skyGradient->SetSceneCentre(_player->GetPlayerPosition());
+	_skyGradient->SetSceneCentre(_player.GetPlayerPosition());
 	_skyGradient->Update(deltaTime);
 
 	_basicLight->CalculateLightColour(_sceneLight, _shadows->GetLightPosition().y, _sceneFog);
 
-	_heatHaze->Update(_timer->GameTime() / 2);
+	_heatHaze->Update(_timer.GameTime() / 2);
 
 	_diamondSquareTerrain->Update(deltaTime);
 
@@ -484,7 +488,7 @@ void MainScene::Update(float deltaTime)
 	std::wostringstream out;
 	out.precision(6);
 	out << L"Day: " << _currentDay << L" - Season: " << _seasonNames.find(_currentSeason)->second.c_str() << L" Time speed: " << _lightRotationAmount;
-	_systemHandlers->GetWindowClass()->SetWindowCaption(out.str().c_str());
+	_systemHandlers.GetWindowClass()->SetWindowCaption(out.str().c_str());
 }
 
 void MainScene::Draw()
@@ -494,19 +498,19 @@ void MainScene::Draw()
 
 	_basicLight->SetAsCurrentRenderTarget();
 	_basicLight->SetAsCurrentViewport();
-	_systemHandlers->GetRenderClass()->DisableRtvClearing();
-	_skyGradient->Render(*_player->GetCamera(), sunPos);
+	_systemHandlers.GetRenderClass()->DisableRtvClearing();
+	_skyGradient->Render(_player.GetCamera(), sunPos);
 
-	_systemHandlers->GetRenderClass()->EnableZBuffer();
+	_systemHandlers.GetRenderClass()->EnableZBuffer();
 	_shadows->Render(_sceneElements);
 
-	_basicLight->Render(*_player->GetCamera(), _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_shadows);
+	_basicLight->Render(_player.GetCamera(), _sceneLight, _pointLights, _spotLight, _sceneFog, _sceneElements, *_shadows);
 	
 	_renderToQuad->SetAsCurrentVertexShader();
 
 	if (_seasonNames.find(_currentSeason)->second == "Summer" || _seasonNames.find(_currentSeason)->second == "Winter")
 	{
-		_heatHaze->Render(_basicLight->GetRenderTargetSRV(), _systemHandlers->GetTextureHandler(), _seasonNames.find(_currentSeason)->second);
+		_heatHaze->Render(_basicLight->GetRenderTargetSRV(), _systemHandlers.GetTextureHandler(), _seasonNames.find(_currentSeason)->second);
 		_renderToQuad->Render(_heatHaze->GetTexture());
 	}
 	else

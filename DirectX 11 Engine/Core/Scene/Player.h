@@ -17,12 +17,12 @@ private:
 	void UpdatePlayerPosition(float delta);
 
 public:
-	void SetPlayerPosition(XMFLOAT3 pos);
+	void SetPlayerPosition(XMFLOAT3 pos) const;
 
-	XMFLOAT3 GetPlayerPosition() { return _camera->GetPosition(); }
-	XMFLOAT3 GetPlayerLookDirection() { return _camera->GetLookDirection(); }
+	XMFLOAT3 GetPlayerPosition() const { return _camera->GetPosition(); }
+	XMFLOAT3 GetPlayerLookDirection() const { return _camera->GetLookDirection(); }
 
-	Camera* GetCamera() { return _camera; }
+	Camera& GetCamera() const { return *_camera; }
 public:
 	Player(WindowClass* windowClass);
 	~Player();

@@ -65,7 +65,7 @@ void Player::UpdatePlayerPosition(float delta)
 	}
 }
 
-void Player::SetPlayerPosition(XMFLOAT3 pos)
+void Player::SetPlayerPosition(XMFLOAT3 pos) const
 {
 	_camera->SetPosition(pos);
 }

@@ -7,7 +7,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 	Timer _appTimer;
 	_appTimer.Reset();
 
-	Application* _fypApplication = new Application(&_appTimer);
+	Application* _fypApplication = new Application(_appTimer);
 	if (FAILED(_fypApplication->InitialiseApplication(hInstance, nCmdShow)))
 	{
 		return -1;

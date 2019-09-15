@@ -30,7 +30,7 @@ private:
 	float _currentCooldown;
 
 public:
-	TestingScene(SystemHandlers* systemHandlers, Timer* timer, Player* player);
+	TestingScene(const SystemHandlers& systemHandlers, const Timer& timer, const Player& player);
 	~TestingScene();
 
 	void Cleanup() override;

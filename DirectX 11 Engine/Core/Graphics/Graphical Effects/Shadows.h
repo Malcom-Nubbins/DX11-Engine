@@ -9,13 +9,13 @@ class Shadows
 {
 	struct BoundingSphere
 	{
-		BoundingSphere() : sphereRadius(0.0f), sphereCentre(0.0f, 0.0f, 0.0f) {}
+		BoundingSphere() : sphereCentre(0.0f, 0.0f, 0.0f), sphereRadius(0.0f) {}
 		XMFLOAT3 sphereCentre;
 		float sphereRadius;
 	};
 
 private:
-	SystemHandlers* _systemHandlers;
+	const SystemHandlers& _systemHandlers;
 	ID3D11VertexShader* _shadowDepthVS;
 	ID3D11InputLayout* _inputLayout;
 
@@ -35,7 +35,7 @@ private:
 	ID3D11Buffer* _shadowDepthMatrixBuffer;
 
 public:
-	Shadows(SystemHandlers* system);
+	Shadows(const SystemHandlers& system);
 	~Shadows();
 	void Cleanup();
 

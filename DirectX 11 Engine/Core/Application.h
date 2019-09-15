@@ -20,7 +20,7 @@
 class Application
 {
 public:
-	Application(Timer* timer);
+	Application(Timer& timer);
 	~Application();
 	void Cleanup();
 
@@ -44,7 +44,7 @@ private:
 
 	SystemHandlers* _systemHandlers;
 
-	Timer* _timer;
+	Timer& _timer;
 
 	MainScene* _mainScene;
 	TestingScene* _testingScene;
