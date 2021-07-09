@@ -1,9 +1,9 @@
 #include "BufferClass.h"
+#include "../../ApplicationNew.h"
 
-BufferClass::BufferClass(D3DClass* d3dClass) : _d3dClass(d3dClass)
+BufferClass::BufferClass() 
 {
 }
-
 
 BufferClass::~BufferClass()
 {
@@ -11,6 +11,7 @@ BufferClass::~BufferClass()
 
 HRESULT BufferClass::CreateGroundPlane(ID3D11Buffer ** vertexBuffer, ID3D11Buffer ** indexBuffer)
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 
 	D3D11_BUFFER_DESC bd;
@@ -33,7 +34,7 @@ HRESULT BufferClass::CreateGroundPlane(ID3D11Buffer ** vertexBuffer, ID3D11Buffe
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = planeVertices;
 
-	hr = _d3dClass->GetDevice()->CreateBuffer(&bd, &InitData, vertexBuffer);
+	hr = device->CreateBuffer(&bd, &InitData, vertexBuffer);
 
 	if (FAILED(hr))
 		return hr;
@@ -53,7 +54,7 @@ HRESULT BufferClass::CreateGroundPlane(ID3D11Buffer ** vertexBuffer, ID3D11Buffe
 
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = planeIndices;
-	hr = _d3dClass->GetDevice()->CreateBuffer(&bd, &InitData, indexBuffer);
+	hr = device->CreateBuffer(&bd, &InitData, indexBuffer);
 
 	if (FAILED(hr))
 		return hr;
@@ -62,6 +63,7 @@ HRESULT BufferClass::CreateGroundPlane(ID3D11Buffer ** vertexBuffer, ID3D11Buffe
 
 HRESULT BufferClass::CreateQuadDynamic(ID3D11Buffer** vertexBuffer, ID3D11Buffer** indexBuffer)
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 	SimpleQuad vertices[] =
 	{
@@ -82,7 +84,7 @@ HRESULT BufferClass::CreateQuadDynamic(ID3D11Buffer** vertexBuffer, ID3D11Buffer
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = vertices;
 
-	hr = _d3dClass->GetDevice()->CreateBuffer(&bd, &InitData, vertexBuffer);
+	hr = device->CreateBuffer(&bd, &InitData, vertexBuffer);
 
 	if (FAILED(hr))
 		return hr;
@@ -103,7 +105,7 @@ HRESULT BufferClass::CreateQuadDynamic(ID3D11Buffer** vertexBuffer, ID3D11Buffer
 
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = indices;
-	hr = _d3dClass->GetDevice()->CreateBuffer(&bd, &InitData, indexBuffer);
+	hr = device->CreateBuffer(&bd, &InitData, indexBuffer);
 
 	if (FAILED(hr))
 		return hr;
@@ -113,6 +115,8 @@ HRESULT BufferClass::CreateQuadDynamic(ID3D11Buffer** vertexBuffer, ID3D11Buffer
 
 HRESULT BufferClass::CreateQuad(ID3D11Buffer ** vertexBuffer, ID3D11Buffer ** indexBuffer)
 {
+	auto device = ApplicationNew::Get().GetDevice();
+
 	HRESULT hr;
 	SimpleQuad vertices[] =
 	{
@@ -133,7 +137,7 @@ HRESULT BufferClass::CreateQuad(ID3D11Buffer ** vertexBuffer, ID3D11Buffer ** in
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = vertices;
 
-	hr = _d3dClass->GetDevice()->CreateBuffer(&bd, &InitData, vertexBuffer);
+	hr = device->CreateBuffer(&bd, &InitData, vertexBuffer);
 
 	if (FAILED(hr))
 		return hr;
@@ -154,7 +158,7 @@ HRESULT BufferClass::CreateQuad(ID3D11Buffer ** vertexBuffer, ID3D11Buffer ** in
 
 	ZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = indices;
-	hr = _d3dClass->GetDevice()->CreateBuffer(&bd, &InitData, indexBuffer);
+	hr = device->CreateBuffer(&bd, &InitData, indexBuffer);
 
 	if (FAILED(hr))
 		return hr;
@@ -174,7 +178,7 @@ void BufferClass::SetVertexShaderBuffers(ID3D11Buffer** buffer)
 
 void BufferClass::SetVertexShaderBuffers(ID3D11Buffer** buffer, int index)
 {
-	_d3dClass->GetContext()->VSSetConstantBuffers(index, 1, buffer);
+	ApplicationNew::Get().GetContext()->VSSetConstantBuffers(index, 1, buffer);
 }
 
 void BufferClass::SetHullShaderBuffers(ID3D11Buffer ** buffer)
@@ -184,7 +188,7 @@ void BufferClass::SetHullShaderBuffers(ID3D11Buffer ** buffer)
 
 void BufferClass::SetHullShaderBuffers(ID3D11Buffer ** buffer, int index)
 {
-	_d3dClass->GetContext()->HSSetConstantBuffers(index, 1, buffer);
+	ApplicationNew::Get().GetContext()->HSSetConstantBuffers(index, 1, buffer);
 }
 
 void BufferClass::SetDomainShaderBuffers(ID3D11Buffer ** buffer)
@@ -194,7 +198,7 @@ void BufferClass::SetDomainShaderBuffers(ID3D11Buffer ** buffer)
 
 void BufferClass::SetDomainShaderBuffers(ID3D11Buffer ** buffer, int index)
 {
-	_d3dClass->GetContext()->DSSetConstantBuffers(index, 1, buffer);
+	ApplicationNew::Get().GetContext()->DSSetConstantBuffers(index, 1, buffer);
 }
 
 void BufferClass::SetPixelShaderBuffers(ID3D11Buffer** buffer)
@@ -204,7 +208,7 @@ void BufferClass::SetPixelShaderBuffers(ID3D11Buffer** buffer)
 
 void BufferClass::SetPixelShaderBuffers(ID3D11Buffer** buffer, int index)
 {
-	_d3dClass->GetContext()->PSSetConstantBuffers(index, 1, buffer);
+	ApplicationNew::Get().GetContext()->PSSetConstantBuffers(index, 1, buffer);
 }
 
 

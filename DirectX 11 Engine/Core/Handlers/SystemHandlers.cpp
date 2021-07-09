@@ -28,7 +28,7 @@ void SystemHandlers::Cleanup()
 	delete _d3dClass;
 	_d3dClass = nullptr;
 
-	_windowClass->Cleanup();
+	/*_windowClass->Cleanup();
 	delete _windowClass;
-	_windowClass = nullptr;
+	_windowClass = nullptr;*/
 }

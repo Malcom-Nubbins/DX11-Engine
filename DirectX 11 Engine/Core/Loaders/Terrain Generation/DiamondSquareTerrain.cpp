@@ -1,6 +1,7 @@
 #include "DiamondSquareTerrain.h"
+#include "../../ApplicationNew.h"
 
-DiamondSquareTerrain::DiamondSquareTerrain(D3DClass* d3dClass) : _d3dClass(d3dClass)
+DiamondSquareTerrain::DiamondSquareTerrain()
 {
 	_gridVertices = std::vector<SimpleVertex>();
 	_vertexBuffer = nullptr;
@@ -231,6 +232,7 @@ void DiamondSquareTerrain::GenerateTerrain()
 
 HRESULT DiamondSquareTerrain::CreateBuffers()
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 	// Vertex Buffer
 	_gridVertices.resize(_gridMesh->Vertices.size());
@@ -257,7 +259,7 @@ HRESULT DiamondSquareTerrain::CreateBuffers()
 	ZeroMemory(&InitGridData, sizeof(InitGridData));
 	InitGridData.pSysMem = &_gridVertices[0];
 
-	hr = _d3dClass->GetDevice()->CreateBuffer(&vbd, &InitGridData, &_vertexBuffer);
+	hr = device->CreateBuffer(&vbd, &InitGridData, &_vertexBuffer);
 	if (FAILED(hr))
 	{
 		return hr;
@@ -278,7 +280,7 @@ HRESULT DiamondSquareTerrain::CreateBuffers()
 	ZeroMemory(&InitGridIndexData, sizeof(InitGridIndexData));
 	InitGridIndexData.pSysMem = &_gridIndices[0];
 
-	hr = _d3dClass->GetDevice()->CreateBuffer(&ibd, &InitGridIndexData, &_indexBuffer);
+	hr = device->CreateBuffer(&ibd, &InitGridIndexData, &_indexBuffer);
 	if (FAILED(hr))
 		return hr;
 
@@ -364,8 +366,8 @@ void DiamondSquareTerrain::ShadowDraw(ShadowDepthMatrixBuffer mb, ID3D11Buffer *
 		if (_terrainGO->CanCastShadows())
 		{
 			mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
-			_d3dClass->GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-			_terrainGO->Draw(_d3dClass->GetContext());
+			ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
+			_terrainGO->Draw(ApplicationNew::Get().GetContext().Get());
 		}
 	}
 }
@@ -374,6 +376,9 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 {
 	if (_finishedBuilding)
 	{
+		auto context = ApplicationNew::Get().GetContext();
+
+
 		Transform* transform = _terrainGO->GetTransform();
 		Appearance* appearance = _terrainGO->GetAppearance();
 
@@ -391,7 +396,7 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 		if (appearance->HasColourTexture())
 		{
 			texture = appearance->GetColourTex();
-			_d3dClass->GetContext()->PSSetShaderResources(0, 1, &texture);
+			context->PSSetShaderResources(0, 1, &texture);
 			cb.useColourTex = 1.0f;
 		}
 		else
@@ -403,7 +408,7 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 		{
 			cb.useBumpMap = 1.0f;
 			texture = appearance->GetNormalMap();
-			_d3dClass->GetContext()->PSSetShaderResources(2, 1, &texture);
+			context->PSSetShaderResources(2, 1, &texture);
 		}
 		else
 		{
@@ -420,9 +425,9 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 		}
 
 		// Update constant buffer
-		_d3dClass->GetContext()->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
-		_d3dClass->GetContext()->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
-		_terrainGO->Draw(_d3dClass->GetContext());
+		context->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
+		context->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
+		_terrainGO->Draw(context.Get());
 	}
 
 }

@@ -1,51 +1,49 @@
 #pragma once
 #include "../Globals/stdafx.h"
-#include "../Handlers/System Handlers/WindowClass.h"
-#include "../Handlers/System Handlers/InputHandler.h"
 
 using namespace DirectX;
 
 class Camera
 {
 private:
-	WindowClass* _windowClass;
 
-	XMFLOAT3 _eye;
+	XMFLOAT3 m_Eye;
 
-	XMFLOAT3 _right;
-	XMFLOAT3 _up; 
-	XMFLOAT3 _at; 
+	XMFLOAT3 m_Right;
+	XMFLOAT3 m_Up; 
+	XMFLOAT3 m_At; 
 
-	float _nearZ;
-	float _farZ;
-	float _aspect;
-	float _fovY;
-	float _nearWindowHeight;
-	float _nearWindowWidth;
+	float m_Near;
+	float m_Far;
+	float m_Aspect;
+	float m_FovY;
 
-	XMFLOAT4X4 _view;
-	XMFLOAT4X4 _defaultView;
+	XMFLOAT4X4 m_View;
+	XMFLOAT4X4 m_DefaultView;
 
-	XMFLOAT4X4 _perspectiveProj;
-	XMFLOAT4X4 _othographicProj;
+	XMFLOAT4X4 m_PerspectiveProj;
+	XMFLOAT4X4 m_OthographicProj;
 
-	bool _orthographicMode;
+	bool m_OrthographicMode;
 public:
-	Camera(WindowClass* windowClass);
-	Camera(const Camera& copy);
+	Camera(XMFLOAT3 eye, XMFLOAT3 right, XMFLOAT3 up, XMFLOAT3 at, 
+		float nearZ, float farZ, float aspect, float fov, bool orthographic = false);
 	~Camera();
 
-	XMFLOAT4X4 GetView() const { return _view; }
-	XMFLOAT4X4 GetDefaultView() const { return _defaultView; }
-	XMFLOAT4X4 GetPerspectiveProj() const { return _perspectiveProj; }
-	XMFLOAT4X4 GetOthographicProj() const { return _othographicProj; }
-	XMFLOAT3 GetPosition() const { return _eye; }
-	XMFLOAT3 GetLookDirection()const { return _at; }
+	XMFLOAT4X4& GetView() { return m_View; }
+	XMFLOAT4X4& GetDefaultView() { return m_DefaultView; }
+	XMFLOAT4X4& GetPerspectiveProj() { return m_PerspectiveProj; }
+	XMFLOAT4X4& GetOthographicProj() { return m_OthographicProj; }
+	XMFLOAT3 GetPosition() const { return m_Eye; }
+	XMFLOAT3 GetLookDirection()const { return m_At; }
 
 	void SetPerspective(bool usePerspective);
-	void SetLens(float fov, float width, float height, float nearZ, float farZ);
-	void LookAt(XMFLOAT3 right, XMFLOAT3 at, XMFLOAT3 up);
+	void SetLens();
+	void LookAt();
 	void SetPosition(XMFLOAT3 position);
+
+	void SetFOV(float fov);
+	void Reset(float fov, float nearZ, float farZ, float aspect);
 
 	void Strafe(float amount);
 	void Walk(float amount);

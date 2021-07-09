@@ -26,7 +26,7 @@ struct TerrainVertex
 	XMFLOAT3 tangent;
 	XMFLOAT3 binormal;
 
-	TerrainVertex() {}
+	TerrainVertex() : binormal(), normal(), position(), tangent(), texCoord() {}
 	TerrainVertex(const XMFLOAT3& pos, const XMFLOAT3& norm, const XMFLOAT3& tangent, const XMFLOAT3& binormal, const XMFLOAT2& tex) : position(pos), normal(norm), texCoord(tex), tangent(tangent), binormal(binormal) {}
 	TerrainVertex(const float px, const float py, const float pz,
 	              const float nx, const float ny, const float nz,
@@ -67,6 +67,11 @@ struct SimpleQuad
 
 struct NewObjectMesh
 {
+	NewObjectMesh() 
+		: vertexBuffer(nullptr)
+		, numOfSubsets(0) 
+	{}
+
 	VertexBuffer* vertexBuffer;
 	UINT numOfSubsets;
 	std::vector<Subset> subsets;
@@ -74,6 +79,12 @@ struct NewObjectMesh
 
 struct ObjectMesh
 {
+	ObjectMesh() : vertexBuffer(nullptr)
+		, indexBuffer(nullptr)
+		, vertexBufferStride(0)
+		, vertexBufferOffset(0)
+	{}
+
 	VertexBuffer* vertexBuffer;
 	IndexBuffer* indexBuffer;
 

@@ -5,11 +5,9 @@
 class ShaderClass
 {
 private:
-	D3DClass * _d3dClass;
-
-	ID3D11SamplerState * _linear = nullptr;
-	ID3D11SamplerState * _anisotropic = nullptr;
-	ID3D11SamplerState* _shadowSamplerComparison = nullptr;
+	static ID3D11SamplerState * m_SSLinear;
+	static ID3D11SamplerState * m_SSAnisotropic;
+	static ID3D11SamplerState* m_SSShadowSamplerComparison;
 	/*ID3D11SamplerState * _DepthNormal = nullptr;
 	ID3D11SamplerState * _RandomVec = nullptr;
 	ID3D11SamplerState* _SSAOBlurSampler = nullptr;
@@ -17,25 +15,25 @@ private:
 	ID3D11SamplerState* _ScreenBlurSampler = nullptr;*/
 
 private:
-	HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
-	HRESULT CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements, ID3D11InputLayout** inputLayout, ID3DBlob* vsBlob);
+	static HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
+	static HRESULT CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements, ID3D11InputLayout** inputLayout, ID3DBlob* vsBlob);
 public:
-	ShaderClass(D3DClass* d3dClass);
+	ShaderClass();
 	~ShaderClass();
 	void Cleanup();
 
-	HRESULT CreateVertexShader(WCHAR* shaderFilename, ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements);
-	HRESULT CreateHullShader(WCHAR* shaderFilename, ID3D11HullShader** hullShader);
-	HRESULT CreateDomainShader(WCHAR* shaderFilename, ID3D11DomainShader** domainShader);
-	HRESULT CreatePixelShader(WCHAR* shaderFilename, ID3D11PixelShader** pixelShader);
+	static HRESULT CreateVertexShader(WCHAR* shaderFilename, ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements);
+	static HRESULT CreateHullShader(WCHAR* shaderFilename, ID3D11HullShader** hullShader);
+	static HRESULT CreateDomainShader(WCHAR* shaderFilename, ID3D11DomainShader** domainShader);
+	static HRESULT CreatePixelShader(WCHAR* shaderFilename, ID3D11PixelShader** pixelShader);
 
-	void SetShadersAndInputLayout(ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout);
-	void SetHullAndDomainShaders(ID3D11HullShader* hullShader, ID3D11DomainShader* domainShader);
+	static void SetShadersAndInputLayout(ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout);
+	static void SetHullAndDomainShaders(ID3D11HullShader* hullShader, ID3D11DomainShader* domainShader);
 
-	void UnbindTesselationStages();
+	static void UnbindTesselationStages();
 
 	HRESULT CreateSamplerStates();
-	ID3D11SamplerState** GetSamplerState(SAMPLER_TYPE type);
+	static ID3D11SamplerState** GetSamplerState(SAMPLER_TYPE type);
 
 };
 

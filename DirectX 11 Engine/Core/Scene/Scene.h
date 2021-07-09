@@ -7,18 +7,16 @@
 class Scene
 {
 protected:
-	const SystemHandlers& _systemHandlers;
-	const Player& _player;
-
-	const Timer& _timer;
 	DirectionalLight _sceneLight;
 	XMFLOAT2 _lastMousePos;
+	Player* m_Player;
 
 public:
-	Scene(const SystemHandlers& systemHandlers, const Timer& timer, const Player& player);
+	Scene(Player& player);
 	virtual ~Scene();
 	virtual void Cleanup() = 0;
 
+	virtual void PreResizeViews() = 0;
 	virtual void ResizeViews(float windowWidth, float windowHeight) = 0;
 
 	virtual void InitialiseScene(float windowWidth, float windowHeight) = 0;

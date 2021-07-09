@@ -1,14 +1,16 @@
 #include "TextureHandler.h"
 
-TextureHandler::TextureHandler(D3DClass* d3dClass) : _d3dClass(d3dClass), _groundDisplacementMap(nullptr),
-                                                     _groundSpecularMap(nullptr), _stoneTex(nullptr),
-                                                     _stoneBumpMap(nullptr), _stoneDisplacementMap(nullptr),
-                                                     _distortionMap(nullptr), _snowTexture(nullptr),
-                                                     _aircraftTexture(nullptr), _aircraftNormalMap(nullptr),
-                                                     _aircraftSpecularMap(nullptr), _aircraftDisplacementMap(nullptr)
+std::map<char const*, ID3D11ShaderResourceView*> TextureHandler::m_Textures;
+
+TextureHandler::TextureHandler(ID3D11Device* device, ID3D11DeviceContext* context) : m_Device(device), m_Context(context), m_GroundDisplacementMap(nullptr),
+                                                     m_GroundSpecularMap(nullptr), m_stoneTex(nullptr),
+                                                     m_stoneBumpMap(nullptr), m_stoneDisplacementMap(nullptr),
+                                                     m_distortionMap(nullptr), m_snowTexture(nullptr),
+                                                     m_aircraftTexture(nullptr), m_aircraftNormalMap(nullptr),
+                                                     m_aircraftSpecularMap(nullptr), m_aircraftDisplacementMap(nullptr)
 {
-	_groundColourTex = nullptr;
-	_groundNormalMap = nullptr;
+	m_GroundColourTex = nullptr;
+	m_GroundNormalMap = nullptr;
 }
 
 TextureHandler::~TextureHandler()
@@ -16,30 +18,58 @@ TextureHandler::~TextureHandler()
 
 void TextureHandler::Cleanup()
 {
-	_groundColourTex->Release();
-	_groundNormalMap->Release();
+	m_Textures.clear();
+
+	m_GroundColourTex->Release();
+	m_GroundNormalMap->Release();
 }
 
 void TextureHandler::LoadAllTextures()
 {
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/stone.dds", nullptr, &_groundColourTex);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/stone_NRM.dds", nullptr, &_groundNormalMap);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/stone_DISP.dds", nullptr, &_groundDisplacementMap);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/stone_SPEC.dds", nullptr, &_groundSpecularMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/stone.dds", nullptr, &m_GroundColourTex);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/stone_NRM.dds", nullptr, &m_GroundNormalMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/stone_DISP.dds", nullptr, &m_GroundDisplacementMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/stone_SPEC.dds", nullptr, &m_GroundSpecularMap);
 
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/concrete_floor_2.dds", nullptr, &_stoneTex);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/concrete_floor_2_NRM.dds", nullptr, &_stoneBumpMap);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/concrete_floor_2_DISP.dds", nullptr, &_stoneDisplacementMap);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/concrete_floor_SPEC.dds", nullptr, &_stoneSpecularMap);
+	m_Textures.emplace(std::make_pair("StoneColour", m_GroundColourTex));
+	m_Textures.emplace(std::make_pair("StoneNormal", m_GroundNormalMap));
+	m_Textures.emplace(std::make_pair("StoneDisplacement", m_GroundDisplacementMap));
+	m_Textures.emplace(std::make_pair("StoneSpecular", m_GroundSpecularMap));
 
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/distortionMap.dds", nullptr, &_distortionMap);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/snow.dds", nullptr, &_snowTexture);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/concrete_floor_2.dds", nullptr, &m_stoneTex);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/concrete_floor_2_NRM.dds", nullptr, &m_stoneBumpMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/concrete_floor_2_DISP.dds", nullptr, &m_stoneDisplacementMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/concrete_floor_SPEC.dds", nullptr, &m_stoneSpecularMap);
 
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_COLOR.dds", nullptr, &_aircraftTexture);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_NRM_new.dds", nullptr, &_aircraftNormalMap);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_SPEC_new.dds", nullptr, &_aircraftSpecularMap);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/Hercules_DISP_new.dds", nullptr, &_aircraftDisplacementMap);
+	m_Textures.emplace(std::make_pair("ConcreteColour", m_stoneTex));
+	m_Textures.emplace(std::make_pair("ConcreteNormal", m_stoneBumpMap));
+	m_Textures.emplace(std::make_pair("ConcreteDisplacement", m_stoneDisplacementMap));
+	m_Textures.emplace(std::make_pair("ConcreteSpecular", m_stoneSpecularMap));
 
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/metal_floor.dds", nullptr, &_metalFloorColourTex);
-	CreateDDSTextureFromFile(_d3dClass->GetDevice(), L"Core/Resources/metal_floor_NRM.dds", nullptr, &_metalFloorNormalMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/distortionMap.dds", nullptr, &m_distortionMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/snow.dds", nullptr, &m_snowTexture);
+
+	m_Textures.emplace(std::make_pair("DistortionMap", m_distortionMap));
+	m_Textures.emplace(std::make_pair("Snow", m_snowTexture));
+
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/Hercules_COLOR.dds", nullptr, &m_aircraftTexture);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/Hercules_NRM_new.dds", nullptr, &m_aircraftNormalMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/Hercules_SPEC_new.dds", nullptr, &m_aircraftSpecularMap);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/Hercules_DISP_new.dds", nullptr, &m_aircraftDisplacementMap);
+
+	m_Textures.emplace(std::make_pair("AircraftColour", m_aircraftTexture));
+	m_Textures.emplace(std::make_pair("AircraftNormal", m_aircraftNormalMap));
+	m_Textures.emplace(std::make_pair("AircraftSpecular", m_aircraftSpecularMap));
+	m_Textures.emplace(std::make_pair("AircraftDisplacement", m_aircraftDisplacementMap));
+
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/metal_floor.dds", nullptr, &m_metalFloorColourTex);
+	CreateDDSTextureFromFile(m_Device.Get(), L"Core/Resources/metal_floor_NRM.dds", nullptr, &m_metalFloorNormalMap);
+
+	m_Textures.emplace(std::make_pair("MetalColour", m_metalFloorColourTex));
+	m_Textures.emplace(std::make_pair("MetalNormal", m_metalFloorNormalMap));
+}
+
+ID3D11ShaderResourceView* TextureHandler::GetTextureByName(char const* name)
+{
+	return m_Textures[name];
 }

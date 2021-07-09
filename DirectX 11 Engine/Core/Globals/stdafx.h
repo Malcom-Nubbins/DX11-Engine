@@ -8,6 +8,22 @@
 #include <directxmath.h>
 #include <directxcolors.h>
 
+#include <dxgi1_6.h>
+
+#include <wrl.h>
+
+using namespace Microsoft::WRL;
+
+#if defined(min)
+#undef min
+#endif
+
+#if defined(max)
+#undef max
+#endif
+
+#include <algorithm>
+
 enum SAMPLER_TYPE
 {
 	LINEAR,
@@ -40,3 +56,19 @@ enum SYSTEM_HANDLER
 
 typedef ID3D11Buffer VertexBuffer;
 typedef ID3D11Buffer IndexBuffer;
+
+inline void ThrowIfFailed(HRESULT const hr)
+{
+	if (FAILED(hr))
+	{
+		throw std::exception();
+	}
+}
+
+inline void ThrowIfFailedBool(BOOL const inResult)
+{
+	if (!inResult)
+	{
+		throw std::exception();
+	}
+}

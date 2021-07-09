@@ -1,6 +1,11 @@
 #include "ShaderClass.h"
+#include "../../ApplicationNew.h"
 
-ShaderClass::ShaderClass(D3DClass* d3dClass) : _d3dClass(d3dClass)
+ID3D11SamplerState* ShaderClass::m_SSLinear(nullptr);
+ID3D11SamplerState* ShaderClass::m_SSAnisotropic(nullptr);
+ID3D11SamplerState* ShaderClass::m_SSShadowSamplerComparison(nullptr);
+
+ShaderClass::ShaderClass()
 {
 }
 
@@ -11,13 +16,14 @@ ShaderClass::~ShaderClass()
 
 void ShaderClass::Cleanup()
 {
-	if (_linear) _linear->Release();
-	if (_anisotropic) _anisotropic->Release();
-	if (_shadowSamplerComparison) _shadowSamplerComparison->Release();
+	if (m_SSLinear) m_SSLinear->Release();
+	if (m_SSAnisotropic) m_SSAnisotropic->Release();
+	if (m_SSShadowSamplerComparison) m_SSShadowSamplerComparison->Release();
 }
 
 HRESULT ShaderClass::CreateVertexShader(WCHAR * shaderFilename, ID3D11VertexShader** vertexShader, ID3D11InputLayout** inputLayout, D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements)
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 	ID3DBlob* vsBlob;
 
@@ -30,7 +36,7 @@ HRESULT ShaderClass::CreateVertexShader(WCHAR * shaderFilename, ID3D11VertexShad
 	}
 
 	// Create the vertex shader
-	hr = _d3dClass->GetDevice()->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, vertexShader);
+	hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, vertexShader);
 
 	if (FAILED(hr))
 	{
@@ -47,6 +53,7 @@ HRESULT ShaderClass::CreateVertexShader(WCHAR * shaderFilename, ID3D11VertexShad
 
 HRESULT ShaderClass::CreateHullShader(WCHAR * shaderFilename, ID3D11HullShader ** hullShader)
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 	ID3DBlob* hsBlob = nullptr;
 	hr = CompileShaderFromFile(shaderFilename, "main", "hs_5_0", &hsBlob);
@@ -59,7 +66,7 @@ HRESULT ShaderClass::CreateHullShader(WCHAR * shaderFilename, ID3D11HullShader *
 	}
 
 	// Create the pixel shader
-	hr = _d3dClass->GetDevice()->CreateHullShader(hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, hullShader);
+	hr = device->CreateHullShader(hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, hullShader);
 	hsBlob->Release();
 
 	if (FAILED(hr))
@@ -70,6 +77,7 @@ HRESULT ShaderClass::CreateHullShader(WCHAR * shaderFilename, ID3D11HullShader *
 
 HRESULT ShaderClass::CreateDomainShader(WCHAR * shaderFilename, ID3D11DomainShader ** domainShader)
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 	ID3DBlob* dsBlob = nullptr;
 	hr = CompileShaderFromFile(shaderFilename, "main", "ds_5_0", &dsBlob);
@@ -82,7 +90,7 @@ HRESULT ShaderClass::CreateDomainShader(WCHAR * shaderFilename, ID3D11DomainShad
 	}
 
 	// Create the pixel shader
-	hr = _d3dClass->GetDevice()->CreateDomainShader(dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, domainShader);
+	hr = device->CreateDomainShader(dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, domainShader);
 	dsBlob->Release();
 
 	if (FAILED(hr))
@@ -93,6 +101,7 @@ HRESULT ShaderClass::CreateDomainShader(WCHAR * shaderFilename, ID3D11DomainShad
 
 HRESULT ShaderClass::CreatePixelShader(WCHAR * shaderFilename, ID3D11PixelShader ** pixelShader)
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 	ID3DBlob* psBlob = nullptr;
 	hr = CompileShaderFromFile(shaderFilename, "main", "ps_5_0", &psBlob);
@@ -105,7 +114,7 @@ HRESULT ShaderClass::CreatePixelShader(WCHAR * shaderFilename, ID3D11PixelShader
 	}
 
 	// Create the pixel shader
-	hr = _d3dClass->GetDevice()->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, pixelShader);
+	hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, pixelShader);
 	psBlob->Release();
 
 	if (FAILED(hr))
@@ -116,9 +125,10 @@ HRESULT ShaderClass::CreatePixelShader(WCHAR * shaderFilename, ID3D11PixelShader
 
 HRESULT ShaderClass::CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements, ID3D11InputLayout** inputLayout, ID3DBlob* vsBlob)
 {
+	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
 
-	hr = _d3dClass->GetDevice()->CreateInputLayout(layout, numElements, vsBlob->GetBufferPointer(),
+	hr = device->CreateInputLayout(layout, numElements, vsBlob->GetBufferPointer(),
 		vsBlob->GetBufferSize(), inputLayout);
 
 	if (FAILED(hr))
@@ -131,29 +141,33 @@ HRESULT ShaderClass::CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT n
 
 void ShaderClass::SetShadersAndInputLayout(ID3D11VertexShader * vertexShader, ID3D11PixelShader * pixelShader, ID3D11InputLayout * inputLayout)
 {
+	auto context = ApplicationNew::Get().GetContext();
 	if(inputLayout != nullptr)
-		_d3dClass->GetContext()->IASetInputLayout(inputLayout);
+		context->IASetInputLayout(inputLayout);
 
 	if(vertexShader != nullptr)
-		_d3dClass->GetContext()->VSSetShader(vertexShader, nullptr, 0);
+		context->VSSetShader(vertexShader, nullptr, 0);
 
 	if (pixelShader != nullptr)
-		_d3dClass->GetContext()->PSSetShader(pixelShader, nullptr, 0);
+		context->PSSetShader(pixelShader, nullptr, 0);
 }
 
 void ShaderClass::SetHullAndDomainShaders(ID3D11HullShader * hullShader, ID3D11DomainShader * domainShader)
 {
+	auto context = ApplicationNew::Get().GetContext();
+
 	if (hullShader != nullptr)
-		_d3dClass->GetContext()->HSSetShader(hullShader, nullptr, 0);
+		context->HSSetShader(hullShader, nullptr, 0);
 
 	if (domainShader != nullptr)
-		_d3dClass->GetContext()->DSSetShader(domainShader, nullptr, 0);
+		context->DSSetShader(domainShader, nullptr, 0);
 }
 
 void ShaderClass::UnbindTesselationStages()
 {
-	_d3dClass->GetContext()->HSSetShader(nullptr, nullptr, 0);
-	_d3dClass->GetContext()->DSSetShader(nullptr, nullptr, 0);
+	auto context = ApplicationNew::Get().GetContext();
+	context->HSSetShader(nullptr, nullptr, 0);
+	context->DSSetShader(nullptr, nullptr, 0);
 }
 
 HRESULT ShaderClass::CompileShaderFromFile(WCHAR * filename, LPCSTR entrypoint, LPCSTR shaderModel, ID3DBlob ** outBlob)
@@ -190,6 +204,8 @@ HRESULT ShaderClass::CompileShaderFromFile(WCHAR * filename, LPCSTR entrypoint, 
 
 HRESULT ShaderClass::CreateSamplerStates()
 {
+	auto device = ApplicationNew::Get().GetDevice();
+
 	HRESULT hr;
 	D3D11_SAMPLER_DESC sampDesc;
 	ZeroMemory(&sampDesc, sizeof(sampDesc));
@@ -202,7 +218,7 @@ HRESULT ShaderClass::CreateSamplerStates()
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = _d3dClass->GetDevice()->CreateSamplerState(&sampDesc, &_linear);
+	hr = device->CreateSamplerState(&sampDesc, &m_SSLinear);
 	if (FAILED(hr))
 		return hr;
 
@@ -215,7 +231,7 @@ HRESULT ShaderClass::CreateSamplerStates()
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = _d3dClass->GetDevice()->CreateSamplerState(&sampDesc, &_anisotropic);
+	hr = device->CreateSamplerState(&sampDesc, &m_SSAnisotropic);
 	if (FAILED(hr))
 		return hr;
 
@@ -230,7 +246,7 @@ HRESULT ShaderClass::CreateSamplerStates()
 	sampDesc.BorderColor[3] = 1e5f;
 	sampDesc.MinLOD = 0;
 	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	hr = _d3dClass->GetDevice()->CreateSamplerState(&sampDesc, &_shadowSamplerComparison);
+	hr = device->CreateSamplerState(&sampDesc, &m_SSShadowSamplerComparison);
 	if (FAILED(hr))
 		return hr;
 
@@ -242,12 +258,12 @@ ID3D11SamplerState ** ShaderClass::GetSamplerState(SAMPLER_TYPE type)
 	switch (type)
 	{
 	case LINEAR:
-		return &_linear;
+		return &m_SSLinear;
 	case ANISOTROPIC:
-		return &_anisotropic;
+		return &m_SSAnisotropic;
 	case SHADOW:
-		return &_shadowSamplerComparison;
+		return &m_SSShadowSamplerComparison;
 	default:
-		return &_linear;
+		return &m_SSLinear;
 	}
 }

@@ -1,6 +1,8 @@
 ﻿#include "Player.h"
+#include "../DX11Engine.h"
+#include "../ApplicationNew.h"
 
-Player::Player(WindowClass* windowClass) : _camera(nullptr), _windowClass(windowClass)
+Player::Player() : m_Camera(nullptr), _windowClass(nullptr)
 {
 }
 
@@ -10,71 +12,99 @@ Player::~Player()
 
 void Player::Cleanup()
 {
-	delete _camera;
-	_camera = nullptr;
+	delete m_Camera;
+	m_Camera = nullptr;
 }
 
 void Player::ResetPlayerCamera(float windowWidth, float windowHeight) const
 {
-	if(_camera != nullptr)
-		_camera->SetLens(XM_PIDIV4, windowWidth, windowHeight, 0.01f, 1000.0f);
+	if (m_Camera != nullptr)
+		m_Camera->Reset((85.0f / 180.0f) * XM_PI, 0.01f, 1000.0f, (windowWidth / windowHeight));
 }
 
 void Player::Initialise()
 {
-	_camera = new Camera(_windowClass);
-	_camera->SetLens(XM_PIDIV4, _windowClass->GetWindowWidth(), _windowClass->GetWindowHeight(), 0.01f, 1000.0f);
-	_camera->LookAt(XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f));
-	_camera->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
+	DX11Engine const& engine = DX11Engine::Get();
+
+	float aspect = static_cast<float>(engine.GetClientWidth()) / static_cast<float>(engine.GetClientHeight());
+
+	m_Camera = new Camera(
+		XMFLOAT3(0.0f, 1.0f, 0.0f), 
+		XMFLOAT3(1.0f, 0.0f, 0.0f), 
+		XMFLOAT3(0.0f, 1.0f, 0.0f),
+		XMFLOAT3(0.0f, 0.0f, 1.0f),
+		0.01f, 1000.0f,
+		aspect, (85.0f / 180.0f) * XM_PI);
 }
 
-void Player::UpdatePlayerLookDirection(float delta)
+void Player::OnMouseButtonDown(MouseButtonEvent& e)
 {
-	POINT state = InputHandler::GetMousePos(_windowClass->GetHWND());
-
-	auto yaw = (state.x - _windowClass->GetScreenCentre().x) * _lookSpeed;
-	auto pitch = (state.y - _windowClass->GetScreenCentre().y) * _lookSpeed;
-
-	_camera->Pitch(pitch * delta);
-	_camera->Yaw(yaw * delta);
-
-	_camera->Update(delta);
-
-	InputHandler::SetMousePos(_windowClass->GetHWND(), _windowClass->GetScreenCentre());
+	if (e.RightMouseButton)
+	{
+		m_Camera->SetFOV((55.0f / 180.0f) * XM_PI);
+	}
 }
 
-void Player::UpdatePlayerPosition(float delta)
+void Player::OnMouseButtonUp(MouseButtonEvent& e)
 {
-	if (InputHandler::IsKeyDown(A))
+	if (!e.RightMouseButton)
 	{
-		_camera->Strafe(-_movementSpeed * delta);
+		m_Camera->SetFOV((85.0f / 180.0f) * XM_PI);
 	}
+}
 
-	if (InputHandler::IsKeyDown(D))
-	{
-		_camera->Strafe(_movementSpeed * delta);
-	}
-	if (InputHandler::IsKeyDown(W))
-	{
-		_camera->Walk(_movementSpeed * delta);
-	}
+void Player::UpdatePlayerLookDirection(MouseMotionEvent& e)
+{
+	auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
+	POINT screenCentre = window->GetScreenCentre();
 
-	if (InputHandler::IsKeyDown(S))
+	auto yaw = (e.X - screenCentre.x) * m_LookSpeed;
+	auto pitch = (e.Y - screenCentre.y) * m_LookSpeed;
+
+	m_Camera->Pitch(pitch * Timer::GetDeltaMilliseconds());
+	m_Camera->Yaw(yaw * Timer::GetDeltaMilliseconds());
+
+	m_Camera->Update(Timer::GetDeltaMilliseconds());
+
+	InputHandler::SetMousePos(window->GetHWND(), window->GetScreenCentre());
+}
+
+void Player::UpdatePlayerPosition(KeyEvent& e)
+{
+	switch (e.Key)
 	{
-		_camera->Walk(-_movementSpeed * delta);
+	case KeyCode::Key::A:
+		{
+			m_Camera->Strafe(-m_MovementSpeed * Timer::GetDeltaMilliseconds());
+		}
+		break;
+	case KeyCode::Key::D:
+		{
+			m_Camera->Strafe(m_MovementSpeed * Timer::GetDeltaMilliseconds());
+		}
+		break;
+	case KeyCode::Key::W:
+		{
+			m_Camera->Walk(m_MovementSpeed * Timer::GetDeltaMilliseconds());
+		}
+		break;
+	case KeyCode::Key::S:
+		{
+			m_Camera->Walk(-m_MovementSpeed * Timer::GetDeltaMilliseconds());
+		}
+		break;
+	default:
+		break;
 	}
 }
 
 void Player::SetPlayerPosition(XMFLOAT3 pos) const
 {
-	_camera->SetPosition(pos);
+	m_Camera->SetPosition(pos);
 }
+
 
 void Player::Update(float delta)
 {
-	if(!InputHandler::IsKeyDown(LeftAlt))
-	{
-		UpdatePlayerLookDirection(delta);
-		UpdatePlayerPosition(delta);
-	}
+
 }

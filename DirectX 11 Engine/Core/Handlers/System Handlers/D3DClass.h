@@ -19,7 +19,7 @@ public:
 	~D3DClass();
 	void Cleanup();
 
-	HRESULT InitialiseDirectX(HWND& hwnd, float renderWidth, float renderHeight);
+	HRESULT InitialiseDirectX11(HWND& hwnd, float renderWidth, float renderHeight);
 
 	ID3D11Device* GetDevice() const { return _device; }
 	ID3D11DeviceContext* GetContext() const { return _deviceContext; }

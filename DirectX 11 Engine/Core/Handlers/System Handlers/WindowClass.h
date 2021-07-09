@@ -1,48 +1,95 @@
 #pragma once
 #include "../../Globals/stdafx.h"
 #include "../../../resource.h"
+#include "../../Globals/Events.h"
+#include "../../Timer.h"
+
+#include <string>
+#include <memory>
+
+class EngineBase;
+
 class WindowClass
 {
 public:
-public:
-	WindowClass();
-	~WindowClass();
 	void Cleanup();
 
-	HRESULT InitWindow(WNDCLASSEX& wcex, HINSTANCE hinst, int cmdShow, UINT windowWidth, UINT windowHeight);
+	HWND GetHWND() { return m_hWnd; }
 
-	void SetWindowCaption(LPCWSTR newCaption);
+	ComPtr<ID3D11RenderTargetView> const& GetBackBuffer() const { return m_BackBuffer; }
 
-	HWND GetHWND() { return _hWnd; }
-	HINSTANCE GetHInstance() { return _hInstance; }
+	float GetWindowWidth() { return static_cast<float>(m_WindowWidth); }
+	float GetWindowHeight() { return static_cast<float>(m_WindowHeight); }
 
-	void SetWindowResizing(bool state) { _resizing = state; }
-	bool GetWindowResizing() { return _resizing; }
+	POINT GetScreenCentre() { return m_ScreenCentre; }
 
-	void SetWindowMinimised(bool state) { _minimised = state; }
-	void SetWindowMaximised(bool state) { _maximised = state; }
+	const std::wstring& GetWindowName() const { return m_WindowCaption; }
 
-	bool GetWindowMinimised() { return _minimised; }
-	bool GetWindowMaximised() { return _maximised; }
+	void Show();
+	void Hide();
 
-	float GetWindowWidth() { return _windowWidth; }
-	float GetWindowHeight() { return _windowHeight; }
+	bool IsVSync() const { return m_VSync; }
+	void SetVsync(bool vsync) { m_VSync = vsync; }
+	void ToggleVSync() { SetVsync(!m_VSync); }
 
-	POINT GetScreenCentre() { return _screenCentre; }
+	bool IsFullscreen() const { return m_Fullscreen; }
+	void SetFullscreen(bool fullscreen);
+	void ToggleFullscreen() { SetFullscreen(!m_Fullscreen); }
+
+	UINT Present();
+
+protected:
+	friend LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+	friend class ApplicationNew;
+	friend class EngineBase;
+
+	WindowClass() = delete;
+	WindowClass(HWND& hwnd, std::wstring& windowName, UINT clientWidth, UINT clientHeight, bool vsync);
+	virtual ~WindowClass();
+
+	void RegisterCallbacks(std::shared_ptr<EngineBase> pEngineBase);
+
+	virtual void OnUpdate(UpdateEvent& e);
+	virtual void OnRender(RenderEvent& e);
+
+	virtual void OnKeyPressed(KeyEvent& e);
+	virtual void OnKeyReleased(KeyEvent& e);
+	virtual void OnMouseMoved(MouseMotionEvent& e);
+	virtual void OnMouseButtonDown(MouseButtonEvent& e);
+	virtual void OnMouseButtonUp(MouseButtonEvent& e);
+	virtual void OnMouseWheel(MouseWheelEvent& e);
+
+	virtual void OnResize(UINT width, UINT height);
+
+	ComPtr<IDXGISwapChain4> CreateSwapChain();
+
+	void UpdateRenderTargetViews();
 
 private:
-	HWND _hWnd;
-	HINSTANCE _hInstance;
+	WindowClass(const WindowClass& copy) = delete;
+	WindowClass& operator=(const WindowClass& other) = delete;
 
-	LPCWSTR _windowCaption;
+	HWND m_hWnd;
 
-	bool _minimised;
-	bool _maximised;
-	bool _resizing;
+	std::wstring m_WindowCaption;
 
-	float _windowWidth;
-	float _windowHeight;
+	UINT m_WindowWidth;
+	UINT m_WindowHeight;
+	bool m_VSync;
+	bool m_Fullscreen;
 
-	POINT _screenCentre;
+	POINT m_ScreenCentre;
+	RECT m_WindowRect;
+
+	std::weak_ptr<EngineBase> m_EngineBase;
+
+	ComPtr<IDXGISwapChain4> m_SwapChain;
+
+	ComPtr<ID3D11RenderTargetView> m_BackBuffer;
+
+	Timer m_UpdateClock;
+	Timer m_RenderClock;
+	uint64_t m_FrameCounter;
 };
 

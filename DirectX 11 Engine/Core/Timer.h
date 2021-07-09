@@ -1,31 +1,27 @@
 #pragma once
-#include "Globals\stdafx.h"
+#include <chrono>
 class Timer
 {
 public:
 	Timer();
-	~Timer();
 
-	float GameTime() const;
-	float DeltaTime() const;
-
+	static void Tick();
 	void Reset();
-	void Start();
-	void Stop();
-	void Tick();
 
-	bool IsScenePaused() const { return _paused; }
+	static double GetDeltaNanoseconds() { return m_DeltaTime.count() * 1.0; }
+	static double GetDeltaMicroseconds() { return m_DeltaTime.count() * 1e-3; }
+	static double GetDeltaMilliseconds() { return m_DeltaTime.count() * 1e-6; }
+	static double GetDeltaSeconds() { return m_DeltaTime.count() * 1e-9; }
+
+	static double GetTotalNanoseconds() { return m_TotalTime.count() * 1.0; }
+	static double GetTotalMicroseconds() { return m_TotalTime.count() * 1e-3; }
+	static double GetTotalMilliseconds() { return m_TotalTime.count() * 1e-6; }
+	static double GetTotalSeconds() { return m_TotalTime.count() * 1e-9; }
 
 private:
-	double _secondsPerCount;
-	double _deltaTime;
+	static std::chrono::high_resolution_clock::time_point m_T0;
 
-	__int64 _baseTime;
-	__int64 _pausedTime;
-	__int64 _stopTime;
-	__int64 _prevTime;
-	__int64 _currTime;
-
-	bool _paused;
+	static std::chrono::high_resolution_clock::duration m_DeltaTime;
+	static std::chrono::high_resolution_clock::duration m_TotalTime;
 };
 

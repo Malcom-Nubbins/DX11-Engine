@@ -1,7 +1,8 @@
 #include "Shadows.h"
+#include "../../ApplicationNew.h"
 
-Shadows::Shadows(const SystemHandlers& system)
-	: _systemHandlers(system), _inputLayout(nullptr), _shadowViewport(), _shadowDepthMatrixBuffer(nullptr)
+Shadows::Shadows()
+	: _inputLayout(nullptr), _shadowViewport(), _shadowDepthMatrixBuffer(nullptr)
 {
 	_shadowDepthVS = nullptr;
 	_sceneBoundary.sphereCentre = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -45,11 +46,23 @@ HRESULT Shadows::Initialise(float windowWidth, float windowHeight)
 	bd.ByteWidth = sizeof(MatrixBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	_systemHandlers.GetD3DClass()->GetDevice()->CreateBuffer(&bd, nullptr, &_shadowDepthMatrixBuffer);
+	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &_shadowDepthMatrixBuffer);
 
 	InitialiseViewport(windowWidth, windowHeight);
 
 	return S_OK;
+}
+
+void Shadows::PreResizeViews()
+{
+	_ShadowTex->Release();
+	_ShadowSRV->Release();
+	_ShadowDepthStencilView->Release();
+}
+
+void Shadows::OnResize(float windowWidth, float windowHeight)
+{
+	Initialise(windowWidth, windowHeight);
 }
 
 HRESULT Shadows::InitialiseShaders()
@@ -63,7 +76,7 @@ HRESULT Shadows::InitialiseShaders()
 		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	HRESULT hr = _systemHandlers.GetShaderClass()->CreateVertexShader((WCHAR*)L"Core/Shaders/ShadowDepthVS.hlsl", &_shadowDepthVS, &_inputLayout, layout, ARRAYSIZE(layout));
+	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ShadowDepthVS.hlsl", &_shadowDepthVS, &_inputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
 
@@ -72,6 +85,8 @@ HRESULT Shadows::InitialiseShaders()
 
 HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeight)
 {
+	auto device = ApplicationNew::Get().GetDevice();
+
 	HRESULT hr;
 	D3D11_TEXTURE2D_DESC texDesc;
 	texDesc.Width = windowWidth;
@@ -86,7 +101,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 
-	hr = _systemHandlers.GetD3DClass()->GetDevice()->CreateTexture2D(&texDesc, 0, &_ShadowTex);
+	hr = device->CreateTexture2D(&texDesc, 0, &_ShadowTex);
 	if (FAILED(hr))
 		return hr;
 
@@ -96,7 +111,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 
-	hr = _systemHandlers.GetD3DClass()->GetDevice()->CreateDepthStencilView(_ShadowTex, &dsvDesc, &_ShadowDepthStencilView);
+	hr = device->CreateDepthStencilView(_ShadowTex.Get(), &dsvDesc, &_ShadowDepthStencilView);
 	if (FAILED(hr))
 		return hr;
 
@@ -106,7 +121,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 
-	hr = _systemHandlers.GetD3DClass()->GetDevice()->CreateShaderResourceView(_ShadowTex, &srvDesc, &_ShadowSRV);
+	hr = device->CreateShaderResourceView(_ShadowTex.Get(), &srvDesc, &_ShadowSRV);
 	if (FAILED(hr))
 		return hr;
 	return S_OK;
@@ -173,11 +188,13 @@ void Shadows::UpdateLightDirection(XMFLOAT3 lightDirection)
 
 void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 {
-	_systemHandlers.GetRenderClass()->SetRasterizerState(SHADOWDEPTH);
+	auto context = ApplicationNew::Get().GetContext();
+
+	RenderClass::SetRasterizerState(SHADOWDEPTH);
 	SetAsCurrentViewport();
 	SetAsCurrentDepthStencil();
 	SetAsCurrentShader();
-	_systemHandlers.GetBufferClass()->SetVertexShaderBuffers(&_shadowDepthMatrixBuffer);
+	BufferClass::SetVertexShaderBuffers(&_shadowDepthMatrixBuffer);
 
 	ShadowDepthMatrixBuffer shadowDepthMatrixBuffer;
 
@@ -192,8 +209,8 @@ void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 		if (element->CanCastShadows())
 		{
 			shadowDepthMatrixBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&element->GetTransform()->GetWorld()));
-			_systemHandlers.GetD3DClass()->GetContext()->UpdateSubresource(_shadowDepthMatrixBuffer, 0, nullptr, &shadowDepthMatrixBuffer, 0, 0);
-			element->Draw(_systemHandlers.GetD3DClass()->GetContext());
+			context->UpdateSubresource(_shadowDepthMatrixBuffer, 0, nullptr, &shadowDepthMatrixBuffer, 0, 0);
+			element->Draw(context.Get());
 		}
 	}
 
@@ -202,15 +219,15 @@ void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 
 void Shadows::SetAsCurrentShader()
 {
-	_systemHandlers.GetShaderClass()->SetShadersAndInputLayout(_shadowDepthVS, nullptr, _inputLayout);
+	ShaderClass::SetShadersAndInputLayout(_shadowDepthVS, nullptr, _inputLayout);
 }
 
 void Shadows::SetAsCurrentDepthStencil()
 {
-	_systemHandlers.GetRenderClass()->SetRenderTargetAndDepthStencil(nullptr, _ShadowDepthStencilView);
+	RenderClass::SetRenderTargetAndDepthStencil(nullptr, _ShadowDepthStencilView);
 }
 
 void Shadows::SetAsCurrentViewport()
 {
-	_systemHandlers.GetRenderClass()->SetViewport(_shadowViewport);
+	RenderClass::SetViewport(_shadowViewport);
 }

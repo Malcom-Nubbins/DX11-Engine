@@ -1,6 +1,7 @@
 #include "FlatTerrain.h"
+#include "../../ApplicationNew.h"
 
-FlatTerrain::FlatTerrain(D3DClass* d3dClass) : _d3dClass(d3dClass)
+FlatTerrain::FlatTerrain()
 {
 	_gridVertices = std::vector<SimpleVertex>();
 	_vertexBuffer = nullptr;
@@ -127,7 +128,7 @@ HRESULT FlatTerrain::CreateBuffers()
 	ZeroMemory(&InitGridData, sizeof(InitGridData));
 	InitGridData.pSysMem = &_gridVertices[0];
 
-	hr = _d3dClass->GetDevice()->CreateBuffer(&vbd, &InitGridData, &_vertexBuffer);
+	hr = ApplicationNew::Get().GetDevice()->CreateBuffer(&vbd, &InitGridData, &_vertexBuffer);
 	if (FAILED(hr))
 	{
 		return hr;
@@ -148,7 +149,7 @@ HRESULT FlatTerrain::CreateBuffers()
 	ZeroMemory(&InitGridIndexData, sizeof(InitGridIndexData));
 	InitGridIndexData.pSysMem = &_gridIndices[0];
 
-	hr = _d3dClass->GetDevice()->CreateBuffer(&ibd, &InitGridIndexData, &_indexBuffer);
+	hr = ApplicationNew::Get().GetDevice()->CreateBuffer(&ibd, &InitGridIndexData, &_indexBuffer);
 	if (FAILED(hr))
 		return hr;
 
@@ -218,19 +219,21 @@ void FlatTerrain::Update(float deltaTime)
 void FlatTerrain::DepthNormalDraw(MatrixBuffer mb, ID3D11Buffer * constBuffer)
 {
 	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
-	_d3dClass->GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-	_terrainGO->Draw(_d3dClass->GetContext());
+	ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
+	_terrainGO->Draw(ApplicationNew::Get().GetContext().Get());
 }
 
 void FlatTerrain::ShadowDraw(ShadowDepthMatrixBuffer mb, ID3D11Buffer * constBuffer)
 {
 	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
-	_d3dClass->GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-	_terrainGO->Draw(_d3dClass->GetContext());
+	ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
+	_terrainGO->Draw(ApplicationNew::Get().GetContext().Get());
 }
 
 void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * matrixBuffer, ID3D11Buffer* objValuesBuffer, ID3D11ShaderResourceView * texArray[])
 {
+	auto context = ApplicationNew::Get().GetContext();
+
 	auto* transform = _terrainGO->GetTransform();
 	auto* appearance = _terrainGO->GetAppearance();
 
@@ -249,7 +252,7 @@ void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * ma
 	if (appearance->HasColourTexture())
 	{
 		texture = appearance->GetColourTex();
-		_d3dClass->GetContext()->PSSetShaderResources(0, 1, &texture);
+		context->PSSetShaderResources(0, 1, &texture);
 		cb.useColourTex = 1.0f;
 	}
 	else
@@ -261,7 +264,7 @@ void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * ma
 	{
 		cb.useBumpMap = 1.0f;
 		texture = appearance->GetNormalMap();
-		_d3dClass->GetContext()->PSSetShaderResources(2, 1, &texture);
+		context->PSSetShaderResources(2, 1, &texture);
 	}
 	else
 	{
@@ -278,9 +281,9 @@ void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * ma
 	}
 
 	// Update constant buffer
-	_d3dClass->GetContext()->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
-	_d3dClass->GetContext()->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
-	_terrainGO->Draw(_d3dClass->GetContext());
+	context->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
+	context->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
+	_terrainGO->Draw(context.Get());
 }
 
 float FlatTerrain::GetWidth()

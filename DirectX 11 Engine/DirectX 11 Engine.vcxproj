@@ -23,32 +23,32 @@
     <ProjectGuid>{BEE3E58F-8789-48D6-8C32-FE70245896C0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DirectX11Engine</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -104,6 +104,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\ApplicationNew.cpp" />
     <ClCompile Include="Core\Graphics\UI\UIBitmap.cpp" />
     <ClCompile Include="Core\Graphics\UI\UserInterface.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\InputHandler.cpp" />
@@ -171,8 +173,13 @@
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Transform.cpp" />
     <ClCompile Include="Core\Loaders\ModelLoader.cpp" />
     <ClCompile Include="Core\Scene\TestingScene.cpp" />
+    <ClCompile Include="Core\EngineBase.cpp" />
+    <ClCompile Include="Core\DX11Engine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\ApplicationNew.h" />
+    <ClInclude Include="Core\Globals\Events.h" />
+    <ClInclude Include="Core\Globals\KeyCodes.h" />
     <ClInclude Include="Core\Graphics\UI\UIBitmap.h" />
     <ClInclude Include="Core\Graphics\UI\UserInterface.h" />
     <ClInclude Include="Core\Handlers\System Handlers\InputHandler.h" />
@@ -205,6 +212,8 @@
     <ClInclude Include="Core\Scene\Scene.h" />
     <ClInclude Include="Core\Timer.h" />
     <ClInclude Include="Core\Loaders\ModelLoader.h" />
+    <ClInclude Include="Core\EngineBase.h" />
+    <ClInclude Include="Core\DX11Engine.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
     <ClInclude Include="Core\Scene\TestingScene.h" />

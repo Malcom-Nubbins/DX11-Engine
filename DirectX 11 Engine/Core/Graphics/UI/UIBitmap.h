@@ -7,9 +7,6 @@
 class UIBitmap
 {
 private:
-	D3DClass* _d3dClass;
-	BufferClass* _bufferClass;
-
 	XMFLOAT2 _screenSize;
 	XMFLOAT2 _bitmapSize;
 	XMFLOAT2 _bitmapPrevPosition;
@@ -22,7 +19,7 @@ private:
 	SceneElement* _uiElement;
 public:
 
-	UIBitmap(D3DClass* d3dClass, BufferClass* bufferClass);
+	UIBitmap();
 	~UIBitmap();
 
 	void Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11ShaderResourceView* texture);

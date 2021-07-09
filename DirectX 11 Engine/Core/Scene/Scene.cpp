@@ -1,7 +1,6 @@
 ﻿#include "Scene.h"
 
-Scene::Scene(const SystemHandlers& systemHandler, const Timer& timer, const Player& player)
-	: _systemHandlers(systemHandler), _player(player), _timer(timer), _sceneLight()
+Scene::Scene(Player& player) : m_Player(&player)
 {
 }
 
@@ -11,6 +10,11 @@ Scene::~Scene()
 }
 
 void Scene::Cleanup()
+{
+
+}
+
+void Scene::PreResizeViews()
 {
 
 }

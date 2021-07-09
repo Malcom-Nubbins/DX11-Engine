@@ -15,11 +15,10 @@ class Shadows
 	};
 
 private:
-	const SystemHandlers& _systemHandlers;
 	ID3D11VertexShader* _shadowDepthVS;
 	ID3D11InputLayout* _inputLayout;
 
-	ID3D11Texture2D* _ShadowTex = nullptr;
+	ComPtr<ID3D11Texture2D> _ShadowTex = nullptr;
 	ID3D11DepthStencilView* _ShadowDepthStencilView = nullptr;
 	ID3D11ShaderResourceView* _ShadowSRV = nullptr;
 	D3D11_VIEWPORT _shadowViewport;
@@ -35,11 +34,14 @@ private:
 	ID3D11Buffer* _shadowDepthMatrixBuffer;
 
 public:
-	Shadows(const SystemHandlers& system);
+	Shadows();
 	~Shadows();
 	void Cleanup();
 
 	HRESULT Initialise(float windowWidth, float windowHeight);
+
+	void PreResizeViews();
+	void OnResize(float windowWidth, float windowHeight);
 
 	void SetAsCurrentShader();
 	void SetAsCurrentDepthStencil();
@@ -52,7 +54,7 @@ public:
 
 	void Render(const std::vector<SceneElement*>& sceneElements);
 
-	XMFLOAT4X4 GetShadowTransform() const { return _shadowTransformMatrix; }
+	XMFLOAT4X4& GetShadowTransform() { return _shadowTransformMatrix; }
 	ID3D11ShaderResourceView* GetShadowSRV() const { return _ShadowSRV; }
 	XMFLOAT3 GetLightPosition() const { return _lightPosition; }
 

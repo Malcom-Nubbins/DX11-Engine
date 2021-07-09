@@ -71,38 +71,10 @@ void Application::Cleanup()
 HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 {
 	HRESULT hr;
-	_d3dClass = new D3DClass();
-	_windowClass = new WindowClass();
-
-	WNDCLASSEX wcex;
-	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.lpfnWndProc = WndProc;
-	hr = _windowClass->InitWindow(wcex ,hinst, cmdShow, _windowWidth, _windowHeight);
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, L"Error creating window", L"Error", MB_OK);
-		return hr;	
-	}
-
-	HWND hwnd = _windowClass->GetHWND();
-	hr = _d3dClass->InitialiseDirectX(hwnd, static_cast<float>(_windowWidth), static_cast<float>(_windowHeight));
-	if (FAILED(hr))
-	{
-		MessageBox(nullptr, L"Failed to initialise DirectX", L"Error", MB_OK);
-		return hr;
-	}
-
-	_renderClass = new RenderClass(_d3dClass);
-	_renderClass->Initialise();
-	_shaderClass = new ShaderClass(_d3dClass);
-	_bufferClass = new BufferClass(_d3dClass);
 
 	hr = _shaderClass->CreateSamplerStates();
 	if (FAILED(hr))
 		return hr;
-
-	_textureHandler = new TextureHandler(_d3dClass);
-	_textureHandler->LoadAllTextures();
 
 	_systemHandlers = new SystemHandlers(_d3dClass, _renderClass, _shaderClass, _bufferClass, _windowClass, _textureHandler);
 
@@ -118,22 +90,22 @@ HRESULT Application::InitialiseApplication(HINSTANCE hinst, int cmdShow)
 	if (FAILED(hr))
 		return hr;*/
 
-	_player = new Player(_windowClass);
-	_player->Initialise();
+	//_player = new Player(_windowClass);
+	//_player->Initialise();
 
-	/*_testingScene = new TestingScene(*_systemHandlers, _timer, *_player);
+	//_testingScene = new TestingScene(*_systemHandlers, _timer, *_player);
 
-	_testingScene->InitialiseScene(_windowWidth, _windowHeight);*/
+	//_testingScene->InitialiseScene(_windowWidth, _windowHeight);
 
-	_mainScene = new MainScene(*_systemHandlers, _timer, *_player);
+	//_mainScene = new MainScene(*_systemHandlers, _timer, *_player);
 
-	_mainScene->InitialiseScene(_windowWidth, _windowHeight);
+	//_mainScene->InitialiseScene(_windowWidth, _windowHeight);
 
-	_ui = new UserInterface(*_systemHandlers, _player->GetCamera());
+	/*_ui = new UserInterface(*_systemHandlers, _player->GetCamera());
 	_ui->Initialise();
 
 	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 5), _textureHandler->GetSnowTexture());
-	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), _textureHandler->GetGroundColourTexture());
+	_ui->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), _textureHandler->GetGroundColourTexture());*/
 
 	return S_OK;
 }
@@ -154,7 +126,7 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		return 0;
 
 	case WM_SIZE:
-		if (_windowClass != nullptr)
+		/*if (_windowClass != nullptr)
 		{
 			_windowWidth = LOWORD(lParam);
 			_windowHeight = HIWORD(lParam);
@@ -192,17 +164,17 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 					Resize(_windowWidth, _windowHeight);
 				}
 			}
-		}
+		}*/
 		return true;
 
 	case WM_ENTERSIZEMOVE:
-		_windowClass->SetWindowResizing(true);
-		_timer.Stop();
+		/*_windowClass->SetWindowResizing(true);
+		_timer.Stop();*/
 		return true;
 
 	case WM_EXITSIZEMOVE:
-		_windowClass->SetWindowResizing(false);
-		_timer.Start();
+		/*_windowClass->SetWindowResizing(false);
+		_timer.Start();*/
 		Resize(_windowWidth, _windowHeight);
 		return true;
 

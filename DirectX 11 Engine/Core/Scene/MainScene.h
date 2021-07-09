@@ -51,10 +51,11 @@ private:
 	float _currentCooldown;
 
 public:
-	MainScene(SystemHandlers& systemHandlers, Timer& timer, Player& player);
+	MainScene(Player& player);
 	~MainScene() override;
 	void Cleanup() override;
 
+	void PreResizeViews() override;
 	void ResizeViews(float windowWidth, float windowHeight) override;
 
 	void InitialiseScene(float windowWidth, float windowHeight) override;

@@ -6,10 +6,11 @@
 class SkyColourGradient
 {
 private:
-	const SystemHandlers& _systemHandlers;
 	ID3D11VertexShader* _colourGradientVS;
 	ID3D11PixelShader* _colourGradientPS;
 	ID3D11InputLayout* _inputLayout;
+
+	ID3D11ShaderResourceView* m_SkySRV;
 
 	XMFLOAT3 _sceneCentre;
 	SceneElement* _skyDomeElement;
@@ -18,7 +19,7 @@ private:
 	ID3D11Buffer* _matrixBuffer;
 
 public:
-	SkyColourGradient(const SystemHandlers& system);
+	SkyColourGradient();
 	~SkyColourGradient();
 	void Cleanup() const;
 
@@ -29,7 +30,7 @@ public:
 	void SetAsCurrentShader();
 
 	void Update(float deltaTime);
-	void Render(const Camera& camera, const XMFLOAT3& sunPos);
+	void Render(Camera& camera, const XMFLOAT3& sunPos);
 
 private:
 	HRESULT InitialiseShaders();

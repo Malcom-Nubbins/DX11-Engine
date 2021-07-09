@@ -26,8 +26,6 @@ class FlatTerrain
 		float cellSpacing;
 	};
 private:
-	D3DClass * _d3dClass;
-
 	ID3D11Buffer * _vertexBuffer;
 	ID3D11Buffer* _indexBuffer;
 
@@ -48,7 +46,7 @@ private:
 	void GetNormals(UINT faceCount, UINT vertexCount);
 
 public:
-	FlatTerrain(D3DClass* d3dClass);
+	FlatTerrain();
 	~FlatTerrain();
 	void Cleanup();
 

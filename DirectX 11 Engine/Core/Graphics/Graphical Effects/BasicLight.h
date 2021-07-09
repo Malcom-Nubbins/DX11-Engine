@@ -9,17 +9,15 @@
 class BasicLight
 {
 private:
-	const SystemHandlers& _systemHandlers;
-
 	ID3D11VertexShader* _lightVS;
 	ID3D11HullShader* _tesselationHS;
 	ID3D11DomainShader* _tesselationDS;
 	ID3D11PixelShader*	_lightPS;
 	ID3D11InputLayout*	_simpleVertexInputLayout;
 
-	ID3D11Texture2D*	_renderTargetTex2D;
-	ID3D11RenderTargetView* _renderTargetView;
-	ID3D11ShaderResourceView* _renderTargetSRV;
+	ID3D11Texture2D*	m_RenderTargetTex2D;
+	ID3D11RenderTargetView* m_RenderTargetView;
+	ID3D11ShaderResourceView* m_RenderTargetShaderResourceView;
 
 	ID3D11Texture2D* _depthStencilBuffer;
 	ID3D11DepthStencilView* _depthStencilView;
@@ -47,10 +45,11 @@ private:
 	bool _renderWireframe;
 
 public:
-	BasicLight(const SystemHandlers& systemHandlers);
+	BasicLight();
 	~BasicLight();
 	void Cleanup() const;
 
+	void PreResize();
 	void Resize(float newWidth, float newHeight);
 
 	HRESULT Initialise(float windowWidth, float windowHeight);
@@ -63,13 +62,13 @@ public:
 	bool GetWireframeState() const { return _renderWireframe; }
 
 	void CalculateLightColour(DirectionalLight& sceneLight, float sunHeight, FogValuesBuffer& sceneFog);
-	ID3D11ShaderResourceView* GetRenderTargetSRV() const { return _renderTargetSRV; }
+	ID3D11ShaderResourceView* GetRenderTargetSRV() const { return m_RenderTargetShaderResourceView; }
 
-	void Render(const Camera& camera, 
+	void Render(Camera& const camera, 
 		const DirectionalLight& sceneLight, const std::vector<PointLight>& pointLights, const SpotLight& spotLight, 
 		const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
 
-	void Render(const Camera&, const DirectionalLight& sceneLight, const SpotLight& spotLight, const::std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
+	void Render(Camera& const camera, const DirectionalLight& sceneLight, const SpotLight& spotLight, const::std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
 
 private:
 	HRESULT InitialiseShaders();

@@ -30,10 +30,12 @@ private:
 	float _currentCooldown;
 
 public:
-	TestingScene(const SystemHandlers& systemHandlers, const Timer& timer, const Player& player);
+	TestingScene(Player& player);
 	~TestingScene();
 
 	void Cleanup() override;
+	
+	void PreResizeViews() override;
 	void ResizeViews(float windowWidth, float windowHeight) override;
 	void InitialiseScene(float windowWidth, float windowHeight) override;
 	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;

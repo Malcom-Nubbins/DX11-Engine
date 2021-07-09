@@ -6,9 +6,6 @@
 class RenderToFullscreenQuad
 {
 private:
-	const SystemHandlers& _systemHandlers;
-	ID3D11RenderTargetView* _backBuffer;
-
 	ID3D11VertexShader* _quadVS;
 	ID3D11PixelShader* _quadPS;
 
@@ -18,13 +15,11 @@ private:
 	ID3D11Buffer*	_quadIndexBuffer;
 
 public:
-	RenderToFullscreenQuad(const SystemHandlers& systemHandlers);
+	RenderToFullscreenQuad();
 	~RenderToFullscreenQuad();
 	void Cleanup();
 
 	HRESULT Initialise(float width, float height);
-
-	void Resize(float width, float height);
 
 	void SetAsCurrentRenderTarget() const;
 
@@ -34,7 +29,6 @@ public:
 	void Render(ID3D11ShaderResourceView* textureToRender) const;
 
 private:
-	HRESULT InitialiseBackBuffer(float width, float height);
 	HRESULT InitialiseShaders();
 	void BuildQuad();
 };

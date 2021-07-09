@@ -6,9 +6,7 @@
 class UserInterface
 {
 private:
-	const SystemHandlers& _systemHandlers;
-
-	const Camera& _camera;
+	Camera& _camera;
 	std::vector<UIBitmap*> _bitmaps;
 
 	ID3D11InputLayout* _inputLayout;
@@ -19,7 +17,7 @@ private:
 	XMFLOAT4X4 _worldMatrix;
 
 public:
-	UserInterface(const SystemHandlers& systemHandlers, const Camera& camera);
+	UserInterface(Camera& camera);
 	~UserInterface();
 
 	void Cleanup();

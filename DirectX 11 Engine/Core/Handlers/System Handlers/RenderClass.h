@@ -4,40 +4,39 @@
 class RenderClass
 {
 private:
-	D3DClass * _d3dClass;
-	ID3D11DepthStencilState* _depthDisabled;
-	ID3D11DepthStencilState* _depthEnabled;
+	static ID3D11DepthStencilState* _depthDisabled;
+	static ID3D11DepthStencilState* _depthEnabled;
 
-	ID3D11RasterizerState* _noCull;
-	ID3D11RasterizerState* _backCull;
-	ID3D11RasterizerState* _wireframe;
-	ID3D11RasterizerState* _shadow;
+	static ID3D11RasterizerState* _noCull;
+	static ID3D11RasterizerState* _backCull;
+	static ID3D11RasterizerState* _wireframe;
+	static ID3D11RasterizerState* _shadow;
 
-	ID3D11BlendState* _alphaBlendState;
-	ID3D11BlendState* _alphaBlendStateDisabled;
+	static ID3D11BlendState* _alphaBlendState;
+	static ID3D11BlendState* _alphaBlendStateDisabled;
 
-	bool _disableRTVClearing;
+	static bool _disableRTVClearing;
 
 public:
-	RenderClass(D3DClass* d3dClass);
+	RenderClass();
 	~RenderClass();
 	void Cleanup();
 
 	void Initialise();
 	void ResizeViews();
 
-	void DisableZBuffer();
-	void EnableZBuffer();
+	static void DisableZBuffer();
+	static void EnableZBuffer();
 
-	void EnableAlphaBlending();
-	void DisableAlphaBlending();
+	static void EnableAlphaBlending();
+	static void DisableAlphaBlending();
 
-	void EnableRtvClearing();
-	void DisableRtvClearing();
+	static void EnableRtvClearing();
+	static void DisableRtvClearing();
 
-	void SetRasterizerState(RASTERIZER_TYPE rasterizer);
+	static void SetRasterizerState(RASTERIZER_TYPE rasterizer);
 
-	void SetViewport(D3D11_VIEWPORT viewport);
-	void SetRenderTargetAndDepthStencil(ID3D11RenderTargetView* renderTarget, ID3D11DepthStencilView* depthStencilView);
+	static void SetViewport(D3D11_VIEWPORT viewport);
+	static void SetRenderTargetAndDepthStencil(ID3D11RenderTargetView* renderTarget, ID3D11DepthStencilView* depthStencilView);
 };
 

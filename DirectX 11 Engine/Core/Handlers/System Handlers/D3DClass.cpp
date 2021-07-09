@@ -20,7 +20,7 @@ void D3DClass::Cleanup()
 	_swapChain = nullptr;
 }
 
-HRESULT D3DClass::InitialiseDirectX(HWND& hwnd, float renderWidth, float renderHeight)
+HRESULT D3DClass::InitialiseDirectX11(HWND& hwnd, float renderWidth, float renderHeight)
 {
 	HRESULT hr;
 	UINT createDeviceFlags = 0;
@@ -102,9 +102,9 @@ HRESULT D3DClass::InitialiseDirectX(HWND& hwnd, float renderWidth, float renderH
 	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 	UINT sampleCount = 1;
 
-	DXGI_SWAP_CHAIN_DESC sd;
+	DXGI_SWAP_CHAIN_DESC1 sd;
 	ZeroMemory(&sd, sizeof(sd));
-	sd.BufferCount = 1;
+	/*sd.BufferCount = 1;
 	sd.BufferDesc.Width = (UINT)renderWidth;
 	sd.BufferDesc.Height = (UINT)renderHeight;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -118,16 +118,16 @@ HRESULT D3DClass::InitialiseDirectX(HWND& hwnd, float renderWidth, float renderH
 	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	sd.Flags = 0;
+	sd.Flags = 0;*/
 
-	for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
+	/*for (UINT driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
 	{
 		_driverType = driverTypes[driverTypeIndex];
 		hr = D3D11CreateDeviceAndSwapChain(nullptr, _driverType, nullptr, 0, featureLevels, numFeatureLevels,
 			D3D11_SDK_VERSION, &sd, &_swapChain, &_device, &_featureLevel, &_deviceContext);
 		if (SUCCEEDED(hr))
 			break;
-	}
+	}*/
 
 	if (FAILED(hr))
 		return hr;

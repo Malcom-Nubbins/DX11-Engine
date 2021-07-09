@@ -27,7 +27,7 @@ public:
 	void SetScale(XMFLOAT3 scale) { _scale = scale; }
 	XMFLOAT3 GetScale() const { return _scale; }
 
-	XMFLOAT4X4 GetWorld() const { return _world; }
+	XMFLOAT4X4& GetWorld() { return _world; }
 
 	void SetParent(Transform* parent) { _parent = parent; }
 
