@@ -1,7 +1,10 @@
 #include "ApplicationNew.h"
 
 #include "Handlers/System Handlers/WindowClass.h"
+#include "Handlers/System Handlers/InputHandler.h"
 #include "EngineBase.h"
+#include "Loaders/ConfigLoader.h"
+#include "Globals/AppValues.h"
 
 #include <map>
 
@@ -37,6 +40,8 @@ void ApplicationNew::Destroy()
 {
 	if (g_App)
 	{
+		g_App->Cleanup();
+
 		assert(g_Windows.empty() && g_WindowByName.empty() && "All windows must be destroyed first");
 
 		delete g_App;
@@ -57,7 +62,7 @@ std::shared_ptr<WindowClass> ApplicationNew::CreateRenderWindow(std::wstring& wi
 		return windowIter->second;
 	}
 
-	RECT windowRect = { 0, 0, clientWidth, clientHeight };
+	RECT windowRect = { 0, 0, static_cast<LONG>(clientWidth), static_cast<LONG>(clientHeight) };
 	AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 
 	HWND hwnd = CreateWindowEx(0, WINDOW_CLASS_NAME, windowName.c_str(),
@@ -115,13 +120,39 @@ int ApplicationNew::Run(std::shared_ptr<EngineBase> pEngineBase)
 	if (!pEngineBase->LoadContent()) return 2;
 
 	MSG msg = { 0 };
-	while (WM_QUIT != msg.message)
+
+	WindowPtr pWindow;
 	{
-		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		pWindow = GetWindowByName(L"DX11 Engine");
+	}
+
+	BOOL done = false;
+	Timer timer = Timer();
+	timer.Reset();
+
+	while (!done)
+	{
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+
+		if (msg.message == WM_QUIT)
+		{
+			done = true;
+			break;
+		}
+
+		timer.Tick();
+
+		InputHandler::UpdateInputState();
+
+		UpdateEvent updateEvent(timer.GetDeltaSeconds(), timer.GetTotalSeconds());
+		pWindow->OnUpdate(updateEvent);
+
+		RenderEvent renderEvent(timer.GetDeltaSeconds(), timer.GetTotalSeconds());
+		pWindow->OnRender(renderEvent);
 	}
 
 	pEngineBase->UnloadContent();
@@ -142,6 +173,7 @@ ApplicationNew::ApplicationNew(HINSTANCE hinst)
 
 ApplicationNew::~ApplicationNew()
 {
+	//m_Device->Release();
 }
 
 void ApplicationNew::Initialise()
@@ -166,10 +198,28 @@ void ApplicationNew::Initialise()
 		MessageBoxA(nullptr, "Unable to register the window class", "Error", MB_OK | MB_ICONERROR);
 	}
 
-	m_Device = CreateDevice(nullptr);
+	CreateDevice(nullptr);
 	
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	HRESULT hr = m_Device->QueryInterface(__uuidof(ID3D11Debug), (void**)&m_Debug);
-	
+#endif
+
+	m_ConfigLoader = new C_ConfigLoader();
+}
+
+void ApplicationNew::Cleanup()
+{
+	m_Context->Flush();
+
+	delete m_ConfigLoader;
+	m_ConfigLoader = nullptr;
+
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	m_Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	m_Debug->Release();
+#endif
+
+	m_Context->Release();
 }
 
 ComPtr<IDXGIAdapter1> ApplicationNew::GetAdapter()
@@ -177,7 +227,7 @@ ComPtr<IDXGIAdapter1> ApplicationNew::GetAdapter()
 	ComPtr<IDXGIFactory1> dxgiFactory;
 	UINT createFactoryFlags = 0;
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	createFactoryFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -216,20 +266,24 @@ ComPtr<IDXGIAdapter1> ApplicationNew::GetAdapter()
 				&& dxgiAdapterDesc1.DedicatedVideoMemory > maxDedicatedVideoMemory)
 			{
 				maxDedicatedVideoMemory = dxgiAdapterDesc1.DedicatedVideoMemory;
+
+				m_Device->Release();
+				m_Context->Release();
 				//ThrowIfFailed(dxgiAdapter1.As(&dxgiAdapter4));
 			}
 		}
 	}
 
+	dxgiFactory->Release();
+
 	return dxgiAdapter1;
 }
 
-ComPtr<ID3D11Device> ApplicationNew::CreateDevice(ComPtr<IDXGIAdapter1> adapter)
+void ApplicationNew::CreateDevice(ComPtr<IDXGIAdapter1> adapter)
 {
-	ComPtr<ID3D11Device> d3d11Device;
 	UINT flags = 0;
 
-#if defined(_DEBUG)
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -243,9 +297,15 @@ ComPtr<ID3D11Device> ApplicationNew::CreateDevice(ComPtr<IDXGIAdapter1> adapter)
 
 	UINT numFeatureLevels = ARRAYSIZE(featureLevels);
 
-	ThrowIfFailed(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &d3d11Device, NULL, &m_Context));
+	ThrowIfFailed(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &m_Device, NULL, &m_Context));
 
-	return d3d11Device;
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	char const deviceName[] = "D3D11 Device";
+	char const contextName[] = "D3D11 Context";
+	m_Device->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(deviceName) - 1, deviceName);
+	m_Context->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(contextName) - 1, contextName);
+#endif
+
 }
 
 static void RemoveWindow(HWND hwnd)
@@ -303,20 +363,14 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 
 	if (pWindow)
 	{
+		PAINTSTRUCT ps;
+		HDC hdc;
 		switch (message)
 		{
 		case WM_PAINT:
-		{
-			Timer::Tick();
-
-			UpdateEvent updateEvent(Timer::GetDeltaMilliseconds(), Timer::GetTotalMilliseconds());
-			pWindow->OnUpdate(updateEvent);
-
-			RenderEvent renderEvent(Timer::GetDeltaMilliseconds(), Timer::GetTotalMilliseconds());
-			pWindow->OnRender(renderEvent);
-		}
-		break;
-
+			hdc = BeginPaint(hwnd, &ps);
+			EndPaint(hwnd, &ps);
+			return 0;
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 		{
@@ -360,7 +414,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 			}
 
 			KeyEvent keyEvent(key, c, KeyEvent::KeyState::Released, ctrl, shift, alt);
-			pWindow->OnKeyPressed(keyEvent);
+			pWindow->OnKeyReleased(keyEvent);
 		}
 		break;
 
@@ -476,5 +530,5 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 		return DefWindowProcW(hwnd, message, wParam, lParam);
 	}
 
-	return 0;
+	return DefWindowProcW(hwnd, message, wParam, lParam);
 }

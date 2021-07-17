@@ -72,6 +72,27 @@ struct NewObjectMesh
 		, numOfSubsets(0) 
 	{}
 
+	void IncreaseRefs()
+	{
+		if (vertexBuffer)
+		{
+			vertexBuffer->AddRef();
+		}
+
+		for (auto const subset : subsets)
+		{
+			if (subset.vertexBuffer)
+			{
+				subset.vertexBuffer->AddRef();
+			}
+
+			if (subset.indexBuffer)
+			{
+				subset.indexBuffer->AddRef();
+			}
+		}
+	}
+
 	VertexBuffer* vertexBuffer;
 	UINT numOfSubsets;
 	std::vector<Subset> subsets;
@@ -90,7 +111,7 @@ struct ObjectMesh
 
 	UINT vertexBufferStride;
 	UINT vertexBufferOffset;
-	int numberOfIndices = -1;
+	size_t numberOfIndices = 0;
 };
 
 struct SurfaceMaterial

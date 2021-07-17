@@ -25,8 +25,8 @@ void OBJLoader::CreateIndices(
 
 	std::pair<SimpleVertex, UINT> pair;
 
-	int numVertices = inVertices.size();
-	for (int i = 0; i < numVertices; ++i) //For each vertex
+	size_t numVertices = inVertices.size();
+	for (size_t i = 0; i < numVertices; ++i) //For each vertex
 	{
 		SimpleVertex vertex = { inVertices[i], inNormals[i],  inTexCoords[i], inTans[i], inBinorms[i] };
 
@@ -147,8 +147,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 						for (int i = 2; i > -1; --i)
 						{
 							inFile >> input;
-							int slash = input.find('/'); //Find first forward slash
-							int secondSlash = input.find('/', slash + 1); //Find second forward slash
+							size_t slash = input.find('/'); //Find first forward slash
+							size_t secondSlash = input.find('/', slash + 1); //Find second forward slash
 
 																		  //Extract from string
 							beforeFirstSlash = input.substr(0, slash); //The vertex position index
@@ -166,8 +166,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 						for (int i = 0; i < 3; ++i)
 						{
 							inFile >> input;
-							int slash = input.find('/'); //Find first forward slash
-							int secondSlash = input.find('/', slash + 1); //Find second forward slash
+							size_t slash = input.find('/'); //Find first forward slash
+							size_t secondSlash = input.find('/', slash + 1); //Find second forward slash
 
 																		  //Extract from string
 							beforeFirstSlash = input.substr(0, slash); //The vertex position index
@@ -196,8 +196,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 			std::vector<XMFLOAT3> expandedVertices;
 			std::vector<XMFLOAT3> expandedNormals;
 			std::vector<XMFLOAT2> expandedTexCoords;
-			unsigned int numIndices = vertIndices.size();
-			for (unsigned int i = 0; i < numIndices; i++)
+			size_t numIndices = vertIndices.size();
+			for (size_t i = 0; i < numIndices; i++)
 			{
 				expandedVertices.push_back(verts[vertIndices[i]]);
 				expandedTexCoords.push_back(texCoords[textureIndices[i]]);
@@ -225,9 +225,9 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 
 			//Turn data from vector form to arrays
 			auto finalVerts = new SimpleVertex[expandedVertices.size()];
-			unsigned int numMeshVertices = expandedVertices.size();
+			size_t numMeshVertices = expandedVertices.size();
 
-			for (int i = 0; i < numMeshVertices; i += 3)
+			for (size_t i = 0; i < numMeshVertices; i += 3)
 			{
 				XMFLOAT3 tangentValues = XMFLOAT3(0.0f, 0.0f, 0.0f);
 				XMFLOAT3 binormalValues = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -287,7 +287,7 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 			D3D11_BUFFER_DESC bd;
 			ZeroMemory(&bd, sizeof(bd));
 			bd.Usage = D3D11_USAGE_DEFAULT;
-			bd.ByteWidth = sizeof(SimpleVertex) * meshVertices.size();
+			bd.ByteWidth = static_cast<UINT>(sizeof(SimpleVertex) * meshVertices.size());
 			bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 			bd.CPUAccessFlags = 0;
 
@@ -302,8 +302,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 			meshData.vertexBufferStride = sizeof(SimpleVertex);
 
 			auto indicesArray = new UINT[meshIndices.size()];
-			unsigned int numMeshIndices = meshIndices.size();
-			for (unsigned int i = 0; i < numMeshIndices; ++i)
+			size_t numMeshIndices = meshIndices.size();
+			for (size_t i = 0; i < numMeshIndices; ++i)
 			{
 				indicesArray[i] = meshIndices[i];
 			}
@@ -320,7 +320,7 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 
 			ZeroMemory(&bd, sizeof(bd));
 			bd.Usage = D3D11_USAGE_DEFAULT;
-			bd.ByteWidth = sizeof(LONG) * meshIndices.size();
+			bd.ByteWidth = static_cast<UINT>(sizeof(LONG) * meshIndices.size());
 			bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 			bd.CPUAccessFlags = 0;
 

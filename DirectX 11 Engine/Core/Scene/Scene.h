@@ -22,6 +22,6 @@ public:
 	virtual void InitialiseScene(float windowWidth, float windowHeight) = 0;
 	virtual void InitialiseSceneGraphics(float windowWidth, float windowHeight) = 0;
 
-	virtual void Update(float delta) = 0;
+	virtual void Update(UpdateEvent& e) = 0;
 	virtual void Draw() = 0;
 };

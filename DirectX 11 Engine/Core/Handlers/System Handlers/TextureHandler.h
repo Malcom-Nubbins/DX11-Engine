@@ -6,9 +6,6 @@
 class TextureHandler
 {
 private:
-	ComPtr<ID3D11Device> m_Device;
-	ComPtr<ID3D11DeviceContext> m_Context;
-
 	static std::map<char const*, ID3D11ShaderResourceView*> m_Textures;
 
 	ID3D11ShaderResourceView* m_GroundColourTex;
@@ -33,7 +30,7 @@ private:
 	ID3D11ShaderResourceView* m_metalFloorNormalMap;
 
 public:
-	TextureHandler(ID3D11Device* device, ID3D11DeviceContext* context);
+	TextureHandler();
 	~TextureHandler();
 	void Cleanup();
 

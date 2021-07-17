@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "../../Globals/stdafx.h"
+#include "../../Globals/Bitmask.h"
 
 enum Keys
 {
@@ -174,5 +175,14 @@ public:
 	static POINT GetMousePos(HWND hwnd);
 	static void SetMousePos(HWND hwnd, POINT pos);
 
+	static bool IsKeyUp(Keys key);
 	static bool IsKeyDown(Keys key);
+
+	static void UpdateInputState();
+
+private:
+	typedef BYTE KeyboardState;
+
+	static KeyboardState m_LastFrameState[256];
+	static KeyboardState m_CurrFrameState[256];
 };	

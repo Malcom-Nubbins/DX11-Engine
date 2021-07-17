@@ -27,7 +27,7 @@ struct VertexOutput
 float4 main(VertexOutput input) : SV_TARGET
 {
     float height;
-    float4 finalColour;
+    float4 finalColour = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
     height = input.SkyDomePos.y;
 

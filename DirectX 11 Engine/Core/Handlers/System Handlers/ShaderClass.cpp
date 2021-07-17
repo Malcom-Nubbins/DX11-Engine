@@ -1,5 +1,6 @@
 #include "ShaderClass.h"
 #include "../../ApplicationNew.h"
+#include "../FileReaderWriter.h"
 
 ID3D11SamplerState* ShaderClass::m_SSLinear(nullptr);
 ID3D11SamplerState* ShaderClass::m_SSAnisotropic(nullptr);
@@ -25,28 +26,55 @@ HRESULT ShaderClass::CreateVertexShader(WCHAR * shaderFilename, ID3D11VertexShad
 {
 	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
-	ID3DBlob* vsBlob;
 
-	hr = CompileShaderFromFile(shaderFilename, "main", "vs_5_0", &vsBlob);
-	if (FAILED(hr))
+	char* bytes = { 0 };
+	size_t size = FileReaderWriter::ReadFileBytes(shaderFilename, bytes);
+
+	if (size != 0)
 	{
-		MessageBox(nullptr,
-			L"The Vertex shader cannot be compiled. Please check that the HLSL file is within the Core/Shaders/ Directory", L"Error", MB_OK);
-		return hr;
+		// Create the vertex shader
+		hr = device->CreateVertexShader((void*)bytes, size, nullptr, vertexShader);
+
+		if (FAILED(hr))
+		{
+			free(bytes);
+			return hr;
+		}
+
+		hr = CreateInputLayout(layout, numElements, inputLayout, bytes, size);
+		if (FAILED(hr))
+		{
+			free(bytes);
+			return hr;
+		}
 	}
-
-	// Create the vertex shader
-	hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, vertexShader);
-
-	if (FAILED(hr))
+	else
 	{
+		ID3DBlob* vsBlob;
+		// Fallback
+		hr = CompileShaderFromFile(shaderFilename, "main", "vs_5_0", &vsBlob);
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr,
+				L"The Vertex shader cannot be compiled. Please check that the HLSL file is within the Core/Shaders/ Directory", L"Error", MB_OK);
+			return hr;
+		}
+
+		// Create the vertex shader
+		hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, vertexShader);
+
+		if (FAILED(hr))
+		{
+			free(bytes);
+			vsBlob->Release();
+			return hr;
+		}
+
+		CreateInputLayout(layout, numElements, inputLayout, vsBlob);
 		vsBlob->Release();
-		return hr;
 	}
 
-	CreateInputLayout(layout, numElements, inputLayout, vsBlob);
-
-	//_vsBlob->Release();
+	free(bytes);
 
 	return S_OK;
 }
@@ -55,22 +83,40 @@ HRESULT ShaderClass::CreateHullShader(WCHAR * shaderFilename, ID3D11HullShader *
 {
 	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
-	ID3DBlob* hsBlob = nullptr;
-	hr = CompileShaderFromFile(shaderFilename, "main", "hs_5_0", &hsBlob);
 
-	if (FAILED(hr))
+	char* bytes = { 0 };
+	size_t size = FileReaderWriter::ReadFileBytes(shaderFilename, bytes);
+
+	if (size != 0)
 	{
-		MessageBox(nullptr,
-			L"The Hull shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		return hr;
+		hr = device->CreateHullShader((void*)bytes, size, nullptr, hullShader);
+		if (FAILED(hr))
+		{
+			free(bytes);
+			return hr;
+		}
+	}
+	else
+	{
+		ID3DBlob* hsBlob = nullptr;
+		hr = CompileShaderFromFile(shaderFilename, "main", "hs_5_0", &hsBlob);
+
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr,
+				L"The Hull shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+			return hr;
+		}
+
+		// Create the pixel shader
+		hr = device->CreateHullShader(hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, hullShader);
+		hsBlob->Release();
+
+		if (FAILED(hr))
+			return hr;
 	}
 
-	// Create the pixel shader
-	hr = device->CreateHullShader(hsBlob->GetBufferPointer(), hsBlob->GetBufferSize(), nullptr, hullShader);
-	hsBlob->Release();
-
-	if (FAILED(hr))
-		return hr;
+	free(bytes);
 
 	return S_OK;
 }
@@ -79,22 +125,40 @@ HRESULT ShaderClass::CreateDomainShader(WCHAR * shaderFilename, ID3D11DomainShad
 {
 	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
-	ID3DBlob* dsBlob = nullptr;
-	hr = CompileShaderFromFile(shaderFilename, "main", "ds_5_0", &dsBlob);
 
-	if (FAILED(hr))
+	char* bytes = { 0 };
+	size_t size = FileReaderWriter::ReadFileBytes(shaderFilename, bytes);
+
+	if (size != 0)
 	{
-		MessageBox(nullptr,
-			L"The Domain shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		return hr;
+		hr = device->CreateDomainShader((void*)bytes, size, nullptr, domainShader);
+		if (FAILED(hr))
+		{
+			free(bytes);
+			return hr;
+		}
+	}
+	else
+	{
+		ID3DBlob* dsBlob = nullptr;
+		hr = CompileShaderFromFile(shaderFilename, "main", "ds_5_0", &dsBlob);
+
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr,
+				L"The Domain shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+			return hr;
+		}
+
+		// Create the pixel shader
+		hr = device->CreateDomainShader(dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, domainShader);
+		dsBlob->Release();
+
+		if (FAILED(hr))
+			return hr;
 	}
 
-	// Create the pixel shader
-	hr = device->CreateDomainShader(dsBlob->GetBufferPointer(), dsBlob->GetBufferSize(), nullptr, domainShader);
-	dsBlob->Release();
-
-	if (FAILED(hr))
-		return hr;
+	free(bytes);
 
 	return S_OK;
 }
@@ -103,22 +167,40 @@ HRESULT ShaderClass::CreatePixelShader(WCHAR * shaderFilename, ID3D11PixelShader
 {
 	auto device = ApplicationNew::Get().GetDevice();
 	HRESULT hr;
-	ID3DBlob* psBlob = nullptr;
-	hr = CompileShaderFromFile(shaderFilename, "main", "ps_5_0", &psBlob);
 
-	if (FAILED(hr))
+	char* bytes = { 0 };
+	size_t size = FileReaderWriter::ReadFileBytes(shaderFilename, bytes);
+
+	if (size != 0)
 	{
-		MessageBox(nullptr,
-			L"The Pixel shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
-		return hr;
+		hr = device->CreatePixelShader((void*)bytes, size, nullptr, pixelShader);
+		if (FAILED(hr))
+		{
+			free(bytes);
+			return hr;
+		}
+	}
+	else
+	{
+		ID3DBlob* psBlob = nullptr;
+		hr = CompileShaderFromFile(shaderFilename, "main", "ps_5_0", &psBlob);
+
+		if (FAILED(hr))
+		{
+			MessageBox(nullptr,
+				L"The Pixel shader cannot be compiled.  Please run this executable from the directory that contains the FX file.", L"Error", MB_OK);
+			return hr;
+		}
+
+		// Create the pixel shader
+		hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, pixelShader);
+		psBlob->Release();
+
+		if (FAILED(hr))
+			return hr;
 	}
 
-	// Create the pixel shader
-	hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, pixelShader);
-	psBlob->Release();
-
-	if (FAILED(hr))
-		return hr;
+	free(bytes);
 
 	return S_OK;
 }
@@ -134,7 +216,18 @@ HRESULT ShaderClass::CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT n
 	if (FAILED(hr))
 		return hr;
 
-	vsBlob->Release();
+	return hr;
+}
+
+HRESULT ShaderClass::CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements, ID3D11InputLayout** inputLayout, char* bytes, size_t len)
+{
+	auto device = ApplicationNew::Get().GetDevice();
+	HRESULT hr;
+
+	hr = device->CreateInputLayout(layout, numElements, (void*)bytes, len, inputLayout);
+
+	if (FAILED(hr))
+		return hr;
 
 	return hr;
 }

@@ -17,10 +17,12 @@ Shadows::~Shadows()
 
 void Shadows::Cleanup()
 {
+	_inputLayout->Release();
 	_shadowDepthVS->Release();
 	_ShadowTex->Release();
 	_ShadowDepthStencilView->Release();
 	_ShadowSRV->Release();
+	_shadowDepthMatrixBuffer->Release();
 }
 
 HRESULT Shadows::Initialise(float windowWidth, float windowHeight)
@@ -62,7 +64,7 @@ void Shadows::PreResizeViews()
 
 void Shadows::OnResize(float windowWidth, float windowHeight)
 {
-	Initialise(windowWidth, windowHeight);
+	InitialiseDepthStencilView(windowWidth, windowHeight);
 }
 
 HRESULT Shadows::InitialiseShaders()
@@ -76,7 +78,7 @@ HRESULT Shadows::InitialiseShaders()
 		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ShadowDepthVS.hlsl", &_shadowDepthVS, &_inputLayout, layout, ARRAYSIZE(layout));
+	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ShadowDepthVS.cso", &_shadowDepthVS, &_inputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
 
@@ -89,8 +91,8 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 
 	HRESULT hr;
 	D3D11_TEXTURE2D_DESC texDesc;
-	texDesc.Width = windowWidth;
-	texDesc.Height = windowHeight;
+	texDesc.Width = static_cast<UINT>(windowWidth);
+	texDesc.Height = static_cast<UINT>(windowHeight);
 	texDesc.MipLevels = 1;
 	texDesc.ArraySize = 1;
 	texDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
@@ -210,7 +212,7 @@ void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 		{
 			shadowDepthMatrixBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&element->GetTransform()->GetWorld()));
 			context->UpdateSubresource(_shadowDepthMatrixBuffer, 0, nullptr, &shadowDepthMatrixBuffer, 0, 0);
-			element->Draw(context.Get());
+			element->Draw();
 		}
 	}
 

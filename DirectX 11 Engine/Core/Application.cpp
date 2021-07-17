@@ -175,7 +175,7 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_EXITSIZEMOVE:
 		/*_windowClass->SetWindowResizing(false);
 		_timer.Start();*/
-		Resize(_windowWidth, _windowHeight);
+		Resize(static_cast<float>(_windowWidth), static_cast<float>(_windowHeight));
 		return true;
 
 	case WM_MENUCHAR:
@@ -213,7 +213,7 @@ void Application::Update(float deltaTime)
 {
 	_player->Update(deltaTime);
 
-	if(_testingScene != nullptr)
+	/*if(_testingScene != nullptr)
 	{
 		_testingScene->Update(deltaTime);
 	}
@@ -221,7 +221,7 @@ void Application::Update(float deltaTime)
 	if (_mainScene != nullptr)
 	{
 		_mainScene->Update(deltaTime);
-	}
+	}*/
 
 	if(_ui != nullptr)
 	{

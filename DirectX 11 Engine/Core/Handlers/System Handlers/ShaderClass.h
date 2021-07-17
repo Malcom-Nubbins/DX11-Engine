@@ -17,6 +17,7 @@ private:
 private:
 	static HRESULT CompileShaderFromFile(WCHAR* szFileName, LPCSTR szEntryPoint, LPCSTR szShaderModel, ID3DBlob** ppBlobOut);
 	static HRESULT CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements, ID3D11InputLayout** inputLayout, ID3DBlob* vsBlob);
+	static HRESULT CreateInputLayout(D3D11_INPUT_ELEMENT_DESC layout[], UINT numElements, ID3D11InputLayout** inputLayout, char* bytes, size_t len);
 public:
 	ShaderClass();
 	~ShaderClass();

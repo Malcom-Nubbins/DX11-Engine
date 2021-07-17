@@ -28,6 +28,8 @@ BasicLight::~BasicLight()
 void BasicLight::Cleanup() const
 {
 	_lightVS->Release();
+	_tesselationHS->Release();
+	_tesselationDS->Release();
 	_lightPS->Release();
 	_simpleVertexInputLayout->Release();
 
@@ -39,6 +41,8 @@ void BasicLight::Cleanup() const
 	_depthStencilView->Release();
 
 	_fogValuesBuffer->Release();
+	_tesselationBuffer->Release();
+	_camLightBuffer->Release();
 
 	_matrixBuffer->Release();
 	_objectValueBuffer->Release();
@@ -161,16 +165,21 @@ HRESULT BasicLight::InitialiseShaders()
 		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/LightVS.hlsl", &_lightVS, &_simpleVertexInputLayout, layout, ARRAYSIZE(layout));
-	if (FAILED(hr))
-		return hr;
-	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/LightPS.hlsl", &_lightPS);
+	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/LightVS.cso", &_lightVS, &_simpleVertexInputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
 
-	hr = ShaderClass::CreateHullShader((WCHAR*)L"Core/Shaders/TesselationHS.hlsl", &_tesselationHS);
+	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/LightPS.cso", &_lightPS);
+	if (FAILED(hr))
+		return hr;
 
-	hr = ShaderClass::CreateDomainShader((WCHAR*)L"Core/Shaders/TesselationDS.hlsl", &_tesselationDS);
+	hr = ShaderClass::CreateHullShader((WCHAR*)L"Core/Shaders/TesselationHS.cso", &_tesselationHS);
+	if (FAILED(hr))
+		return hr;
+
+	hr = ShaderClass::CreateDomainShader((WCHAR*)L"Core/Shaders/TesselationDS.cso", &_tesselationDS);
+	if (FAILED(hr))
+		return hr;
 
 	D3D11_BUFFER_DESC bd;
 	ZeroMemory(&bd, sizeof(bd));
@@ -233,8 +242,10 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 		return hr;
 	}
 
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	char const rtvNamee[] = "BasicLightRTV";
 	m_RenderTargetView->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(rtvNamee) - 1, rtvNamee);
+#endif
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = renderTargetTexDesc.Format;
@@ -247,8 +258,8 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 	UINT sampleCount = 1;
 	D3D11_TEXTURE2D_DESC depthBufferDesc{};
 
-	depthBufferDesc.Width = windowWidth;
-	depthBufferDesc.Height = windowHeight;
+	depthBufferDesc.Width = static_cast<UINT>(windowWidth);
+	depthBufferDesc.Height = static_cast<UINT>(windowHeight);
 	depthBufferDesc.MipLevels = 1;
 	depthBufferDesc.ArraySize = 1;
 	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
@@ -328,7 +339,7 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 	}
 }
 
-void BasicLight::Render(Camera& const camera, const DirectionalLight& sceneLight, const std::vector<PointLight>& pointLights, const SpotLight& spotLight, 
+void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, const std::vector<PointLight>& pointLights, const SpotLight& spotLight, 
 						const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, Shadows& shadowClass)
 {
 	auto context = ApplicationNew::Get().GetContext();
@@ -375,7 +386,7 @@ void BasicLight::Render(Camera& const camera, const DirectionalLight& sceneLight
 	else
 		objValBuffer.usePointLights = 0.0f;
 
-	objValBuffer.numOfLights = pointLights.size();
+	objValBuffer.numOfLights = static_cast<float>(pointLights.size());
 
 	if (pointLights.size() < 96)
 	{
@@ -484,13 +495,13 @@ void BasicLight::Render(Camera& const camera, const DirectionalLight& sceneLight
 		context->UpdateSubresource(_fogValuesBuffer, 0, nullptr, &fogValuesBuffer, 0, 0);
 		context->UpdateSubresource(_camLightBuffer, 0, nullptr, &camLightValues, 0, 0);
 
-		element->Draw(context.Get());
+		element->Draw();
 	}
 
 	//terrain.Draw(matBuffer, objValBuffer, matrixBuffer, objectValueBuffer, nullptr);
 }
 
-void BasicLight::Render(Camera& const camera, const DirectionalLight& sceneLight, const SpotLight& spotLight,
+void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, const SpotLight& spotLight,
 	const ::std::vector<SceneElement*>& sceneElements, Shadows& shadowClass)
 {
 	const auto emptyPointLightsVector = std::vector<PointLight>();

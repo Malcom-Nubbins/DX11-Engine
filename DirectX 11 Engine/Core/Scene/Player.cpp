@@ -2,7 +2,12 @@
 #include "../DX11Engine.h"
 #include "../ApplicationNew.h"
 
-Player::Player() : m_Camera(nullptr), _windowClass(nullptr)
+Player::Player() 
+	: m_Camera(nullptr)
+	, _windowClass(nullptr)
+	, m_CurrMovementState(MovementState::None)
+	, m_Sprint(false)
+	, m_LockMouse(true)
 {
 }
 
@@ -43,6 +48,11 @@ void Player::OnMouseButtonDown(MouseButtonEvent& e)
 	{
 		m_Camera->SetFOV((55.0f / 180.0f) * XM_PI);
 	}
+
+	if (e.MiddleMouseButton)
+	{
+		m_LockMouse = true;
+	}
 }
 
 void Player::OnMouseButtonUp(MouseButtonEvent& e)
@@ -55,47 +65,80 @@ void Player::OnMouseButtonUp(MouseButtonEvent& e)
 
 void Player::UpdatePlayerLookDirection(MouseMotionEvent& e)
 {
-	auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
-	POINT screenCentre = window->GetScreenCentre();
+	if (m_LockMouse)
+	{
+		auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
+		POINT screenCentre = window->GetScreenCentre();
 
-	auto yaw = (e.X - screenCentre.x) * m_LookSpeed;
-	auto pitch = (e.Y - screenCentre.y) * m_LookSpeed;
+		m_CurrCamYaw = (e.X - screenCentre.x) * m_LookSpeed;
+		m_CurrCamPitch = (e.Y - screenCentre.y) * m_LookSpeed;
 
-	m_Camera->Pitch(pitch * Timer::GetDeltaMilliseconds());
-	m_Camera->Yaw(yaw * Timer::GetDeltaMilliseconds());
-
-	m_Camera->Update(Timer::GetDeltaMilliseconds());
-
-	InputHandler::SetMousePos(window->GetHWND(), window->GetScreenCentre());
+		InputHandler::SetMousePos(window->GetHWND(), window->GetScreenCentre());
+	}
 }
 
-void Player::UpdatePlayerPosition(KeyEvent& e)
+void Player::OnPlayerMovementKeyPressed(KeyEvent& e)
 {
-	switch (e.Key)
+	using namespace KeyCode;
+	if (e.Key == Key::A)
 	{
-	case KeyCode::Key::A:
-		{
-			m_Camera->Strafe(-m_MovementSpeed * Timer::GetDeltaMilliseconds());
-		}
-		break;
-	case KeyCode::Key::D:
-		{
-			m_Camera->Strafe(m_MovementSpeed * Timer::GetDeltaMilliseconds());
-		}
-		break;
-	case KeyCode::Key::W:
-		{
-			m_Camera->Walk(m_MovementSpeed * Timer::GetDeltaMilliseconds());
-		}
-		break;
-	case KeyCode::Key::S:
-		{
-			m_Camera->Walk(-m_MovementSpeed * Timer::GetDeltaMilliseconds());
-		}
-		break;
-	default:
-		break;
+		m_CurrMovementState = m_CurrMovementState | MovementState::Left;
 	}
+
+	if (e.Key == Key::D)
+	{
+		m_CurrMovementState = m_CurrMovementState | MovementState::Right;
+	}
+
+	if (e.Key == Key::W)
+	{
+		m_CurrMovementState = m_CurrMovementState | MovementState::Forward;
+	}
+
+	if (e.Key == Key::S)
+	{
+		m_CurrMovementState = m_CurrMovementState | MovementState::Backward;
+	}
+
+	m_Sprint = e.Shift;
+}
+
+void Player::OnPlayerMovementKeyReleased(KeyEvent& e)
+{
+	using namespace KeyCode;
+	if (e.Key == Key::A)
+	{
+		if ((MovementState::Left & m_CurrMovementState) == MovementState::Left)
+		{
+			m_CurrMovementState = m_CurrMovementState & ~MovementState::Left;
+		}
+	}
+
+	if (e.Key == Key::D)
+	{
+		if ((MovementState::Right & m_CurrMovementState) == MovementState::Right)
+		{
+			m_CurrMovementState = m_CurrMovementState & ~MovementState::Right;
+		}
+	}
+
+	if (e.Key == Key::W)
+	{
+		if ((MovementState::Forward & m_CurrMovementState) == MovementState::Forward)
+		{
+			m_CurrMovementState = m_CurrMovementState & ~MovementState::Forward;
+		}
+	}
+
+	if (e.Key == Key::S)
+	{
+		if ((MovementState::Backward & m_CurrMovementState) == MovementState::Backward)
+		{
+			m_CurrMovementState = m_CurrMovementState & ~MovementState::Backward;
+		}
+	}
+
+	m_Sprint = e.Shift;
 }
 
 void Player::SetPlayerPosition(XMFLOAT3 pos) const
@@ -104,7 +147,43 @@ void Player::SetPlayerPosition(XMFLOAT3 pos) const
 }
 
 
-void Player::Update(float delta)
+void Player::Update(double delta)
 {
+	bool shouldMoveLeft = ((MovementState::Left & m_CurrMovementState) == MovementState::Left);
+	bool shouldMoveRight = ((MovementState::Right & m_CurrMovementState) == MovementState::Right);
+	bool shouldMoveForward = ((MovementState::Forward & m_CurrMovementState) == MovementState::Forward);
+	bool shouldMoveBackward = ((MovementState::Backward & m_CurrMovementState) == MovementState::Backward);
 
+	double moveSpeed = m_Sprint ? (m_MovementSpeed * 2.5f) : m_MovementSpeed;
+	moveSpeed *= delta;
+
+	if (InputHandler::IsKeyDown(Keys::M))
+	{
+		m_LockMouse = false;
+	}
+
+	if (shouldMoveLeft)
+	{
+		m_Camera->Strafe(-moveSpeed);
+	}
+
+	if (shouldMoveRight)
+	{
+		m_Camera->Strafe(moveSpeed);
+	}
+
+	if (shouldMoveForward)
+	{
+		m_Camera->Walk(moveSpeed);
+	}
+
+	if (shouldMoveBackward)
+	{
+		m_Camera->Walk(-moveSpeed);
+	}
+
+	m_Camera->Pitch(m_CurrCamPitch * delta);
+	m_Camera->Yaw(m_CurrCamYaw * delta);
+
+	m_Camera->Update(delta);
 }

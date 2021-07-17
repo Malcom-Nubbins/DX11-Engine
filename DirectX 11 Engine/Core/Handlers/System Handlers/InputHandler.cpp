@@ -1,5 +1,8 @@
 ﻿#include "InputHandler.h"
 
+InputHandler::KeyboardState InputHandler::m_CurrFrameState[256];
+InputHandler::KeyboardState InputHandler::m_LastFrameState[256];
+
 InputHandler::InputHandler()
 {
 }
@@ -44,15 +47,24 @@ void InputHandler::SetMousePos(HWND hwnd, POINT pos)
 	}
 }
 
+bool InputHandler::IsKeyUp(Keys key)
+{
+	bool wasKeyDownPreviousFrame = (m_LastFrameState[key] & 0x80) > 0;
+	bool isKeyDownThisFrame = (m_CurrFrameState[key] & 0x80) > 0;
+
+	bool wasKeyReleased = wasKeyDownPreviousFrame && !isKeyDownThisFrame;
+
+	return wasKeyReleased;
+}
+
 bool InputHandler::IsKeyDown(Keys key)
 {
-	BYTE keyboardState[256];
+	return (m_CurrFrameState[key] & 0x80) > 0;
+}
 
-	// WinAPI call to get the keyboard state.
-	GetKeyboardState(keyboardState);
+void InputHandler::UpdateInputState()
+{
+	memcpy(m_LastFrameState, m_CurrFrameState, 256);
 
-	// Check whether the key has been pressed.
-	return (keyboardState[key] & 0x80) > 0;
-
-	return false;
+	GetKeyboardState(m_CurrFrameState);
 }

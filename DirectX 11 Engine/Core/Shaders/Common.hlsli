@@ -86,7 +86,7 @@ float3 DirectSpecularBRDF(float4 specularAlbedo, float3 normal, float3 lightDir,
 
     float D = alpha2 / (Pi * pow(nDotH * nDotH * (alpha2 - 1) + 1, 2.0f));
 
-    float F = SchlickFresnel(specularAlbedo.rgb, halfVec, lightDir);
+    float3 F = SchlickFresnel(specularAlbedo.rgb, halfVec, lightDir);
 
     float G = GSmith(specularAlbedo.w, nDotV, nDotL);
 
@@ -101,7 +101,7 @@ void ComputeDirectionalLight(Surface surface, DirectionalLight dirLight,
     ambient = float3(0.0f, 0.0f, 0.0f);
     diffuse = float3(0.0f, 0.0f, 0.0f);
     specular = float3(0.0f, 0.0f, 0.0f);
-    ambient = surface.Ambient * dirLight.Ambient;
+    ambient = float3(surface.Ambient.rgb) * float3(dirLight.Ambient.rgb);
 
     float3 normalisedLightDir = normalize(dirLight.LightDirection);
 
@@ -129,7 +129,7 @@ void ComputePointLight(Surface surface, PointLight pointLight, float3 pos,
 
     lightVec /= distance;
 
-    ambient = surface.Ambient * pointLight.Ambient;
+    ambient = float3(surface.Ambient.rgb) * float3(pointLight.Ambient.rgb);
 
     float diffuseAmount = dot(lightVec, normal);
 
@@ -139,8 +139,8 @@ void ComputePointLight(Surface surface, PointLight pointLight, float3 pos,
         float3 reflection = reflect(-lightVec, normal);
         float specularAmount = pow(max(dot(reflection, toEye), 0.0f), surface.Specular.w);
 
-        diffuse = diffuseAmount * surface.Diffuse * pointLight.Diffuse;
-        specular = specularAmount * surface.Specular * pointLight.Specular;
+        diffuse = diffuseAmount * (float3(surface.Diffuse.rgb) * float3(pointLight.Diffuse.rgb));
+        specular = specularAmount * (float3(surface.Specular.rgb) * float3(pointLight.Specular.rgb));
     }
 
     float attenuation = 1.0f / dot(pointLight.Attenuation, float3(1.0f, distance, distance * distance));
@@ -166,7 +166,7 @@ void ComputeSpotLight(Surface surface, SpotLight spotLight, float3 pos,
 
     lightVec /= distance;
 
-    ambient = surface.Ambient * spotLight.Ambient;
+    ambient = float3(surface.Ambient.rgb) * float3(spotLight.Ambient.rgb);
 
     float diffuseAmount = dot(lightVec, normal);
 

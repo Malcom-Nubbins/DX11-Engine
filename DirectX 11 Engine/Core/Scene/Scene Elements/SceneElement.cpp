@@ -1,7 +1,7 @@
 #include "SceneElement.h"
 
-SceneElement::SceneElement(std::string elementName, Transform* transform, Appearance* appearance)
-	: _transform(transform), _appearance(appearance), _name(elementName), _castShadows(false), _affectedByLight(false)
+SceneElement::SceneElement(std::string elementName, Transform const& transform, Appearance const& appearance)
+	: _transform(std::make_unique<Transform>(transform)), _appearance(std::make_unique<Appearance>(appearance)), _name(elementName), _castShadows(false), _affectedByLight(false)
 {
 }
 
@@ -11,17 +11,30 @@ SceneElement::~SceneElement()
 
 void SceneElement::Cleanup()
 {
-	delete _transform;
-	delete _appearance;
+	if (_transform != nullptr)
+	{
+		Transform* transformPtr = _transform.release();
+		delete transformPtr;
+		_transform = nullptr;
+	}
+	
+	if (_appearance != nullptr)
+	{
+		_appearance->Cleanup();
+
+		Appearance* appearancePtr = _appearance.release();
+		delete appearancePtr;
+		_appearance = nullptr;
+	}
 }
 
 void SceneElement::AddChild(SceneElement * child)
 {
 	_children.push_back(child);
-	child->GetTransform()->SetParent(_transform);
+	child->GetTransform()->SetParent(_transform.get());
 }
 
-void SceneElement::Update(float deltaTime)
+void SceneElement::Update(double deltaTime)
 {
 	_transform->Update(deltaTime);
 
@@ -34,12 +47,12 @@ void SceneElement::Update(float deltaTime)
 	}
 }
 
-void SceneElement::Draw(ID3D11DeviceContext* deviceContext)
+void SceneElement::Draw()
 {
 	if(_name == "Aircraft")
 	{
 		auto temp = 1;
 	}
 
-	_appearance->Draw(deviceContext);
+	_appearance->Draw();
 }

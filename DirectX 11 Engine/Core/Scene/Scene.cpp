@@ -33,7 +33,7 @@ void Scene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 {
 }
 
-void Scene::Update(float delta)
+void Scene::Update(UpdateEvent& e)
 {
 }
 

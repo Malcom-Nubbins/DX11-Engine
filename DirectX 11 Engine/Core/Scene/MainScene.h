@@ -61,7 +61,7 @@ public:
 	void InitialiseScene(float windowWidth, float windowHeight) override;
 	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;
 
-	void Update(float deltaTime) override;
+	void Update(UpdateEvent& e) override;
 	void Draw() override;
 };
 

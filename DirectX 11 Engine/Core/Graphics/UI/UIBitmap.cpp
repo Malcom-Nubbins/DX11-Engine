@@ -10,6 +10,15 @@ UIBitmap::~UIBitmap()
 {
 }
 
+void UIBitmap::Cleanup()
+{
+	_texture->Release();
+	_vertexBuffer->Release();
+	_indexBuffer->Release();
+
+	_uiElement->Cleanup();
+}
+
 void UIBitmap::Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11ShaderResourceView* texture)
 {
 	_screenSize = screenSize;
@@ -20,19 +29,21 @@ void UIBitmap::Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11Shader
 	BufferClass::CreateQuadDynamic(&_vertexBuffer, &_indexBuffer);
 
 	_uiQuad.vertexBuffer = _vertexBuffer;
+	_uiQuad.vertexBuffer->AddRef();
 	_uiQuad.indexBuffer = _indexBuffer;
+	_uiQuad.indexBuffer->AddRef();
 	_uiQuad.numberOfIndices = 6;
 	_uiQuad.vertexBufferOffset = 0;
 	_uiQuad.vertexBufferStride = sizeof(SimpleQuad);
 
-	auto* uiTransform = new Transform();
+	auto uiTransform = std::make_shared<Transform>();
 	uiTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	uiTransform->SetScale(XMFLOAT3(1, 1, 1.0f));
 	uiTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* uiAppearance = new Appearance(_uiQuad, ObjectMaterial{});
+	auto uiAppearance = std::make_shared<Appearance>(_uiQuad, ObjectMaterial{});
 
-	_uiElement = new SceneElement("UI Square", uiTransform, uiAppearance);
+	_uiElement = new SceneElement("UI Square", *uiTransform, *uiAppearance);
 }
 
 void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
@@ -64,7 +75,11 @@ void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 		{ XMFLOAT3(right, bottom, 0.0f),XMFLOAT2(1.0f, 1.0f) }
 	};
 
-	context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr))
+	{
+		return;
+	}
 
 	auto* vertsPtr = reinterpret_cast<SimpleQuad*>(mappedResource.pData);
 
@@ -102,7 +117,11 @@ void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
 		{ XMFLOAT3(right, bottom, 0.0f),XMFLOAT2(1.0f, 1.0f) }
 	};
 
-	context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr))
+	{
+		return;
+	}
 
 	auto* vertsPtr = reinterpret_cast<SimpleQuad*>(mappedResource.pData);
 
@@ -111,7 +130,7 @@ void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
 	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0);
 }
 
-void UIBitmap::Update(float delta)
+void UIBitmap::Update(double delta)
 {
 	MoveBitmap(_bitmapPrevPosition);
 	_uiElement->Update(delta);
@@ -123,5 +142,5 @@ void UIBitmap::Draw()
 
 	context->PSSetShaderResources(0, 1, &_texture);
 
-	_uiElement->Draw(context.Get());
+	_uiElement->Draw();
 }

@@ -15,6 +15,11 @@ RenderToFullscreenQuad::~RenderToFullscreenQuad()
 
 void RenderToFullscreenQuad::Cleanup()
 {
+	_inputLayout->Release();
+	_quadVS->Release();
+	_quadPS->Release();
+	_quad.vertexBuffer->Release();
+	_quad.indexBuffer->Release();
 }
 
 HRESULT RenderToFullscreenQuad::Initialise(const float width, const float height)
@@ -55,10 +60,10 @@ HRESULT RenderToFullscreenQuad::InitialiseShaders()
 	};
 
 	
-	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/FullscreenQuadVS.hlsl", &_quadVS, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
+	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/FullscreenQuadVS.cso", &_quadVS, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
 	if (FAILED(hr))
 		return hr;
-	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/FullscreenQuadPS.hlsl", &_quadPS);
+	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/FullscreenQuadPS.cso", &_quadPS);
 	if (FAILED(hr))
 		return hr;
 
@@ -92,5 +97,5 @@ void RenderToFullscreenQuad::Render(ID3D11ShaderResourceView * textureToRender) 
 	context->IASetIndexBuffer(_quad.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 	context->PSSetShaderResources(0, 1, &textureToRender);
-	context->DrawIndexed(_quad.numberOfIndices, 0, 0);
+	context->DrawIndexed(static_cast<UINT>(_quad.numberOfIndices), 0, 0);
 }

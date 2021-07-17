@@ -22,6 +22,7 @@ public:
 
 	virtual bool LoadContent() override;
 	virtual void UnloadContent() override;
+	virtual void Cleanup() override;
 
 	static DX11Engine& Get();
 
@@ -30,6 +31,7 @@ protected:
 	virtual void OnRender(RenderEvent& e) override;
 
 	virtual void OnKeyPressed(KeyEvent& e) override;
+	virtual void OnKeyReleased(KeyEvent& e) override;
 	virtual void OnMouseWheel(MouseWheelEvent& e) override;
 	virtual void PreOnResize() override;
 	virtual void OnResize(UINT width, UINT height) override;

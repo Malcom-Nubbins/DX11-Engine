@@ -4,3 +4,5 @@
 
 #define WINDOW_WIDTH 1600	
 #define WINDOW_HEIGHT 900
+
+#define USE_D3D11_DEBUGGING 0

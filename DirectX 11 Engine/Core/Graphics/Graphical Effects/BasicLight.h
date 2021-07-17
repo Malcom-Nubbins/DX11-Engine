@@ -64,11 +64,11 @@ public:
 	void CalculateLightColour(DirectionalLight& sceneLight, float sunHeight, FogValuesBuffer& sceneFog);
 	ID3D11ShaderResourceView* GetRenderTargetSRV() const { return m_RenderTargetShaderResourceView; }
 
-	void Render(Camera& const camera, 
+	void Render(Camera& camera, 
 		const DirectionalLight& sceneLight, const std::vector<PointLight>& pointLights, const SpotLight& spotLight, 
 		const FogValuesBuffer& fogValues, const std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
 
-	void Render(Camera& const camera, const DirectionalLight& sceneLight, const SpotLight& spotLight, const::std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
+	void Render(Camera& camera, const DirectionalLight& sceneLight, const SpotLight& spotLight, const::std::vector<SceneElement*>& sceneElements, Shadows& shadowClass);
 
 private:
 	HRESULT InitialiseShaders();

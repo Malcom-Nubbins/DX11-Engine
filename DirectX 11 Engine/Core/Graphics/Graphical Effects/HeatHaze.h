@@ -24,6 +24,7 @@ public:
 	void Cleanup() const;
 
 	HRESULT Initialise(float width, float height);
+	void PreResize();
 	void Resize(float width, float height);
 
 	void SetAsCurrentRenderTarget() const;

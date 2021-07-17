@@ -60,12 +60,15 @@ HRESULT HeatHaze::Initialise(const float width, const float height)
 	return S_OK;
 }
 
-void HeatHaze::Resize(const float width, const float height)
+void HeatHaze::PreResize()
 {
 	_renderTargetTex2D->Release();
 	_renderTargetView->Release();
 	_renderTargetSRV->Release();
+}
 
+void HeatHaze::Resize(const float width, const float height)
+{
 	InitialiseRenderTarget(width, height);
 }
 
@@ -114,7 +117,7 @@ HRESULT HeatHaze::InitialiseRenderTarget(const float width, const float height)
 
 HRESULT HeatHaze::InitialiseShaders()
 {
-	HRESULT hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/HeatHazePS.hlsl", &_heatHazePS);
+	HRESULT hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/HeatHazePS.cso", &_heatHazePS);
 	if (FAILED(hr))
 		return hr;
 
@@ -183,5 +186,5 @@ void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, std::string s
 
 	context->UpdateSubresource(_heatHazeValues, 0, nullptr, &_values, 0, 0);
 
-	context->DrawIndexed(_quad.numberOfIndices, 0, 0);
+	context->DrawIndexed(static_cast<UINT>(_quad.numberOfIndices), 0, 0);
 }

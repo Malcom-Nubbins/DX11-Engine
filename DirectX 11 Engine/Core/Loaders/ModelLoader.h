@@ -31,5 +31,7 @@ private:
 	static void CalculateTBN(std::vector<SimpleVertex>& vertices, int** indices, int ids[3]);
 public:
 	static bool LoadModel(ID3D11Device* device, std::wstring filename, NewObjectMesh& modelMesh, bool invertFaces);
+
+	static void UnloadAllModels();
 };
 

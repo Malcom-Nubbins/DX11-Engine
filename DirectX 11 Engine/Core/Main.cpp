@@ -7,11 +7,13 @@
 
 void ReportLiveObjects()
 {
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	IDXGIDebug1* dxgiDebug;
 	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
 
 	dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
 	dxgiDebug->Release();
+#endif
 }
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
@@ -34,7 +36,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	ApplicationNew::Destroy();
 
-	atexit(&ReportLiveObjects);
+	//atexit(&ReportLiveObjects);
 
 	return retCode;
 }

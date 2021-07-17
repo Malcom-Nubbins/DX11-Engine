@@ -31,6 +31,6 @@ public:
 
 	void SetParent(Transform* parent) { _parent = parent; }
 
-	void Update(float delta);
+	void Update(double delta);
 };
 

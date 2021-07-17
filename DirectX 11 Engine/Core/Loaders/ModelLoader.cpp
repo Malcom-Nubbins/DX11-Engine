@@ -145,7 +145,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 		D3D11_BUFFER_DESC bd;
 		ZeroMemory(&bd, sizeof(bd));
 		bd.Usage = D3D11_USAGE_DEFAULT;
-		bd.ByteWidth = sizeof(LONG) * indices.size();
+		bd.ByteWidth = static_cast<UINT>(sizeof(LONG) * indices.size());
 		bd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 		bd.CPUAccessFlags = 0;
 		bd.MiscFlags = 0;
@@ -160,12 +160,12 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 
 		subset.vertexBufferStride = sizeof(SimpleVertex);
 		subset.vertexBufferOffset = 0;
-		subset.indexCount = indices.size();
+		subset.indexCount = static_cast<UINT>(indices.size());
 
 		modelMesh.subsets.push_back(subset);
 		modelMesh.numOfSubsets++;
 
-		vertexOffset += indices.size();
+		vertexOffset += static_cast<UINT>(indices.size());
 		indices.clear();
 
 		currId++;
@@ -269,19 +269,24 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 				if (face.empty())
 					continue;
 
-				char* cstr = new char[face.length() + 1];
-				strcpy(cstr, face.c_str());
+				size_t len = face.length() + 1;
 
-				char* p = std::strtok(cstr, "/");
+				char* cstr = new char[len];
+				char* context = NULL;
+
+				strcpy_s(cstr, len, face.c_str());
+
+				char* p = strtok_s(cstr, "/", &context);
 
 				size_t count = 0;
 				for (UINT ui = 0; p != nullptr; ++ui)
 				{
-					faceTokens.tokensList[ui] = static_cast<char*>(malloc(strlen(p) + 1));
+					size_t size = strlen(p) + 1;
+					faceTokens.tokensList[ui] = static_cast<char*>(malloc(size));
 					if (faceTokens.tokensList[ui])
 					{
-						strcpy(faceTokens.tokensList[ui], p);
-						p = std::strtok(nullptr, "/");
+						strcpy_s(faceTokens.tokensList[ui], size, p);
+						p = strtok_s(nullptr, "/", &context);
 						count++;
 					}
 					else
@@ -328,7 +333,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 					v.normal = normals[idNorm];
 
 					vertices.push_back(v);
-					vertexIndex = vertices.size() - 1;
+					vertexIndex = static_cast<int>(vertices.size()) - 1;
 					availableVertices.insert(std::make_pair(std::make_tuple(idPos, idTex, idNorm), vertexIndex));
 				}
 
@@ -367,19 +372,23 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 				if (face.empty())
 					continue;
 
-				char* cstr = new char[face.length() + 1];
-				strcpy(cstr, face.c_str());
+				size_t len = face.length() + 1;
+				char* cstr = new char[len];
+				char* context = NULL;
 
-				char* p = std::strtok(cstr, "/");
+				strcpy_s(cstr, len, face.c_str());
+
+				char* p = strtok_s(cstr, "/", &context);
 
 				size_t count = 0;
 				for (UINT ui = 0; p != nullptr; ++ui)
 				{
-					faceTokens.tokensList[ui] = static_cast<char*>(malloc(strlen(p) + 1));
+					size_t size = strlen(p) + 1;
+					faceTokens.tokensList[ui] = static_cast<char*>(malloc(size));
 					if (faceTokens.tokensList[ui])
 					{
-						strcpy(faceTokens.tokensList[ui], p);
-						p = std::strtok(nullptr, "/");
+						strcpy_s(faceTokens.tokensList[ui], size, p);
+						p = strtok_s(nullptr, "/", &context);
 						count++;
 					}
 					else
@@ -426,7 +435,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 					v.normal = normals[idNorm];
 
 					vertices.push_back(v);
-					vertexIndex = vertices.size() - 1;
+					vertexIndex = static_cast<int>(vertices.size()) - 1;
 					availableVertices.insert(std::make_pair(std::make_tuple(idPos, idTex, idNorm), vertexIndex));
 				}
 
@@ -493,14 +502,17 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 
 		std::getline(in, currLine);
 
-		char* cstr = new char[currLine.length() + 1];
-		strcpy(cstr, currLine.c_str());
+		size_t len = currLine.length() + 1;
+		char* cstr = new char[len];
+		char* context = NULL;
 
-		char* p = std::strtok(cstr, " ");
+		strcpy_s(cstr, len, currLine.c_str());
+
+		char* p = strtok_s(cstr, " ", &context);
 		while(p != nullptr)
 		{
 			tokensCount++;
-			p = std::strtok(nullptr, " ");
+			p = strtok_s(nullptr, " ", &context);
 		}
 
 		delete[] cstr;
@@ -510,18 +522,20 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 
 		if(tokens.tokensList)
 		{
-			cstr = new char[currLine.length() + 1];
-			strcpy(cstr, currLine.c_str());
+			len = currLine.length() + 1;
+			cstr = new char[len];
+			strcpy_s(cstr, len, currLine.c_str());
 
-			p = std::strtok(cstr, " ");
+			p = strtok_s(cstr, " ", &context);
 
 			for (UINT i = 0; p != nullptr; ++i)
 			{
-				tokens.tokensList[i] = static_cast<char*>(malloc(strlen(p) + 1));
+				size_t size = strlen(p) + 1;
+				tokens.tokensList[i] = static_cast<char*>(malloc(size));
 				if(tokens.tokensList[i])
 				{
-					strcpy(tokens.tokensList[i], p);
-					p = std::strtok(nullptr, " ");
+					strcpy_s(tokens.tokensList[i], size, p);
+					p = strtok_s(nullptr, " ", &context);
 				}
 			}
 
@@ -620,7 +634,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 	D3D11_BUFFER_DESC vbd;
 	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = D3D11_USAGE_DEFAULT;
-	vbd.ByteWidth = sizeof(SimpleVertex) * vertices.size();
+	vbd.ByteWidth = static_cast<UINT>(sizeof(SimpleVertex) * vertices.size());
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
@@ -636,4 +650,27 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 	_modelCache.insert(std::make_pair(filename, modelMesh));
 
 	return true;
+}
+
+void ModelLoader::UnloadAllModels()
+{
+	for (auto const modelCache : _modelCache)
+	{
+		NewObjectMesh objectMesh(modelCache.second);
+		objectMesh.vertexBuffer->Release();
+		for (UINT i = 0; i < objectMesh.numOfSubsets; ++i)
+		{
+			Subset subset = objectMesh.subsets[i];
+
+			if (subset.vertexBuffer)
+			{
+				objectMesh.subsets[i].vertexBuffer->Release();
+			}
+			
+			if (subset.indexBuffer)
+			{
+				objectMesh.subsets[i].indexBuffer->Release();
+			}
+		}
+	}
 }

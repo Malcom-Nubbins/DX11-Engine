@@ -28,6 +28,6 @@ public:
 
 	void AddBitmapToUI(XMFLOAT2 bitmapSize, XMFLOAT2 bitmapPos, ID3D11ShaderResourceView* bitmapTexture);
 
-	void Update(float delta);
+	void Update(double delta);
 	void Draw();
 };

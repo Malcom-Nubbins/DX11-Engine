@@ -11,8 +11,8 @@ using namespace DirectX;
 class SceneElement
 {
 private:
-	Transform * _transform;
-	Appearance* _appearance;
+	std::unique_ptr<Transform> _transform;
+	std::unique_ptr<Appearance> _appearance;
 
 	std::string _name;
 
@@ -22,18 +22,18 @@ private:
 	std::vector<SceneElement*> _children;
 
 public:
-	SceneElement(std::string elementName, Transform* transform, Appearance* appearance);
+	SceneElement(std::string elementName, Transform const& transform, Appearance const& appearance);
 	~SceneElement();
 
 	void Cleanup();
 
-	void Update(float deltaTime);
-	void Draw(ID3D11DeviceContext* deviceContext);
+	void Update(double deltaTime);
+	void Draw();
 
 public:
 	
-	Transform * GetTransform() const { return _transform; }
-	Appearance * GetAppearance() const { return _appearance; }
+	Transform * GetTransform() const { return _transform.get(); }
+	Appearance * GetAppearance() const { return _appearance.get(); }
 
 	void SetCastShadows(bool castShadows) { _castShadows = castShadows; }
 	bool CanCastShadows() const { return _castShadows; }

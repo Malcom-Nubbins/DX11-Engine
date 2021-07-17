@@ -29,7 +29,7 @@ void Camera::SetLens()
 {
 	DX11Engine const& engine = DX11Engine::Get();
 
-	auto proj = XMMatrixOrthographicLH(engine.GetClientWidth(), engine.GetClientHeight(), m_Near, m_Far);
+	auto proj = XMMatrixOrthographicLH(static_cast<float>(engine.GetClientWidth()), static_cast<float>(engine.GetClientHeight()), m_Near, m_Far);
 	XMStoreFloat4x4(&m_OthographicProj, proj);
 
 	const auto camRight = XMLoadFloat3(&m_Right);
@@ -74,7 +74,7 @@ void Camera::Reset(float fov, float nearZ, float farZ, float aspect)
 	SetLens();
 }
 
-void Camera::Strafe(const float amount)
+void Camera::Strafe(const double amount)
 {
 	const auto strafe = XMVectorReplicate(amount);
 	const auto right = XMLoadFloat3(&m_Right);
@@ -82,7 +82,7 @@ void Camera::Strafe(const float amount)
 	XMStoreFloat3(&m_Eye, XMVectorMultiplyAdd(strafe, right, eye));
 }
 
-void Camera::Walk(float amount)
+void Camera::Walk(double amount)
 {
 	const auto walk = XMVectorReplicate(amount);
 	const auto at = XMLoadFloat3(&m_At);

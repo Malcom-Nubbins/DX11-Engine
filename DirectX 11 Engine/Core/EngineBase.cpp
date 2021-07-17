@@ -2,6 +2,7 @@
 #include "Globals/stdafx.h"
 #include "ApplicationNew.h"
 #include "Handlers/System Handlers/WindowClass.h"
+#include "Handlers/System Handlers/InputHandler.h"
 
 EngineBase::EngineBase(const std::wstring& name, UINT width, UINT height, bool vsync)
 	: m_Name(name)
@@ -49,7 +50,7 @@ void EngineBase::OnKeyPressed(KeyEvent& e)
 {
 	if (e.Key == KeyCode::Key::Escape)
 	{
-		PostQuitMessage(0);
+		ApplicationNew::Get().Quit();
 	}
 }
 

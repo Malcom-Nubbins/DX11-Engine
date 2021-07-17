@@ -20,7 +20,12 @@ void DiamondSquareTerrain::Cleanup()
 	if (_vertexBuffer) _vertexBuffer->Release();
 	if (_indexBuffer) _indexBuffer->Release();
 	delete _gridMesh;
+	_gridMesh = nullptr;
+
+	_terrainGO->Cleanup();
 	delete _terrainGO;
+	_terrainGO = nullptr;
+
 	delete[] _heightMap;
 }
 
@@ -367,7 +372,7 @@ void DiamondSquareTerrain::ShadowDraw(ShadowDepthMatrixBuffer mb, ID3D11Buffer *
 		{
 			mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
 			ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-			_terrainGO->Draw(ApplicationNew::Get().GetContext().Get());
+			_terrainGO->Draw();
 		}
 	}
 }
@@ -427,7 +432,7 @@ void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Bu
 		// Update constant buffer
 		context->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
 		context->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
-		_terrainGO->Draw(context.Get());
+		_terrainGO->Draw();
 	}
 
 }

@@ -120,7 +120,7 @@ float4 main(VertexOutput input) : SV_TARGET
 
         if(useSpecularMap == 1.0f)
         {
-            float specularIntensity = texSpecularMap.Sample(samLinear, input.Tex);
+            float specularIntensity = texSpecularMap.Sample(samLinear, input.Tex).r;
             specular *= specularIntensity;
         }
 

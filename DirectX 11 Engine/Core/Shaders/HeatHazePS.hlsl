@@ -30,10 +30,10 @@ float4 main(VertexOutput input) : SV_TARGET
 
     if(blizzard == 1.0f)
     {
-        float wavetime = sin(time * 2) - 1.1;
+        float wavetime = sin(time) - 1.1f;
 
         // Snow layers
-        float4 snowForeground = texDistortionMap.Sample(linearSampler, float2(input.Tex.x - time * 2, input.Tex.y - time * 2)) * 0.5f;
+        float4 snowForeground = texDistortionMap.Sample(linearSampler, float2(input.Tex.x - time, input.Tex.y - time)) * 0.5f;
         float4 snowBackground = texDistortionMap.Sample(linearSampler, float2(input.Tex.x + wavetime, input.Tex.y - time / 2) * 3) * 0.5f;
 
         // Texture to overlay with snow

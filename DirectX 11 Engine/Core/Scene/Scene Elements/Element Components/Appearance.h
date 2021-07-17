@@ -19,6 +19,8 @@ public:
 	Appearance(NewObjectMesh mesh, ObjectMaterial material);
 	~Appearance();
 
+	void Cleanup();
+
 	void SetColourTexture(ID3D11ShaderResourceView* colourTex) { _colourTex = colourTex; }
 	void SetNormalMap(ID3D11ShaderResourceView* normalMap) { _normalMap = normalMap; }
 	void SetDisplacementMap(ID3D11ShaderResourceView* displacementMap) { _displacementMap = displacementMap; }
@@ -39,7 +41,7 @@ public:
 
 	ObjectMaterial GetObjectMaterial() const { return _material; }
 
-	void Draw(ID3D11DeviceContext* context);
+	void Draw();
 
 };
 

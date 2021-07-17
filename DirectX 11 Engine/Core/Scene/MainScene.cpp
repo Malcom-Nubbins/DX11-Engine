@@ -69,16 +69,28 @@ void MainScene::Cleanup()
 	delete _renderToQuad;
 	_renderToQuad = nullptr;
 
+	//_diamondSquareTerrain->Cleanup();
+
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
 
-	_sceneElements.shrink_to_fit();
+	for (auto const sceneElement : _sceneElements)
+	{
+		if (sceneElement)
+		{
+			sceneElement->Cleanup();
+		}
+	}
+
+	_sceneElements.clear();
 }
 
 void MainScene::PreResizeViews()
 {
 	Scene::PreResizeViews();
 	_basicLight->PreResize();
+	_heatHaze->PreResize();
+	_shadows->PreResizeViews();
 }
 
 void MainScene::ResizeViews(float windowWidth, float windowHeight)
@@ -87,6 +99,8 @@ void MainScene::ResizeViews(float windowWidth, float windowHeight)
 	//_d3dClass->GetSwapChain()->ResizeBuffers(1, windowWidth, windowHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
 	_basicLight->Resize(windowWidth, windowHeight);
 	_heatHaze->Resize(windowWidth, windowHeight);
+	_shadows->OnResize(4096, 4096);
+	m_Player->ResetPlayerCamera(windowWidth, windowHeight);
 }
 
 void MainScene::InitialiseScene(float windowWidth, float windowHeight)
@@ -117,13 +131,13 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	_sceneFog.UseFog = 1.0f;
 	
 	ObjectMaterial aircraftMat;
-	aircraftMat.ambient = XMFLOAT4(1.000, 0.766, 0.336, 1.0f);
-	aircraftMat.diffuse = XMFLOAT4(1.000, 0.766, 0.336, 1.0f);
+	aircraftMat.ambient = XMFLOAT4(1.000f, 0.766f, 0.336f, 1.0f);
+	aircraftMat.diffuse = XMFLOAT4(1.000f, 0.766f, 0.336f, 1.0f);
 	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 
 	ObjectMaterial concrete;
-	concrete.ambient = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
-	concrete.diffuse = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
+	concrete.ambient = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
+	concrete.diffuse = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
 	concrete.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.6f);
 
 	ObjectMaterial shiny;
@@ -132,9 +146,9 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	shiny.specular = XMFLOAT4(0.560f, 0.570f, 0.580f, 0.3f);
 
 	ObjectMaterial charcoal;
-	charcoal.ambient = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
-	charcoal.diffuse = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
-	charcoal.specular = XMFLOAT4(0.02, 0.02, 0.02, 0.3f);
+	charcoal.ambient = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
+	charcoal.diffuse = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
+	charcoal.specular = XMFLOAT4(0.02f, 0.02f, 0.02f, 0.3f);
 
 	ObjectMaterial matte;
 	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -177,75 +191,76 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	diamondSquareMesh.vertexBufferStride = sizeof(SimpleVertex);
 
 	// Transforms
-	auto* groundTransform = new Transform();
+	auto groundTransform = std::make_shared<Transform>();
 	groundTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto underworldTransform = new Transform();
+	auto underworldTransform = std::make_shared<Transform>();
 	underworldTransform->SetPosition(XMFLOAT3(0.0f, -15.0f, 0.0f));
 	underworldTransform->SetScale(XMFLOAT3(256.0f, 1.0f, 256.0f));
 	underworldTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* aircraftTransform = new Transform();
+	auto aircraftTransform = std::make_shared<Transform>();
 	aircraftTransform->SetPosition(XMFLOAT3(0.0f, _diamondSquareTerrain->GetHeight(0, 0) + 8.0f, 0));
 	aircraftTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	aircraftTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* sunSphereTransform = new Transform();
+	auto sunSphereTransform = std::make_shared<Transform>();
 	sunSphereTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	sunSphereTransform->SetScale(XMFLOAT3(4.0f, 4.0f, 4.0f));
 	sunSphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 
 	// Appearances
-	Appearance* groundAppearance = new Appearance(diamondSquareMesh, concrete);
-	groundAppearance->SetColourTexture(TextureHandler::GetTextureByName("StoneColour"));
-	groundAppearance->SetNormalMap(TextureHandler::GetTextureByName("StoneNormal"));
-	groundAppearance->SetDisplacementMap(TextureHandler::GetTextureByName("StoneDisplacement"));
+	std::shared_ptr<Appearance> groundAppearance = std::make_shared<Appearance>(diamondSquareMesh, concrete);
+	groundAppearance->SetColourTexture(TextureHandler::GetTextureByName("GrassyStoneColour"));
+	groundAppearance->SetNormalMap(TextureHandler::GetTextureByName("GrassyStoneNormal"));
+	groundAppearance->SetDisplacementMap(TextureHandler::GetTextureByName("GrassyStoneDisplacement"));
 	//groundAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetGroundSpecularMap());
 
-	Appearance* underworldAppearance = new Appearance(planeMesh, shiny);
+	std::shared_ptr<Appearance> underworldAppearance = std::make_shared<Appearance>(planeMesh, shiny);
 	underworldAppearance->SetColourTexture(TextureHandler::GetTextureByName("StoneColour"));
 	underworldAppearance->SetNormalMap(TextureHandler::GetTextureByName("StoneNormal"));
 	underworldAppearance->SetDisplacementMap(TextureHandler::GetTextureByName("StoneDisplacement"));
 
-	Appearance* sphereAppearance = new Appearance(sphere, charcoal);
+	std::shared_ptr<Appearance> sphereAppearance = std::make_shared<Appearance>(sphere, charcoal);
 	//sphereAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetStoneTexture());
 	//sphereAppearance->SetNormalMap(_systemHandlers->GetTextureHandler()->GetStoneNormalMap());
 	//sphereAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetStoneDisplacementMap());
 
-	Appearance* aircraftAppearance = new Appearance(aircraftMesh, aircraftMat);
+	std::shared_ptr<Appearance> aircraftAppearance = std::make_shared<Appearance>(aircraftMesh, aircraftMat);
 	aircraftAppearance->SetColourTexture(TextureHandler::GetTextureByName("AircraftColour"));
 	aircraftAppearance->SetNormalMap(TextureHandler::GetTextureByName("AircraftNormal"));
 	//aircraftAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetAircraftSpecularMap());
 	//aircraftAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetAircraftDisplacementMap());
 
-	Appearance* sunSphereAppearance = new Appearance(sphere, shiny);
+	std::shared_ptr<Appearance> sunSphereAppearance = std::make_shared<Appearance>(sphere, shiny);
 
 	// Scene Elements
 	{
-		SceneElement* element = new SceneElement("Ground Plane", groundTransform, groundAppearance);
+		SceneElement* element = new SceneElement("Ground Plane", *groundTransform, *groundAppearance);
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
-		_diamondSquareTerrain->SetGameObject(element);
+		//_diamondSquareTerrain->SetGameObject(element);
 		_diamondSquareTerrain->SetTerrainFinishedBuilding(true);
 		_sceneElements.push_back(element);
 
-		element = new SceneElement("Underworld", underworldTransform, underworldAppearance);
+		element = new SceneElement("Underworld", *underworldTransform, *underworldAppearance);
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
 		_sceneElements.push_back(element);
 
-		srand(time(NULL));
+		srand(static_cast<unsigned int>(time(NULL)));
 		for (int i = 0; i < 90; ++i)
 		{
-			Transform* sphereTransform = new Transform();
+			auto sphereTransform = std::make_shared<Transform>();
 			sphereTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 			sphereTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 			sphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-			element = new SceneElement("Spheres", sphereTransform, sphereAppearance);
+			std::string sphereElementName = FormatCString("Spheres %d", i);
+			element = new SceneElement(sphereElementName, *sphereTransform, *sphereAppearance);
 			const float randomX = MathsHandler::RandomFloat(-128, 128);
 			const float randomZ = MathsHandler::RandomFloat(-128, 128);
 
@@ -256,7 +271,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			_sceneElements.push_back(element);
 		}
 
-		element = new SceneElement("Aircraft", aircraftTransform, aircraftAppearance);
+		element = new SceneElement("Aircraft", *aircraftTransform, *aircraftAppearance);
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
 		_sceneElements.push_back(element);
@@ -271,12 +286,12 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		//_pointLights.push_back(light);
 
 
-		auto* plantAppearance = new Appearance(plant0, matte);
-		auto* plant2Appearance = new Appearance(plant1, matte);
+		auto plantAppearance = std::make_shared<Appearance>(plant0, matte);
+		auto plant2Appearance = std::make_shared<Appearance>(plant1, matte);
 
-		for (int i = 0; i < 60; ++i)
+		for (int i = 0; i < 90; ++i)
 		{
-			auto* plantTransform = new Transform();
+			auto plantTransform = std::make_shared<Transform>();
 			plantTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 			plantTransform->SetScale(XMFLOAT3(5.0f, 5.0f, 5.0f));
 			plantTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -284,10 +299,11 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			float randomX = MathsHandler::RandomFloat(-90, 90);
 			float randomZ = MathsHandler::RandomFloat(-90, 90);
 
-			element = new SceneElement("Plant " + i, plantTransform, plantAppearance);
+			std::string plantName = FormatCString("Plant %d", i);
+			element = new SceneElement(plantName, *plantTransform, *plantAppearance);
 			element->GetTransform()->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
 			element->GetTransform()->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-			element->GetTransform()->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(rand()), 0.0f));
+			element->GetTransform()->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(static_cast<float>(rand())), 0.0f));
 			element->SetCastShadows(true);
 			element->SetAffectedByLight(true);
 
@@ -299,10 +315,10 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			randomX = MathsHandler::RandomFloat(-90, 90);
 			randomZ = MathsHandler::RandomFloat(-90, 90);
 
-			element = new SceneElement("Plant " + i, plantTransform, plant2Appearance);
+			element = new SceneElement(plantName, *plantTransform, *plant2Appearance);
 			element->GetTransform()->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
 			element->GetTransform()->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-			element->GetTransform()->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(rand()), 0.0f));
+			element->GetTransform()->SetRotation(XMFLOAT3(0.0f, XMConvertToRadians(static_cast<float>(rand())), 0.0f));
 			element->SetCastShadows(true);
 			element->SetAffectedByLight(true);
 
@@ -312,7 +328,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			_sceneElements.push_back(element);
 		}
 
-		element = new SceneElement("Light Source Sphere", sunSphereTransform, sunSphereAppearance);
+		element = new SceneElement("Light Source Sphere", *sunSphereTransform, *sunSphereAppearance);
 		element->SetCastShadows(false);
 		element->SetAffectedByLight(false);
 		_sceneElements.push_back(element);
@@ -325,7 +341,7 @@ void MainScene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 	_basicLight->Initialise(windowWidth, windowHeight);
 
 	_shadows = new Shadows();
-	_shadows->Initialise(8192, 8192);
+	_shadows->Initialise(4096, 4096);
 
 	_skyGradient = new SkyColourGradient();
 	_skyGradient->Initialise();
@@ -337,9 +353,9 @@ void MainScene::InitialiseSceneGraphics(float windowWidth, float windowHeight)
 	_heatHaze->Initialise(windowWidth, windowHeight);
 }
 
-void MainScene::Update(float deltaTime)
+void MainScene::Update(UpdateEvent& e)
 {	
-	Scene::Update(deltaTime);
+	Scene::Update(e);
 
 	_spotLight.position = m_Player->GetPlayerPosition();
 	_spotLight.direction = m_Player->GetPlayerLookDirection();
@@ -351,13 +367,13 @@ void MainScene::Update(float deltaTime)
 	// Rotate the light at a 45 degree angle
 	XMFLOAT3 rotationAxis = XMFLOAT3(0.0f, -0.5f, 0.5f);
 	XMVECTOR axis = XMLoadFloat3(&rotationAxis);
-	XMVECTOR rotationQuaternion = XMQuaternionRotationAxis(axis, _lightRotationAmount * deltaTime);
+	XMVECTOR rotationQuaternion = XMQuaternionRotationAxis(axis, _lightRotationAmount * e.ElapsedTime);
 	
 	XMVECTOR rotatedLight = XMVector3Rotate(XMLoadFloat3(&lightDir), rotationQuaternion);
 	XMStoreFloat3(&lightDir, rotatedLight);
 	_preOffsetLightDir = lightDir;
 
-	_currentTime += _lightRotationAmount * deltaTime;
+	_currentTime += _lightRotationAmount * e.ElapsedTime;
 	if (_currentTime >= _fullRotationAmount)
 	{
 		// Day has passed
@@ -410,49 +426,49 @@ void MainScene::Update(float deltaTime)
 		_sceneFog.FogRange = 80.0f;
 	}
 
-	if (GetAsyncKeyState(VK_OEM_PERIOD))
+	if (InputHandler::IsKeyDown(Keys::OemPeriod))
 	{
-		_lightRotationAmount += 0.5f * deltaTime;
+		_lightRotationAmount += (0.5f * e.ElapsedTime);
 
 		if (_lightRotationAmount > 2.0f)
 			_lightRotationAmount = 2.0f;
 	}
 
-	if (GetAsyncKeyState(VK_OEM_COMMA))
+	if (InputHandler::IsKeyDown(Keys::OemComma))
 	{
-		_lightRotationAmount -= 0.5f * deltaTime;
+		_lightRotationAmount -= (0.5f * e.ElapsedTime);
 
 		if (_lightRotationAmount < -2.0f)
 			_lightRotationAmount = -2.0f;
 	}
 
-	if (GetAsyncKeyState('1'))
+	if (InputHandler::IsKeyDown(Keys::D1))
 	{
 		// Switch to Spring
 		_currentSeason = 0;
 		_currentDay = 1;
 
 	}
-	if (GetAsyncKeyState('2'))
+	if (InputHandler::IsKeyDown(Keys::D2))
 	{
 		// Switch to Summer
 		_currentSeason = 1;
 		_currentDay = 5;
 	}
-	if (GetAsyncKeyState('3'))
+	if (InputHandler::IsKeyDown(Keys::D3))
 	{
 		// Switch to Autumn
 		_currentSeason = 2;
 		_currentDay = 9;
 	}
-	if (GetAsyncKeyState('4'))
+	if (InputHandler::IsKeyDown(Keys::D4))
 	{
 		// Switch to Winter
 		_currentSeason = 3;
 		_currentDay = 13;
 	}
 
-	if (GetAsyncKeyState('T'))
+	if (InputHandler::IsKeyDown(Keys::T))
 	{
 		_lightRotationAmount = 0.0f;
 	}
@@ -468,17 +484,17 @@ void MainScene::Update(float deltaTime)
 		{
 			element->GetTransform()->SetPosition(_shadows->GetLightPosition());
 		}
-		element->Update(deltaTime);
+		element->Update(e.ElapsedTime);
 	}
 
 	_skyGradient->SetSceneCentre(m_Player->GetPlayerPosition());
-	_skyGradient->Update(deltaTime);
+	_skyGradient->Update(e.ElapsedTime);
 
 	_basicLight->CalculateLightColour(_sceneLight, _shadows->GetLightPosition().y, _sceneFog);
 
-	_heatHaze->Update(Timer::GetDeltaMilliseconds() / 2);
+	_heatHaze->Update(e.TotalTime / 2.0);
 
-	_diamondSquareTerrain->Update(deltaTime);
+	//_diamondSquareTerrain->Update(deltaTime);
 
 	if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('R'))
 	{
@@ -490,11 +506,11 @@ void MainScene::Update(float deltaTime)
 	}
 
 	if(_currentCooldown > 0.0f)
-		_currentCooldown -= deltaTime;
+		_currentCooldown -= e.ElapsedTime;
 
-	std::wostringstream out;
+	/*std::wostringstream out;
 	out.precision(6);
-	out << L"Day: " << _currentDay << L" - Season: " << _seasonNames.find(_currentSeason)->second.c_str() << L" Time speed: " << _lightRotationAmount;
+	out << L"Day: " << _currentDay << L" - Season: " << _seasonNames.find(_currentSeason)->second.c_str() << L" Time speed: " << _lightRotationAmount;*/
 	//_systemHandlers.GetWindowClass()->SetWindowCaption(out.str().c_str());
 }
 

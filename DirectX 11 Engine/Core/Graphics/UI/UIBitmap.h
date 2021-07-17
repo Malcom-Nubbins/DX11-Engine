@@ -22,6 +22,8 @@ public:
 	UIBitmap();
 	~UIBitmap();
 
+	void Cleanup();
+
 	void Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11ShaderResourceView* texture);
 
 	void UpdateScreenSize(XMFLOAT2 newScreenSize);
@@ -29,7 +31,7 @@ public:
 
 	SceneElement* GetUIElement() { return _uiElement; }
 
-	void Update(float delta);
+	void Update(double delta);
 	void Draw();
 
 };

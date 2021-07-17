@@ -10,7 +10,7 @@ Transform::~Transform()
 {
 }
 
-void Transform::Update(float deltaTime)
+void Transform::Update(double deltaTime)
 {
 	XMMATRIX scale = XMMatrixScaling(_scale.x, _scale.y, _scale.z);
 	XMMATRIX rotation = XMMatrixRotationX(_rotation.x) * XMMatrixRotationY(_rotation.y) * XMMatrixRotationZ(_rotation.z);

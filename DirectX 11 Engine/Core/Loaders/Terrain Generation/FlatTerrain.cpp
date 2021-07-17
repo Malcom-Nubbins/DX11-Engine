@@ -18,8 +18,13 @@ void FlatTerrain::Cleanup()
 {
 	if (_vertexBuffer) _vertexBuffer->Release();
 	if (_indexBuffer) _indexBuffer->Release();
+	
 	delete _gridMesh;
+	_gridMesh = nullptr;
+
+	_terrainGO->Cleanup();
 	delete _terrainGO;
+	_terrainGO = nullptr;
 }
 
 void FlatTerrain::SetTerrainValues(float terrainWidth, float terrainDepth, UINT sizeOfTerrain)
@@ -134,6 +139,7 @@ HRESULT FlatTerrain::CreateBuffers()
 		return hr;
 	}
 
+	
 	// Index Buffer
 	_gridIndices.insert(_gridIndices.end(), _gridMesh->Indices.begin(), _gridMesh->Indices.end());
 
@@ -152,6 +158,16 @@ HRESULT FlatTerrain::CreateBuffers()
 	hr = ApplicationNew::Get().GetDevice()->CreateBuffer(&ibd, &InitGridIndexData, &_indexBuffer);
 	if (FAILED(hr))
 		return hr;
+
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	char const flatTerrainVBName[] = "FlatTerrainVB";
+	_vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(flatTerrainVBName) - 1, flatTerrainVBName);
+
+	char const flatTerrainIBName[] = "FlatTerrainIB";
+	_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(flatTerrainIBName) - 1, flatTerrainIBName);
+#endif
+
+	
 
 	return S_OK;
 }
@@ -220,14 +236,14 @@ void FlatTerrain::DepthNormalDraw(MatrixBuffer mb, ID3D11Buffer * constBuffer)
 {
 	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
 	ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-	_terrainGO->Draw(ApplicationNew::Get().GetContext().Get());
+	_terrainGO->Draw();
 }
 
 void FlatTerrain::ShadowDraw(ShadowDepthMatrixBuffer mb, ID3D11Buffer * constBuffer)
 {
 	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
 	ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-	_terrainGO->Draw(ApplicationNew::Get().GetContext().Get());
+	_terrainGO->Draw();
 }
 
 void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * matrixBuffer, ID3D11Buffer* objValuesBuffer, ID3D11ShaderResourceView * texArray[])
@@ -283,7 +299,7 @@ void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * ma
 	// Update constant buffer
 	context->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
 	context->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
-	_terrainGO->Draw(context.Get());
+	_terrainGO->Draw();
 }
 
 float FlatTerrain::GetWidth()

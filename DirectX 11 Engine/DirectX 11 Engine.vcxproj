@@ -75,12 +75,15 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <ExecutablePath>E:\Projects\DirectX 11 Engine\Build;$(ExecutablePath)</ExecutablePath>
+    <OutDir>..\Build</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>..\Build</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -106,6 +109,9 @@
       <SubSystem>Windows</SubSystem>
       <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ObjectFileOutput>$(OutDir)Core\Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -137,9 +143,15 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ObjectFileOutput>$(OutDir)Core\Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Globals\Bitmask.cpp" />
+    <ClCompile Include="Core\Loaders\ConfigLoader.cpp" />
     <ClCompile Include="Core\ApplicationNew.cpp" />
     <ClCompile Include="Core\Graphics\UI\UIBitmap.cpp" />
     <ClCompile Include="Core\Graphics\UI\UserInterface.cpp" />
@@ -175,8 +187,11 @@
     <ClCompile Include="Core\Scene\TestingScene.cpp" />
     <ClCompile Include="Core\EngineBase.cpp" />
     <ClCompile Include="Core\DX11Engine.cpp" />
+    <ClCompile Include="Core\Handlers\FileReaderWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\Globals\Bitmask.h" />
+    <ClInclude Include="Core\Loaders\ConfigLoader.h" />
     <ClInclude Include="Core\ApplicationNew.h" />
     <ClInclude Include="Core\Globals\Events.h" />
     <ClInclude Include="Core\Globals\KeyCodes.h" />
@@ -214,6 +229,7 @@
     <ClInclude Include="Core\Loaders\ModelLoader.h" />
     <ClInclude Include="Core\EngineBase.h" />
     <ClInclude Include="Core\DX11Engine.h" />
+    <ClInclude Include="Core\Handlers\FileReaderWriter.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
     <ClInclude Include="Core\Scene\TestingScene.h" />

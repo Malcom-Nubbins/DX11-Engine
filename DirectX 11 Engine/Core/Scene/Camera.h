@@ -45,8 +45,8 @@ public:
 	void SetFOV(float fov);
 	void Reset(float fov, float nearZ, float farZ, float aspect);
 
-	void Strafe(float amount);
-	void Walk(float amount);
+	void Strafe(double amount);
+	void Walk(double amount);
 
 	void Pitch(float angle);
 	void Yaw(float angle);

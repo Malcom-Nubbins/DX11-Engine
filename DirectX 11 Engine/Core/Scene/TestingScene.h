@@ -39,7 +39,7 @@ public:
 	void ResizeViews(float windowWidth, float windowHeight) override;
 	void InitialiseScene(float windowWidth, float windowHeight) override;
 	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;
-	void Update(float delta) override;
+	void Update(UpdateEvent& e) override;
 	void Draw() override;
 };
 

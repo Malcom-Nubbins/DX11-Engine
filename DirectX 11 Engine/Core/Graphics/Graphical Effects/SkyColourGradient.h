@@ -29,8 +29,8 @@ public:
 
 	void SetAsCurrentShader();
 
-	void Update(float deltaTime);
-	void Render(Camera& camera, const XMFLOAT3& sunPos);
+	void Update(double deltaTime);
+	void Render(Camera& camera, XMFLOAT3& sunPos);
 
 private:
 	HRESULT InitialiseShaders();

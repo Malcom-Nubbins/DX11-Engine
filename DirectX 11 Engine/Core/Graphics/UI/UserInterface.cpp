@@ -18,6 +18,7 @@ void UserInterface::Cleanup()
 {
 	for (auto uiBitmap : _bitmaps)
 	{
+		uiBitmap->Cleanup();
 		delete uiBitmap;
 	}
 
@@ -61,8 +62,8 @@ void UserInterface::Initialise()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/UIVertexShader.hlsl", &_vertexShader, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
-	ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/FullscreenQuadPS.hlsl", &_pixelShader);
+	ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/UIVertexShader.cso", &_vertexShader, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
+	ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/FullscreenQuadPS.cso", &_pixelShader);
 }
 
 void UserInterface::AddBitmapToUI(XMFLOAT2 bitmapSize, XMFLOAT2 bitmapPos, ID3D11ShaderResourceView* bitmapTexture)
@@ -77,7 +78,7 @@ void UserInterface::AddBitmapToUI(XMFLOAT2 bitmapSize, XMFLOAT2 bitmapPos, ID3D1
 	_bitmaps.push_back(bitmap);
 }
 
-void UserInterface::Update(float delta)
+void UserInterface::Update(double delta)
 {
 	for(auto bitmap : _bitmaps)
 	{

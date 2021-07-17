@@ -12,15 +12,24 @@ private:
 
 	Camera * m_Camera;
 
-	const float m_LookSpeed = 0.25f;
-	const float m_MovementSpeed = 3.0f;
+	MovementState m_CurrMovementState;
+
+	bool m_LockMouse;
+
+	const float m_LookSpeed = 2.0f;
+	const float m_MovementSpeed = 6.0f;
+	bool m_Sprint;
+
+	float m_CurrCamYaw;
+	float m_CurrCamPitch;
 private:
 	
 
 public:
 	void SetPlayerPosition(XMFLOAT3 pos) const;
 	void UpdatePlayerLookDirection(MouseMotionEvent& e);
-	void UpdatePlayerPosition(KeyEvent& e);
+	void OnPlayerMovementKeyPressed(KeyEvent& e);
+	void OnPlayerMovementKeyReleased(KeyEvent& e);
 
 	XMFLOAT3 GetPlayerPosition() const { return m_Camera->GetPosition(); }
 	XMFLOAT3 GetPlayerLookDirection() const { return m_Camera->GetLookDirection(); }
@@ -38,5 +47,5 @@ public:
 	void OnMouseButtonDown(MouseButtonEvent& e);
 	void OnMouseButtonUp(MouseButtonEvent& e);
 
-	void Update(float delta);
+	void Update(double delta);
 };

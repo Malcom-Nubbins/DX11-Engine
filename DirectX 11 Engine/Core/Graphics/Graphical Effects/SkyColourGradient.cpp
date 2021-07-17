@@ -18,10 +18,12 @@ SkyColourGradient::~SkyColourGradient()
 
 void SkyColourGradient::Cleanup() const
 {
+	_skyDomeElement->Cleanup();
 	_colourGradientVS->Release();
 	_colourGradientPS->Release();
 	_inputLayout->Release();
 	_gradientValuesBuffer->Release();
+	_matrixBuffer->Release();
 }
 
 HRESULT SkyColourGradient::Initialise()
@@ -56,10 +58,10 @@ HRESULT SkyColourGradient::InitialiseShaders()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ColourGradientVS.hlsl", &_colourGradientVS, &_inputLayout, layout, ARRAYSIZE(layout));
+	hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ColourGradientVS.cso", &_colourGradientVS, &_inputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
-	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/ColourGradientPS.hlsl", &_colourGradientPS);
+	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/ColourGradientPS.cso", &_colourGradientPS);
 	if (FAILED(hr))
 		return hr;
 
@@ -98,7 +100,7 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	matte.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 	matte.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	auto* skyDomeTransform = new Transform();
+	auto skyDomeTransform = std::make_shared<Transform>();
 	skyDomeTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	skyDomeTransform->SetScale(XMFLOAT3(1.0f, 0.5f, 1.0f));
 	skyDomeTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -106,10 +108,10 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	NewObjectMesh sphere;
 	ModelLoader::LoadModel(ApplicationNew::Get().GetDevice().Get(), L"Core/Resources/Objects/spherex1.obj", sphere, false);
 
-	auto appearance = new Appearance(sphere, matte);
+	auto appearance = std::make_shared<Appearance>(sphere, matte);
 	appearance->SetColourTexture(nullptr);
 
-	_skyDomeElement = new SceneElement("Sky dome",  skyDomeTransform, appearance);
+	_skyDomeElement = new SceneElement("Sky dome", *skyDomeTransform, *appearance);
 	_skyDomeElement->SetCastShadows(false);
 	_skyDomeElement->SetAffectedByLight(false);
 }
@@ -119,13 +121,13 @@ void SkyColourGradient::SetAsCurrentShader()
 	ShaderClass::SetShadersAndInputLayout(_colourGradientVS, _colourGradientPS, _inputLayout);
 }
 
-void SkyColourGradient::Update(float deltaTime)
+void SkyColourGradient::Update(double deltaTime)
 {
 	_skyDomeElement->GetTransform()->SetPosition(_sceneCentre);
 	_skyDomeElement->Update(deltaTime);
 }
 
-void SkyColourGradient::Render(Camera& const camera, const XMFLOAT3& sunPos)
+void SkyColourGradient::Render(Camera& camera, XMFLOAT3&  sunPos)
 {
 	auto context = ApplicationNew::Get().GetContext();
 
@@ -162,5 +164,5 @@ void SkyColourGradient::Render(Camera& const camera, const XMFLOAT3& sunPos)
 	context->UpdateSubresource(_matrixBuffer, 0, nullptr, &matrixBufferValues, 0, 0);
 	context->UpdateSubresource(_gradientValuesBuffer, 0, nullptr, &colourValues, 0, 0);
 
-	_skyDomeElement->Draw(context.Get());
+	_skyDomeElement->Draw();
 }

@@ -88,8 +88,6 @@ private:
 
 	ComPtr<ID3D11RenderTargetView> m_BackBuffer;
 
-	Timer m_UpdateClock;
-	Timer m_RenderClock;
 	uint64_t m_FrameCounter;
 };
 

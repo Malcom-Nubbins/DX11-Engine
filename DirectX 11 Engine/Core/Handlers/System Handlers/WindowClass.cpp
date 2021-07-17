@@ -2,7 +2,7 @@
 #include "../../ApplicationNew.h"
 #include "../../EngineBase.h"
 
-WindowClass::WindowClass(HWND& hwnd, std::wstring& const windowName, UINT clientWidth, UINT clientHeight, bool vsync)
+WindowClass::WindowClass(HWND& hwnd, std::wstring& windowName, UINT clientWidth, UINT clientHeight, bool vsync)
 	: m_hWnd(hwnd)
 	, m_WindowCaption(windowName)
 	, m_WindowWidth(clientWidth)
@@ -34,24 +34,20 @@ void WindowClass::RegisterCallbacks(std::shared_ptr<EngineBase> pEngineBase)
 
 void WindowClass::OnUpdate(UpdateEvent& e)
 {
-	m_UpdateClock.Tick();
-
 	if (auto pEngine = m_EngineBase.lock())
 	{
 		m_FrameCounter++;
 
-		UpdateEvent updateEvent(m_UpdateClock.GetDeltaSeconds(), m_UpdateClock.GetTotalSeconds());
+		UpdateEvent updateEvent(e.ElapsedTime, e.TotalTime);
 		pEngine->OnUpdate(updateEvent);
 	}
 }
 
 void WindowClass::OnRender(RenderEvent& e)
 {
-	m_RenderClock.Tick();
-
 	if (auto pEngine = m_EngineBase.lock())
 	{
-		RenderEvent renderEvent(m_RenderClock.GetDeltaSeconds(), m_RenderClock.GetTotalSeconds());
+		RenderEvent renderEvent(e.ElapsedTime, e.TotalTime);
 		pEngine->OnRender(renderEvent);
 	}
 }
@@ -106,25 +102,27 @@ void WindowClass::OnMouseWheel(MouseWheelEvent& e)
 
 void WindowClass::OnResize(UINT width, UINT height)
 {
-	if (auto pEngine = m_EngineBase.lock())
-	{
-		ID3D11RenderTargetView* nullViews[] = { nullptr };
-
-		ApplicationNew::Get().GetContext()->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
-
-		pEngine->PreOnResize();
-
-		ApplicationNew::Get().GetContext()->Flush();
-
-		auto debugPtr = ApplicationNew::Get().GetDebug();
-		if (debugPtr)
-		{
-			debugPtr->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-		}
-	}
-
 	if (m_WindowWidth != width || m_WindowHeight != height)
 	{
+		if (auto pEngine = m_EngineBase.lock())
+		{
+			ID3D11RenderTargetView* nullViews[] = { nullptr };
+
+			ApplicationNew::Get().GetContext()->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+
+			pEngine->PreOnResize();
+
+			ApplicationNew::Get().GetContext()->Flush();
+
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+			ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
+			if (debugPtr)
+			{
+				debugPtr->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+			}
+#endif
+		}
+
 		m_WindowWidth = std::max(1, static_cast<int>(width));
 		m_WindowHeight = std::max(1, static_cast<int>(height));
 
@@ -134,11 +132,13 @@ void WindowClass::OnResize(UINT width, UINT height)
 		m_BackBuffer.Reset();
 		ApplicationNew::Get().GetContext()->ClearState();
 
-		auto debugPtr = ApplicationNew::Get().GetDebug();
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+		ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
 		if (debugPtr)
 		{
 			debugPtr->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 		}
+#endif
 
 		DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 		ThrowIfFailed(m_SwapChain->GetDesc(&swapChainDesc));
@@ -207,9 +207,10 @@ void WindowClass::UpdateRenderTargetViews()
 	pBackBuffer->Release();
 	backBuffer->Release();
 
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	char const backBufferName[] = "BackBuffer";
 	m_BackBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(backBufferName) - 1, backBufferName);
-
+#endif
 }
 
 void WindowClass::Cleanup()
@@ -227,6 +228,9 @@ void WindowClass::Cleanup()
 		DestroyWindow(m_hWnd);
 		m_hWnd = nullptr;
 	}
+
+	m_SwapChain->Release();
+	m_SwapChain = nullptr;
 }
 
 void WindowClass::Show()

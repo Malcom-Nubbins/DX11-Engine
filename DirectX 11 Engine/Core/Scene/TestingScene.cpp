@@ -43,8 +43,8 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
 
 	ObjectMaterial concrete{};
-	concrete.ambient = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
-	concrete.diffuse = XMFLOAT4(0.51, 0.51, 0.51, 1.0f);
+	concrete.ambient = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
+	concrete.diffuse = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
 	concrete.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.6f);
 
 	ObjectMaterial shiny{};
@@ -53,9 +53,9 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	shiny.specular = XMFLOAT4(0.560f, 0.570f, 0.580f, 0.3f);
 
 	ObjectMaterial charcoal{};
-	charcoal.ambient = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
-	charcoal.diffuse = XMFLOAT4(0.02, 0.02, 0.02, 1.0f);
-	charcoal.specular = XMFLOAT4(0.02, 0.02, 0.02, 0.3f);
+	charcoal.ambient = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
+	charcoal.diffuse = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
+	charcoal.specular = XMFLOAT4(0.02f, 0.02f, 0.02f, 0.3f);
 
 	ObjectMaterial matte{};
 	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -78,33 +78,33 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	NewObjectMesh sphere;
 	ModelLoader::LoadModel(ApplicationNew::Get().GetDevice().Get(), L"Core/Resources/Objects/spherex.obj", sphere, false);
 
-	auto* groundTransform = new Transform();
+	auto groundTransform = std::make_shared<Transform>();
 	groundTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* groundAppearance = new Appearance(planeMesh, concrete);
+	auto groundAppearance = std::make_shared<Appearance>(planeMesh, concrete);
 	groundAppearance->SetColourTexture(TextureHandler::GetTextureByName("ConcreteColour"));
 	groundAppearance->SetNormalMap(TextureHandler::GetTextureByName("ConcreteNormal"));
 	//groundAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
 	//groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
 
-	auto* sphereTransform = new Transform();
+	auto sphereTransform = std::make_shared<Transform>();
 	sphereTransform->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
 	sphereTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	sphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto* sphereAppearance = new Appearance(sphere, shiny);
+	auto sphereAppearance = std::make_shared<Appearance>(sphere, shiny);
 
 	//Scene elements
 	{
-		auto* groundPlaneElement = new SceneElement("Ground Plane", groundTransform, groundAppearance);
+		auto* groundPlaneElement = new SceneElement("Ground Plane", *groundTransform, *groundAppearance);
 		groundPlaneElement->SetCastShadows(false);
 		groundPlaneElement->SetAffectedByLight(true);
-		_flatPlane->SetGameObject(groundPlaneElement);
+		//_flatPlane->SetGameObject(groundPlaneElement);
 		_sceneElements.push_back(groundPlaneElement);
 
-		auto* sphereElement = new SceneElement("Sphere", sphereTransform, sphereAppearance);
+		auto* sphereElement = new SceneElement("Sphere", *sphereTransform, *sphereAppearance);
 		sphereElement->SetCastShadows(true);
 		sphereElement->SetAffectedByLight(true);
 		_sceneElements.push_back(sphereElement);
@@ -129,25 +129,32 @@ void TestingScene::InitialiseSceneGraphics(float windowWidth, float windowHeight
 void TestingScene::Cleanup()
 {
 	_skyGradient->Cleanup();
-	delete _skyGradient;
 	_skyGradient = nullptr;
 
 	_shadows->Cleanup();
-	delete _shadows;
 	_shadows = nullptr;
 
 	_basicLight->Cleanup();
-	delete _basicLight;
 	_basicLight = nullptr;
 
 	_renderToQuad->Cleanup();
-	delete _renderToQuad;
 	_renderToQuad = nullptr;
+
+	/*_flatPlane->Cleanup();
+	_flatPlane = nullptr;*/
 
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
 
-	_sceneElements.shrink_to_fit();
+	for (auto const sceneElement : _sceneElements)
+	{
+		if (sceneElement)
+		{
+			sceneElement->Cleanup();
+		}
+	}
+
+	_sceneElements.clear();
 }
 
 void TestingScene::PreResizeViews()
@@ -165,9 +172,9 @@ void TestingScene::ResizeViews(float windowWidth, float windowHeight)
 	m_Player->ResetPlayerCamera(windowWidth, windowHeight);
 }
 
-void TestingScene::Update(float delta)
+void TestingScene::Update(UpdateEvent& e)
 {
-	Scene::Update(delta);
+	Scene::Update(e);
 
 	/*_spotLight.position = _player.GetPlayerPosition();
 	_spotLight.direction = _player.GetPlayerLookDirection();*/
@@ -186,15 +193,15 @@ void TestingScene::Update(float delta)
 	}
 
 	_skyGradient->SetSceneCentre(m_Player->GetPlayerPosition());
-	_skyGradient->Update(delta);
+	_skyGradient->Update(e.ElapsedTime);
 
 	for (auto element : _sceneElements)
 	{
-		element->Update(delta);
+		element->Update(e.ElapsedTime);
 	}
 
 	if (_currentCooldown > 0.0f)
-		_currentCooldown -= delta;
+		_currentCooldown -= e.ElapsedTime;
 }
 
 void TestingScene::Draw()
@@ -202,7 +209,10 @@ void TestingScene::Draw()
 	_basicLight->SetAsCurrentRenderTarget();
 	_basicLight->SetAsCurrentViewport();
 	RenderClass::DisableRtvClearing();
-	_skyGradient->Render(m_Player->GetCamera(), XMFLOAT3(0.0f, 50.0f, 0.0f));
+
+	XMFLOAT3 sunPos(0.0f, 50.0f, 0.0f);
+
+	_skyGradient->Render(m_Player->GetCamera(), sunPos);
 
 	RenderClass::EnableZBuffer();
 	_shadows->Render(_sceneElements);
