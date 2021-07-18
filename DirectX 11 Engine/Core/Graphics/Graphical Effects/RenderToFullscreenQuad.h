@@ -9,10 +9,11 @@ private:
 	ID3D11VertexShader* _quadVS;
 	ID3D11PixelShader* _quadPS;
 
+	ID3D11RenderTargetView* m_MSAARTV;
+	ID3D11Texture2D* m_MSAARenderTargetTex2D;
+
 	ID3D11InputLayout* _inputLayout;
 	ObjectMesh		_quad;
-	ID3D11Buffer*	_quadVertexBuffer;
-	ID3D11Buffer*	_quadIndexBuffer;
 
 public:
 	RenderToFullscreenQuad();
@@ -20,6 +21,10 @@ public:
 	void Cleanup();
 
 	HRESULT Initialise(float width, float height);
+	HRESULT InitRenderTargets(float width, float height);
+
+	void PreResize();
+	void OnResize(float width, float height);
 
 	void SetAsCurrentRenderTarget() const;
 

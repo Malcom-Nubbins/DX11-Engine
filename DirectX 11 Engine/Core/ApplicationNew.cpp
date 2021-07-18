@@ -168,12 +168,15 @@ void ApplicationNew::Quit(int exitCode)
 
 ApplicationNew::ApplicationNew(HINSTANCE hinst)
 	: m_hInstance(hinst)
+	, m_ConfigLoader(nullptr)
+	, m_Debug(nullptr)
 {
 }
 
 ApplicationNew::~ApplicationNew()
 {
-	//m_Device->Release();
+	m_Context.Reset();
+	m_Device.Reset();
 }
 
 void ApplicationNew::Initialise()
@@ -209,6 +212,7 @@ void ApplicationNew::Initialise()
 
 void ApplicationNew::Cleanup()
 {
+	m_Context->ClearState();
 	m_Context->Flush();
 
 	delete m_ConfigLoader;
@@ -216,10 +220,7 @@ void ApplicationNew::Cleanup()
 
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	m_Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-	m_Debug->Release();
 #endif
-
-	m_Context->Release();
 }
 
 ComPtr<IDXGIAdapter1> ApplicationNew::GetAdapter()

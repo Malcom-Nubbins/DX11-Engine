@@ -69,7 +69,8 @@ void MainScene::Cleanup()
 	delete _renderToQuad;
 	_renderToQuad = nullptr;
 
-	//_diamondSquareTerrain->Cleanup();
+	_diamondSquareTerrain->Cleanup();
+	_diamondSquareTerrain = nullptr;
 
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
@@ -91,6 +92,7 @@ void MainScene::PreResizeViews()
 	_basicLight->PreResize();
 	_heatHaze->PreResize();
 	_shadows->PreResizeViews();
+	_renderToQuad->PreResize();
 }
 
 void MainScene::ResizeViews(float windowWidth, float windowHeight)
@@ -100,6 +102,7 @@ void MainScene::ResizeViews(float windowWidth, float windowHeight)
 	_basicLight->Resize(windowWidth, windowHeight);
 	_heatHaze->Resize(windowWidth, windowHeight);
 	_shadows->OnResize(4096, 4096);
+	_renderToQuad->OnResize(windowWidth, windowHeight);
 	m_Player->ResetPlayerCamera(windowWidth, windowHeight);
 }
 
@@ -156,6 +159,13 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.3f);
 
 	BufferClass::CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
+
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	char const vbName[] = "Main Scene plane VB";
+	char const ibName[] = "Main scene plane IB";
+	_planeVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(vbName) - 1, vbName);
+	_planeIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(ibName) - 1, ibName);
+#endif
 
 	ObjectMesh planeMesh;
 	planeMesh.vertexBuffer = _planeVertexBuffer;
@@ -242,7 +252,6 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 		SceneElement* element = new SceneElement("Ground Plane", *groundTransform, *groundAppearance);
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
-		//_diamondSquareTerrain->SetGameObject(element);
 		_diamondSquareTerrain->SetTerrainFinishedBuilding(true);
 		_sceneElements.push_back(element);
 
@@ -493,8 +502,6 @@ void MainScene::Update(UpdateEvent& e)
 	_basicLight->CalculateLightColour(_sceneLight, _shadows->GetLightPosition().y, _sceneFog);
 
 	_heatHaze->Update(e.TotalTime / 2.0);
-
-	//_diamondSquareTerrain->Update(deltaTime);
 
 	if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('R'))
 	{

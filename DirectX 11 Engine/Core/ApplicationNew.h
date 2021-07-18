@@ -1,5 +1,6 @@
 #pragma once
 #include "Globals/stdafx.h"
+#include "Globals/AppValues.h"
 
 class WindowClass;
 class EngineBase;
@@ -26,7 +27,7 @@ public:
 	ComPtr<ID3D11Device> const& GetDevice() const { return m_Device; }
 	ComPtr<ID3D11DeviceContext> const& GetContext() const { return m_Context; }
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
-	ComPtr<ID3D11Debug> const& GetDebug() const { return m_Debug; }
+	ComPtr<ID3D11Debug> GetDebug() const { return m_Debug; }
 #endif
 	C_ConfigLoader const& GetConfigLoader() const { return *m_ConfigLoader; }
 
@@ -47,7 +48,7 @@ private:
 	HINSTANCE m_hInstance;
 	ComPtr<ID3D11Device> m_Device;
 	ComPtr<ID3D11DeviceContext> m_Context;
-	ID3D11Debug* m_Debug;
+	ComPtr<ID3D11Debug> m_Debug;
 	C_ConfigLoader* m_ConfigLoader;
 };
 

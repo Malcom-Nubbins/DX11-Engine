@@ -14,8 +14,8 @@ private:
 
 	DirectionalLight _sceneLight;
 
-	ID3D11Buffer* _planeVertexBuffer;
-	ID3D11Buffer* _planeIndexBuffer;
+	VertexBuffer _planeVertexBuffer;
+	IndexBuffer _planeIndexBuffer;
 
 	BasicLight * _basicLight;
 	Shadows* _shadows;

@@ -42,8 +42,8 @@ struct Subset
 	{
 	}
 
-	VertexBuffer* vertexBuffer;
-	IndexBuffer* indexBuffer;
+	VertexBuffer vertexBuffer;
+	IndexBuffer indexBuffer;
 
 	UINT vertexBufferStride;
 	UINT vertexBufferOffset;
@@ -93,7 +93,7 @@ struct NewObjectMesh
 		}
 	}
 
-	VertexBuffer* vertexBuffer;
+	VertexBuffer vertexBuffer;
 	UINT numOfSubsets;
 	std::vector<Subset> subsets;
 };
@@ -106,8 +106,8 @@ struct ObjectMesh
 		, vertexBufferOffset(0)
 	{}
 
-	VertexBuffer* vertexBuffer;
-	IndexBuffer* indexBuffer;
+	VertexBuffer vertexBuffer;
+	IndexBuffer indexBuffer;
 
 	UINT vertexBufferStride;
 	UINT vertexBufferOffset;

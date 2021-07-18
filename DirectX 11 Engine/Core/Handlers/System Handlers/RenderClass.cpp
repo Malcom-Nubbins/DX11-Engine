@@ -193,7 +193,7 @@ void RenderClass::SetRasterizerState(RASTERIZER_TYPE rasterizer)
 			ZeroMemory(&rasteriserdesc, sizeof(D3D11_RASTERIZER_DESC));
 			rasteriserdesc.FillMode = D3D11_FILL_SOLID;
 			rasteriserdesc.CullMode = D3D11_CULL_NONE;
-			rasteriserdesc.MultisampleEnable = false;
+			rasteriserdesc.MultisampleEnable = true;
 			rasteriserdesc.AntialiasedLineEnable = false;
 			rasteriserdesc.FrontCounterClockwise = false;
 			device->CreateRasterizerState(&rasteriserdesc, &_noCull);

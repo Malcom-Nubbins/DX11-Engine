@@ -28,6 +28,14 @@ void UIBitmap::Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11Shader
 
 	BufferClass::CreateQuadDynamic(&_vertexBuffer, &_indexBuffer);
 
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	char const uiQuadVBName[] = "UI Quad VB";
+	char const uiQuadIBName[] = "UI Quad IB";
+
+	_vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadVBName) - 1, uiQuadVBName);
+	_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadIBName) - 1, uiQuadIBName);
+#endif
+
 	_uiQuad.vertexBuffer = _vertexBuffer;
 	_uiQuad.vertexBuffer->AddRef();
 	_uiQuad.indexBuffer = _indexBuffer;
@@ -75,7 +83,7 @@ void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 		{ XMFLOAT3(right, bottom, 0.0f),XMFLOAT2(1.0f, 1.0f) }
 	};
 
-	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr))
 	{
 		return;
@@ -85,7 +93,7 @@ void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 
 	memcpy(vertsPtr, verts, sizeof(SimpleQuad) * 4);
 
-	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0);
+	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0);
 }
 
 void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
@@ -117,7 +125,7 @@ void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
 		{ XMFLOAT3(right, bottom, 0.0f),XMFLOAT2(1.0f, 1.0f) }
 	};
 
-	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr))
 	{
 		return;
@@ -127,7 +135,7 @@ void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
 
 	memcpy(vertsPtr, verts, sizeof(SimpleQuad) * 4);
 
-	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer, 0);
+	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0);
 }
 
 void UIBitmap::Update(double delta)

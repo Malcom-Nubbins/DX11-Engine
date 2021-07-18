@@ -282,5 +282,6 @@
     <FxCompile Include="Core\Shaders\TesselationHS.hlsl" />
     <FxCompile Include="Core\Shaders\TesselationDS.hlsl" />
     <FxCompile Include="Core\Shaders\UIVertexShader.hlsl" />
+    <FxCompile Include="Core\Shaders\UIPixelShader.hlsl" />
   </ItemGroup>
 </Project>

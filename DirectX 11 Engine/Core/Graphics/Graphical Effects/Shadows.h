@@ -18,7 +18,7 @@ private:
 	ID3D11VertexShader* _shadowDepthVS;
 	ID3D11InputLayout* _inputLayout;
 
-	ComPtr<ID3D11Texture2D> _ShadowTex = nullptr;
+	ID3D11Texture2D* _ShadowTex = nullptr;
 	ID3D11DepthStencilView* _ShadowDepthStencilView = nullptr;
 	ID3D11ShaderResourceView* _ShadowSRV = nullptr;
 	D3D11_VIEWPORT _shadowViewport;

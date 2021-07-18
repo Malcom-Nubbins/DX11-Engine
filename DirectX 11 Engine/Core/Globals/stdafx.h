@@ -29,8 +29,8 @@ using namespace Microsoft::WRL;
 
 #include <algorithm>
 
-typedef ID3D11Buffer VertexBuffer;
-typedef ID3D11Buffer IndexBuffer;
+typedef ComPtr<ID3D11Buffer> VertexBuffer;
+typedef ComPtr<ID3D11Buffer> IndexBuffer;
 
 typedef unsigned __int64 u64;
 typedef unsigned __int32 u32;

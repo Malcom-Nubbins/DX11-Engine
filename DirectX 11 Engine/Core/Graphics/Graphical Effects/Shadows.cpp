@@ -113,7 +113,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 
-	hr = device->CreateDepthStencilView(_ShadowTex.Get(), &dsvDesc, &_ShadowDepthStencilView);
+	hr = device->CreateDepthStencilView(_ShadowTex, &dsvDesc, &_ShadowDepthStencilView);
 	if (FAILED(hr))
 		return hr;
 
@@ -123,7 +123,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 
-	hr = device->CreateShaderResourceView(_ShadowTex.Get(), &srvDesc, &_ShadowSRV);
+	hr = device->CreateShaderResourceView(_ShadowTex, &srvDesc, &_ShadowSRV);
 	if (FAILED(hr))
 		return hr;
 	return S_OK;
@@ -196,6 +196,7 @@ void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 	SetAsCurrentViewport();
 	SetAsCurrentDepthStencil();
 	SetAsCurrentShader();
+	context->PSSetShader(nullptr, nullptr, 0);
 	BufferClass::SetVertexShaderBuffers(&_shadowDepthMatrixBuffer);
 
 	ShadowDepthMatrixBuffer shadowDepthMatrixBuffer;

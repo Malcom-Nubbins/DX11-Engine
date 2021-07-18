@@ -29,6 +29,11 @@ private:
 	ID3D11ShaderResourceView* m_metalFloorColourTex;
 	ID3D11ShaderResourceView* m_metalFloorNormalMap;
 
+	ID3D11ShaderResourceView* m_GrassyColourTex;
+	ID3D11ShaderResourceView* m_GrassyNormalMap;
+	ID3D11ShaderResourceView* m_GrassyDisplacementMap;
+	ID3D11ShaderResourceView* m_GrassySpecularMap;
+
 public:
 	TextureHandler();
 	~TextureHandler();

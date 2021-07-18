@@ -7,7 +7,6 @@ DiamondSquareTerrain::DiamondSquareTerrain()
 	_vertexBuffer = nullptr;
 	_indexBuffer = nullptr;
 	_gridMesh = nullptr;
-	_terrainGO = nullptr;
 	_finishedBuilding = false;
 }
 
@@ -21,10 +20,6 @@ void DiamondSquareTerrain::Cleanup()
 	if (_indexBuffer) _indexBuffer->Release();
 	delete _gridMesh;
 	_gridMesh = nullptr;
-
-	_terrainGO->Cleanup();
-	delete _terrainGO;
-	_terrainGO = nullptr;
 
 	delete[] _heightMap;
 }
@@ -300,8 +295,6 @@ void DiamondSquareTerrain::UpdateMeshData()
 	updatedMesh.numberOfIndices = static_cast<int>(_gridMesh->Indices.size());
 	updatedMesh.vertexBufferOffset = 0;
 	updatedMesh.vertexBufferStride = sizeof(SimpleVertex);
-
-	_terrainGO->GetAppearance()->UpdateObjectMesh(updatedMesh);
 }
 
 void DiamondSquareTerrain::GetNormals(UINT faceCount, UINT vertexCount)
@@ -361,80 +354,17 @@ void DiamondSquareTerrain::GetNormals(UINT faceCount, UINT vertexCount)
 
 void DiamondSquareTerrain::Update(float deltaTime)
 {
-	_terrainGO->Update(deltaTime);
+	
 }
 
 void DiamondSquareTerrain::ShadowDraw(ShadowDepthMatrixBuffer mb, ID3D11Buffer * constBuffer)
 {
-	if (_finishedBuilding)
-	{
-		if (_terrainGO->CanCastShadows())
-		{
-			mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
-			ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-			_terrainGO->Draw();
-		}
-	}
+	
 }
 
 void DiamondSquareTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * matrixBuffer, ID3D11Buffer* objValuesBuffer, ID3D11ShaderResourceView * texArray[])
 {
-	if (_finishedBuilding)
-	{
-		auto context = ApplicationNew::Get().GetContext();
-
-
-		Transform* transform = _terrainGO->GetTransform();
-		Appearance* appearance = _terrainGO->GetAppearance();
-
-		ObjectMaterial material = appearance->GetObjectMaterial();
-		// Copy material to shader
-		cb.surface.ambient = material.ambient;
-		cb.surface.diffuse = material.diffuse;
-		cb.surface.specular = material.specular;
-
-		// Set world matrix
-		mb.World = XMMatrixTranspose(XMLoadFloat4x4(&transform->GetWorld()));
-
-		ID3D11ShaderResourceView* texture;
-		// Set texture
-		if (appearance->HasColourTexture())
-		{
-			texture = appearance->GetColourTex();
-			context->PSSetShaderResources(0, 1, &texture);
-			cb.useColourTex = 1.0f;
-		}
-		else
-		{
-			cb.useColourTex = 0.0f;
-		}
-
-		if (appearance->HasNormalMap())
-		{
-			cb.useBumpMap = 1.0f;
-			texture = appearance->GetNormalMap();
-			context->PSSetShaderResources(2, 1, &texture);
-		}
-		else
-		{
-			cb.useBumpMap = 0.0f;
-		}
-
-		if (_terrainGO->IsAffectedByLight())
-		{
-			cb.affectedByLight = 1.0f;
-		}
-		else
-		{
-			cb.affectedByLight = 0.0f;
-		}
-
-		// Update constant buffer
-		context->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
-		context->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
-		_terrainGO->Draw();
-	}
-
+	
 }
 
 float DiamondSquareTerrain::GetWidth()

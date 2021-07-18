@@ -216,7 +216,7 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 	renderTargetTexDesc.MipLevels = 1;
 	renderTargetTexDesc.ArraySize = 1;
 	renderTargetTexDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	renderTargetTexDesc.SampleDesc.Count = 1;
+	renderTargetTexDesc.SampleDesc.Count = 4;
 	renderTargetTexDesc.SampleDesc.Quality = 0;
 	renderTargetTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	renderTargetTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -232,7 +232,7 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc{};
 	renderTargetDesc.Format = renderTargetTexDesc.Format;
-	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 	renderTargetDesc.Texture2D.MipSlice = 0;
 
 	hr = device->CreateRenderTargetView(m_RenderTargetTex2D, &renderTargetDesc, &m_RenderTargetView);
@@ -249,13 +249,13 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = renderTargetTexDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
 
 	device->CreateShaderResourceView(m_RenderTargetTex2D, &srvDesc, &m_RenderTargetShaderResourceView);
 
-	UINT sampleCount = 1;
+	UINT sampleCount = 4;
 	D3D11_TEXTURE2D_DESC depthBufferDesc{};
 
 	depthBufferDesc.Width = static_cast<UINT>(windowWidth);
@@ -497,6 +497,10 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 
 		element->Draw();
 	}
+
+	// Clear out the resource slots
+	ID3D11ShaderResourceView* const srv[4] = { nullptr, nullptr, nullptr, nullptr };
+	context->PSSetShaderResources(0, 4, srv);
 
 	//terrain.Draw(matBuffer, objValBuffer, matrixBuffer, objectValueBuffer, nullptr);
 }

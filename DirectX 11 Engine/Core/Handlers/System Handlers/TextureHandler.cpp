@@ -20,8 +20,11 @@ void TextureHandler::Cleanup()
 {
 	for (auto tex : m_Textures)
 	{
-		tex.second->Release();
-		tex.second = nullptr;
+		if (tex.second != nullptr)
+		{
+			tex.second->Release();
+			tex.second = nullptr;
+		}
 	}
 
 	m_Textures.clear();
@@ -73,15 +76,15 @@ void TextureHandler::LoadAllTextures()
 	m_Textures.emplace(std::make_pair("MetalColour", m_metalFloorColourTex));
 	m_Textures.emplace(std::make_pair("MetalNormal", m_metalFloorNormalMap));
 
-	ComPtr<ID3D11ShaderResourceView> grassyStoneTex = nullptr;
-	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone.dds", nullptr, grassyStoneTex.GetAddressOf());
-	m_Textures.emplace(std::make_pair("GrassyStoneColour", std::move(grassyStoneTex.Get())));
-	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone_NRM.dds", nullptr, grassyStoneTex.GetAddressOf());
-	m_Textures.emplace(std::make_pair("GrassyStoneNormal", std::move(grassyStoneTex.Get())));
-	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone_DISP.dds", nullptr, grassyStoneTex.GetAddressOf());
-	m_Textures.emplace(std::make_pair("GrassyStoneDisplacement", std::move(grassyStoneTex.Get())));
-	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone_SPEC.dds", nullptr, grassyStoneTex.GetAddressOf());
-	m_Textures.emplace(std::make_pair("GrassyStoneSpecular", std::move(grassyStoneTex.Get())));
+	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone.dds", nullptr, &m_GrassyColourTex);
+	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone_NRM.dds", nullptr, &m_GrassyNormalMap);
+	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone_DISP.dds", nullptr, &m_GrassyDisplacementMap);
+	CreateDDSTextureFromFile(device.Get(), L"Core/Resources/grassyStone_SPEC.dds", nullptr, &m_GrassySpecularMap);
+
+	m_Textures.emplace(std::make_pair("GrassyStoneColour", m_GrassyColourTex));
+	m_Textures.emplace(std::make_pair("GrassyStoneNormal", m_GrassyNormalMap));
+	m_Textures.emplace(std::make_pair("GrassyStoneDisplacement", m_GrassyDisplacementMap));
+	m_Textures.emplace(std::make_pair("GrassyStoneSpecular", m_GrassySpecularMap));
 }
 
 ID3D11ShaderResourceView* TextureHandler::GetTextureByName(char const* name)

@@ -45,11 +45,11 @@ bool DX11Engine::LoadContent()
 	m_Player = new Player();
 	m_Player->Initialise();
 
-	m_MainScene = new MainScene(*m_Player);
-	m_MainScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());
+	/*m_MainScene = new MainScene(*m_Player);
+	m_MainScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());*/
 
-	/*m_TestingScene = new TestingScene(*m_Player);
-	m_TestingScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());*/
+	m_TestingScene = new TestingScene(*m_Player);
+	m_TestingScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());
 
 	m_UI = new UserInterface(m_Player->GetCamera());
 	m_UI->Initialise();

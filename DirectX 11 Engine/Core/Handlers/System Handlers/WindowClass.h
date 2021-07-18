@@ -16,7 +16,8 @@ public:
 
 	HWND GetHWND() { return m_hWnd; }
 
-	ComPtr<ID3D11RenderTargetView> const& GetBackBuffer() const { return m_BackBuffer; }
+	ID3D11Texture2D* GetBackBufferTex() const { return m_BackBufferTex2D.Get(); }
+	ID3D11RenderTargetView* GetBackBuffer() const { return m_BackBuffer.Get(); }
 
 	float GetWindowWidth() { return static_cast<float>(m_WindowWidth); }
 	float GetWindowHeight() { return static_cast<float>(m_WindowHeight); }
@@ -62,7 +63,7 @@ protected:
 
 	virtual void OnResize(UINT width, UINT height);
 
-	ComPtr<IDXGISwapChain4> CreateSwapChain();
+	void CreateSwapChain();
 
 	void UpdateRenderTargetViews();
 
@@ -86,6 +87,7 @@ private:
 
 	ComPtr<IDXGISwapChain4> m_SwapChain;
 
+	ComPtr<ID3D11Texture2D> m_BackBufferTex2D;
 	ComPtr<ID3D11RenderTargetView> m_BackBuffer;
 
 	uint64_t m_FrameCounter;

@@ -129,19 +129,23 @@ void TestingScene::InitialiseSceneGraphics(float windowWidth, float windowHeight
 void TestingScene::Cleanup()
 {
 	_skyGradient->Cleanup();
+	delete _skyGradient;
 	_skyGradient = nullptr;
 
 	_shadows->Cleanup();
+	delete _shadows;
 	_shadows = nullptr;
 
 	_basicLight->Cleanup();
+	delete _basicLight;
 	_basicLight = nullptr;
 
 	_renderToQuad->Cleanup();
+	delete _renderToQuad;
 	_renderToQuad = nullptr;
 
-	/*_flatPlane->Cleanup();
-	_flatPlane = nullptr;*/
+	_flatPlane->Cleanup();
+	_flatPlane = nullptr;
 
 	_planeVertexBuffer->Release();
 	_planeIndexBuffer->Release();
@@ -162,12 +166,14 @@ void TestingScene::PreResizeViews()
 	Scene::PreResizeViews();
 	_basicLight->PreResize();
 	_shadows->PreResizeViews();
+	_renderToQuad->PreResize();
 }
 
 void TestingScene::ResizeViews(float windowWidth, float windowHeight)
 {
 	Scene::ResizeViews(windowWidth, windowHeight);
 	_basicLight->Resize(windowWidth, windowHeight);
+	_renderToQuad->OnResize(windowWidth, windowHeight);
 	_shadows->OnResize(4096, 4096);
 	m_Player->ResetPlayerCamera(windowWidth, windowHeight);
 }
@@ -201,7 +207,7 @@ void TestingScene::Update(UpdateEvent& e)
 	}
 
 	if (_currentCooldown > 0.0f)
-		_currentCooldown -= e.ElapsedTime;
+		_currentCooldown -= static_cast<float>(e.ElapsedTime);
 }
 
 void TestingScene::Draw()

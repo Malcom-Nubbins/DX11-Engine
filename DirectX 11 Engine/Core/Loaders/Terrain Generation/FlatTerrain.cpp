@@ -1,7 +1,7 @@
 #include "FlatTerrain.h"
 #include "../../ApplicationNew.h"
 
-FlatTerrain::FlatTerrain()
+FlatTerrain::FlatTerrain() : _terrainGO(nullptr)
 {
 	_gridVertices = std::vector<SimpleVertex>();
 	_vertexBuffer = nullptr;
@@ -22,9 +22,12 @@ void FlatTerrain::Cleanup()
 	delete _gridMesh;
 	_gridMesh = nullptr;
 
-	_terrainGO->Cleanup();
-	delete _terrainGO;
-	_terrainGO = nullptr;
+	if (_terrainGO != nullptr)
+	{
+		_terrainGO->Cleanup();
+		delete _terrainGO;
+		_terrainGO = nullptr;
+	}	
 }
 
 void FlatTerrain::SetTerrainValues(float terrainWidth, float terrainDepth, UINT sizeOfTerrain)
@@ -138,7 +141,6 @@ HRESULT FlatTerrain::CreateBuffers()
 	{
 		return hr;
 	}
-
 	
 	// Index Buffer
 	_gridIndices.insert(_gridIndices.end(), _gridMesh->Indices.begin(), _gridMesh->Indices.end());
@@ -166,8 +168,6 @@ HRESULT FlatTerrain::CreateBuffers()
 	char const flatTerrainIBName[] = "FlatTerrainIB";
 	_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(flatTerrainIBName) - 1, flatTerrainIBName);
 #endif
-
-	
 
 	return S_OK;
 }

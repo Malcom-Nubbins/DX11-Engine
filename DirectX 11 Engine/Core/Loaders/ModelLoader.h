@@ -7,6 +7,7 @@
 
 #include "../Globals/Structs.h"
 #include "../Handlers/System Handlers/MathsHandler.h"
+#include "../Globals/AppValues.h"
 #include <map>
 
 class ModelLoader

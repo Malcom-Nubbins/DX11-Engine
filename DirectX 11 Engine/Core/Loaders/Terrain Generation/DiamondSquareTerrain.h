@@ -26,8 +26,8 @@ class DiamondSquareTerrain
 	};
 
 private:
-	ID3D11Buffer * _vertexBuffer;
-	ID3D11Buffer* _indexBuffer;
+	VertexBuffer _vertexBuffer;
+	IndexBuffer _indexBuffer;
 
 	GridMeshData* _gridMesh;
 
@@ -37,8 +37,6 @@ private:
 	double* _heightMap;
 	std::vector<float> _heights;
 	InitInfo _info;
-
-	SceneElement *_terrainGO;
 
 	bool _finishedBuilding;
 
@@ -70,7 +68,6 @@ public:
 	void SetTerrainValues(float terrainWidth, float terrainDepth, UINT sizeOfTerrain);
 	void RegenerateTerrain();
 	void GenerateTerrain();
-	void SetGameObject(SceneElement* object) { _terrainGO = object; }
 
 	void Update(float deltaTime);
 
@@ -82,8 +79,8 @@ public:
 	float GetDepth();
 	float GetHeight(float camX, float camZ);
 
-	ID3D11Buffer * GetVertexBuffer() const { return _vertexBuffer; }
-	ID3D11Buffer* GetIndexBuffer() const { return _indexBuffer; }
+	VertexBuffer GetVertexBuffer() const { return _vertexBuffer; }
+	VertexBuffer GetIndexBuffer() const { return _indexBuffer; }
 	GridMeshData* GetMeshData() const { return _gridMesh; }
 
 	void SetTerrainFinishedBuilding(bool state) { _finishedBuilding = state; }

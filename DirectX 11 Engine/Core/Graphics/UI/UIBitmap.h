@@ -12,8 +12,8 @@ private:
 	XMFLOAT2 _bitmapPrevPosition;
 	ID3D11ShaderResourceView* _texture;
 
-	VertexBuffer* _vertexBuffer;
-	IndexBuffer* _indexBuffer;
+	VertexBuffer _vertexBuffer;
+	IndexBuffer _indexBuffer;
 
 	ObjectMesh	_uiQuad;
 	SceneElement* _uiElement;

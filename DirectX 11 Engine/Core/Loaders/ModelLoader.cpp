@@ -1,6 +1,8 @@
 #include "ModelLoader.h"
 #include <iterator>
 #include <map>
+#include "../Globals/AppValues.h"
+#include "../ApplicationNew.h"
 
 std::map<std::wstring, NewObjectMesh> ModelLoader::_modelCache;
 
@@ -161,6 +163,13 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 		subset.vertexBufferStride = sizeof(SimpleVertex);
 		subset.vertexBufferOffset = 0;
 		subset.indexCount = static_cast<UINT>(indices.size());
+
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING)
+		std::wstring const filenameWStr(filename.c_str());
+		std::string const filenameStr(filenameWStr.begin(), filenameWStr.end());
+		std::string const indexBufferName = FormatCString("Index Buffer: %s", filenameStr.c_str());
+		subset.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, indexBufferName.length(), indexBufferName.c_str());
+#endif
 
 		modelMesh.subsets.push_back(subset);
 		modelMesh.numOfSubsets++;
@@ -647,6 +656,13 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 	if (FAILED(hr))
 		return false;
 
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	std::wstring const filenameWStr(filename.c_str());
+	std::string const filenameStr(filenameWStr.begin(), filenameWStr.end());
+	std::string const vertexBufferName = FormatCString("Vertex Buffer: %s", filenameStr.c_str());
+	modelMesh.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, vertexBufferName.length(), vertexBufferName.c_str());
+#endif
+
 	_modelCache.insert(std::make_pair(filename, modelMesh));
 
 	return true;
@@ -654,7 +670,17 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 
 void ModelLoader::UnloadAllModels()
 {
-	for (auto const modelCache : _modelCache)
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
+	if (debugPtr)
+	{
+		debugPtr->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	}
+#endif
+
+	_modelCache.clear();
+
+	/*for (auto const modelCache : _modelCache)
 	{
 		NewObjectMesh objectMesh(modelCache.second);
 		objectMesh.vertexBuffer->Release();
@@ -672,5 +698,5 @@ void ModelLoader::UnloadAllModels()
 				objectMesh.subsets[i].indexBuffer->Release();
 			}
 		}
-	}
+	}*/
 }

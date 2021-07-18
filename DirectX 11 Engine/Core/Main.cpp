@@ -16,7 +16,7 @@ void ReportLiveObjects()
 #endif
 }
 
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
 	int retCode = 0;
 
@@ -36,7 +36,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLi
 
 	ApplicationNew::Destroy();
 
-	//atexit(&ReportLiveObjects);
+	atexit(&ReportLiveObjects);
 
 	return retCode;
 }

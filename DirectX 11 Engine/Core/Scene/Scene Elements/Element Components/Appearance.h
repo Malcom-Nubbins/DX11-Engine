@@ -15,8 +15,8 @@ private:
 	ID3D11ShaderResourceView* _specularMap;
 
 public:
-	Appearance(ObjectMesh mesh, ObjectMaterial material);
-	Appearance(NewObjectMesh mesh, ObjectMaterial material);
+	Appearance(ObjectMesh const& mesh, ObjectMaterial const& material);
+	Appearance(NewObjectMesh const& mesh, ObjectMaterial const& material);
 	~Appearance();
 
 	void Cleanup();

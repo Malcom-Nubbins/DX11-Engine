@@ -1,6 +1,7 @@
 #include "WindowClass.h"
 #include "../../ApplicationNew.h"
 #include "../../EngineBase.h"
+#include "../../Globals/AppValues.h"
 
 WindowClass::WindowClass(HWND& hwnd, std::wstring& windowName, UINT clientWidth, UINT clientHeight, bool vsync)
 	: m_hWnd(hwnd)
@@ -12,10 +13,12 @@ WindowClass::WindowClass(HWND& hwnd, std::wstring& windowName, UINT clientWidth,
 	, m_FrameCounter(0)
 	, m_VSync(vsync)
 	, m_Fullscreen(false)
+	, m_BackBuffer(nullptr)
+	, m_BackBufferTex2D(nullptr)
 {
 	ApplicationNew& app = ApplicationNew::Get();
 
-	m_SwapChain = CreateSwapChain();
+	CreateSwapChain();
 
 	UpdateRenderTargetViews();
 
@@ -25,6 +28,9 @@ WindowClass::WindowClass(HWND& hwnd, std::wstring& windowName, UINT clientWidth,
 
 WindowClass::~WindowClass()
 {
+	m_BackBuffer.Reset();
+	m_BackBufferTex2D.Reset();
+	m_SwapChain.Reset();
 }
 
 void WindowClass::RegisterCallbacks(std::shared_ptr<EngineBase> pEngineBase)
@@ -129,8 +135,11 @@ void WindowClass::OnResize(UINT width, UINT height)
 		m_ScreenCentre.x = m_WindowWidth / 2;
 		m_ScreenCentre.y = m_WindowHeight / 2;
 
+		m_BackBufferTex2D.Reset();
 		m_BackBuffer.Reset();
+
 		ApplicationNew::Get().GetContext()->ClearState();
+		ApplicationNew::Get().GetContext()->Flush();
 
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 		ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
@@ -153,12 +162,12 @@ void WindowClass::OnResize(UINT width, UINT height)
 	}
 }
 
-ComPtr<IDXGISwapChain4> WindowClass::CreateSwapChain()
+void WindowClass::CreateSwapChain()
 {
 	ApplicationNew& app = ApplicationNew::Get();
 	ComPtr<IDXGISwapChain4> dxgiSwapChain4;
 	ComPtr<IDXGIFactory4> dxgiFactory4;
-	UINT createFactoryFlags;
+	UINT createFactoryFlags = 0;
 
 #if defined(_DEBUG)
 	createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
@@ -175,9 +184,9 @@ ComPtr<IDXGISwapChain4> WindowClass::CreateSwapChain()
 	sd.Stereo = false;
 	sd.SampleDesc = { 1, 0 };
 	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.BufferCount = 1;
+	sd.BufferCount = 2;
 	sd.Scaling = DXGI_SCALING_STRETCH;
-	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	sd.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	sd.Flags = 0;
 
@@ -189,7 +198,9 @@ ComPtr<IDXGISwapChain4> WindowClass::CreateSwapChain()
 	ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
 	ThrowIfFailed(swapChain1.As(&dxgiSwapChain4));
 
-	return dxgiSwapChain4;
+	m_SwapChain = dxgiSwapChain4;
+
+	//dxgiSwapChain4->Release();
 }
 
 void WindowClass::UpdateRenderTargetViews()
@@ -197,19 +208,27 @@ void WindowClass::UpdateRenderTargetViews()
 	auto device = ApplicationNew::Get().GetDevice();
 
 	ID3D11Texture2D* backBuffer;
-	ThrowIfFailed(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<LPVOID*>(&backBuffer)));
+	ThrowIfFailed(m_SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBuffer));
 	
+	m_BackBufferTex2D = backBuffer;
+
 	ID3D11RenderTargetView* pBackBuffer = m_BackBuffer.Get();
 	device->CreateRenderTargetView(backBuffer, nullptr, &pBackBuffer);
 
 	m_BackBuffer = pBackBuffer;
 
 	pBackBuffer->Release();
+	pBackBuffer = nullptr;
+
 	backBuffer->Release();
+	backBuffer = nullptr;
 
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	char const backBufferName[] = "BackBuffer";
 	m_BackBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(backBufferName) - 1, backBufferName);
+
+	char const backBufferTexName[] = "BackBufferTex";
+	m_BackBufferTex2D->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(backBufferTexName) - 1, backBufferTexName);
 #endif
 }
 
@@ -220,8 +239,8 @@ void WindowClass::Cleanup()
 		engine->OnWindowDestroyed();
 	}
 
-	auto backBuff = m_BackBuffer.Get();
-	m_BackBuffer.Reset();
+	/*m_BackBuffer->Release();
+	m_BackBufferTex2D->Release();*/
 
 	if (m_hWnd)
 	{
@@ -229,8 +248,19 @@ void WindowClass::Cleanup()
 		m_hWnd = nullptr;
 	}
 
-	m_SwapChain->Release();
-	m_SwapChain = nullptr;
+	//m_SwapChain->Release();
+	//m_SwapChain = nullptr;
+
+	ApplicationNew::Get().GetContext()->ClearState();
+	ApplicationNew::Get().GetContext()->Flush();
+
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
+	if (debugPtr)
+	{
+		debugPtr->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	}
+#endif
 }
 
 void WindowClass::Show()

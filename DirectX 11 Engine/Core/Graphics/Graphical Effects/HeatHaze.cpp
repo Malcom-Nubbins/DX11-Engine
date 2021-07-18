@@ -83,18 +83,22 @@ HRESULT HeatHaze::InitialiseRenderTarget(const float width, const float height)
 	renderTargetTexDesc.MipLevels = 1;
 	renderTargetTexDesc.ArraySize = 1;
 	renderTargetTexDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	renderTargetTexDesc.SampleDesc.Count = 1;
+	renderTargetTexDesc.SampleDesc.Count = 4;
 	renderTargetTexDesc.SampleDesc.Quality = 0;
 	renderTargetTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	renderTargetTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	renderTargetTexDesc.CPUAccessFlags = 0;
 	renderTargetTexDesc.MiscFlags = 0;
 
-	device->CreateTexture2D(&renderTargetTexDesc, nullptr, &_renderTargetTex2D);
+	hr = device->CreateTexture2D(&renderTargetTexDesc, nullptr, &_renderTargetTex2D);
+	if (FAILED(hr))
+	{
+		return hr;
+	}
 
 	D3D11_RENDER_TARGET_VIEW_DESC renderTargetDesc;
 	renderTargetDesc.Format = renderTargetTexDesc.Format;
-	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 	renderTargetDesc.Texture2D.MipSlice = 0;
 
 	hr = device->CreateRenderTargetView(_renderTargetTex2D, &renderTargetDesc, &_renderTargetView);
@@ -106,7 +110,7 @@ HRESULT HeatHaze::InitialiseRenderTarget(const float width, const float height)
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = renderTargetTexDesc.Format;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
 
@@ -131,6 +135,13 @@ void HeatHaze::BuildQuad()
 	{
 		return;
 	}
+
+#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+	char const vbName[] = "Heat Haze VB";
+	char const ibName[] = "Heat Haze IB";
+	_quad.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(vbName) - 1, vbName);
+	_quad.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(ibName) - 1, ibName);
+#endif
 
 	_quad.numberOfIndices = 6;
 	_quad.vertexBufferOffset = 0;
@@ -179,8 +190,8 @@ void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, std::string s
 	SetAsCurrentRenderTarget();
 	SetAsCurrentPixelShader();
 
-	context->IASetVertexBuffers(0, 1, &_quad.vertexBuffer, &_quad.vertexBufferStride, &_quad.vertexBufferOffset);
-	context->IASetIndexBuffer(_quad.indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	context->IASetVertexBuffers(0, 1, _quad.vertexBuffer.GetAddressOf(), &_quad.vertexBufferStride, &_quad.vertexBufferOffset);
+	context->IASetIndexBuffer(_quad.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	context->PSSetShaderResources(0, 1, &textureToProcess);
 
