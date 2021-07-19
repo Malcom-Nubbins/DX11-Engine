@@ -260,6 +260,18 @@
     <ClInclude Include="Core\Globals\Bitmask.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_iterators.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_print.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FYP - Seasonal Day Night Cycle.rc">

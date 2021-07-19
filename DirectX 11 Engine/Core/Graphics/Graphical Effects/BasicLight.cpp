@@ -1,5 +1,6 @@
 #include "BasicLight.h"
 #include "../../ApplicationNew.h"
+#include "../../Loaders/ConfigLoader.h"
 
 BasicLight::BasicLight()
 	: _tesselationHS(nullptr), _tesselationDS(nullptr), _viewport(),
@@ -90,6 +91,15 @@ void BasicLight::Resize(float newWidth, float newHeight)
 HRESULT BasicLight::Initialise(float windowWidth, float windowHeight)
 {
 	auto device = ApplicationNew::Get().GetDevice();
+
+	int msaaCount = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "MSAA");
+	if (msaaCount == -1)
+	{
+		msaaCount = 0;
+	}
+
+	m_MSAACount = static_cast<UINT>(msaaCount);
+
 	HRESULT hr;
 	hr = InitialiseShaders();
 	if (FAILED(hr))
@@ -210,13 +220,16 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 {
 	auto device = ApplicationNew::Get().GetDevice();
 
+	UINT sampleQuality;
+	device->CheckMultisampleQualityLevels(DXGI_FORMAT_R32G32B32A32_FLOAT, m_MSAACount, &sampleQuality);
+
 	D3D11_TEXTURE2D_DESC renderTargetTexDesc;
 	renderTargetTexDesc.Width = static_cast<UINT>(windowWidth);
 	renderTargetTexDesc.Height = static_cast<UINT>(windowHeight);
 	renderTargetTexDesc.MipLevels = 1;
 	renderTargetTexDesc.ArraySize = 1;
 	renderTargetTexDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	renderTargetTexDesc.SampleDesc.Count = 4;
+	renderTargetTexDesc.SampleDesc.Count = m_MSAACount;
 	renderTargetTexDesc.SampleDesc.Quality = 0;
 	renderTargetTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	renderTargetTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -255,7 +268,8 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 
 	device->CreateShaderResourceView(m_RenderTargetTex2D, &srvDesc, &m_RenderTargetShaderResourceView);
 
-	UINT sampleCount = 4;
+	device->CheckMultisampleQualityLevels(DXGI_FORMAT_D24_UNORM_S8_UINT, m_MSAACount, &sampleQuality);
+
 	D3D11_TEXTURE2D_DESC depthBufferDesc{};
 
 	depthBufferDesc.Width = static_cast<UINT>(windowWidth);
@@ -263,7 +277,7 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 	depthBufferDesc.MipLevels = 1;
 	depthBufferDesc.ArraySize = 1;
 	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthBufferDesc.SampleDesc.Count = sampleCount;
+	depthBufferDesc.SampleDesc.Count = m_MSAACount;
 	depthBufferDesc.SampleDesc.Quality = 0;
 	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;

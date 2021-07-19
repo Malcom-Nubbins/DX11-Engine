@@ -90,6 +90,8 @@ void UserInterface::Draw()
 {
 	auto app = &ApplicationNew::Get();
 
+	RenderClass::SetRenderTargetAndDepthStencil(app->GetWindowByName(L"DX11 Engine")->GetBackBuffer(), nullptr);
+
 	RenderClass::DisableZBuffer();
 	RenderClass::EnableAlphaBlending();
 

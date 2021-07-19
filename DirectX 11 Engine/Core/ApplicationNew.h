@@ -29,7 +29,7 @@ public:
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	ComPtr<ID3D11Debug> GetDebug() const { return m_Debug; }
 #endif
-	C_ConfigLoader const& GetConfigLoader() const { return *m_ConfigLoader; }
+	C_ConfigLoader const* GetConfigLoader() const { return m_ConfigLoader; }
 
 protected:
 	ApplicationNew(HINSTANCE hinst);

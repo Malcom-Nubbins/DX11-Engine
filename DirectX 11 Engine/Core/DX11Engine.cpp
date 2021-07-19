@@ -188,6 +188,11 @@ void DX11Engine::OnResize(UINT width, UINT height)
 	{
 		m_MainScene->ResizeViews(static_cast<float>(width), static_cast<float>(height));
 	}
+
+	if (m_UI != nullptr)
+	{
+		m_UI->Resize(static_cast<float>(width), static_cast<float>(height));
+	}
 }
 
 void DX11Engine::OnMouseMoved(MouseMotionEvent& e)

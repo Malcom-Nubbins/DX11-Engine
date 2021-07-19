@@ -75,6 +75,12 @@ enum class MovementState : u8
 	Right = 0x08
 };
 
+enum class SettingType
+{
+	Graphics,
+	Video
+};
+
 inline constexpr MovementState operator~(MovementState a) 
 {
 	return static_cast<MovementState>(~static_cast<u8>(a));

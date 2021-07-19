@@ -1,5 +1,6 @@
 #include "Globals/stdafx.h"
 #include "ApplicationNew.h"
+#include "Loaders/ConfigLoader.h"
 #include "DX11Engine.h"
 
 #include <Shlwapi.h>
@@ -30,8 +31,33 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 	ApplicationNew::Create(hInstance);
 	{
-		std::shared_ptr<DX11Engine> dx11Engine = std::make_shared<DX11Engine>(L"DX11 Engine", 1280, 720, true);
-		retCode = ApplicationNew::Get().Run(dx11Engine);
+		C_ConfigLoader const* const configLoader = ApplicationNew::Get().GetConfigLoader();
+		int const renderWidth = configLoader->GetSettingValue(SettingType::Video, "ScreenWidth");
+		int const renderHeight = configLoader->GetSettingValue(SettingType::Video, "ScreenHeight");
+		int const vsync = configLoader->GetSettingValue(SettingType::Video, "VSync");
+
+		if (renderWidth == -1)
+		{
+			std::exception("Invalid render width obtained from config file");
+			retCode = -1;
+		}
+
+		if (renderHeight == -1)
+		{
+			std::exception("Invalid render height obtained from config file");
+			retCode = -1;
+		}
+
+		if (vsync == -1)
+		{
+			std::exception("Invalud vsync value obtained from config file");
+		}
+
+		if (retCode != -1)
+		{
+			std::shared_ptr<DX11Engine> dx11Engine = std::make_shared<DX11Engine>(L"DX11 Engine", static_cast<UINT>(renderWidth), static_cast<UINT>(renderHeight), static_cast<bool>(vsync));
+			retCode = ApplicationNew::Get().Run(dx11Engine);
+		}
 	}
 
 	ApplicationNew::Destroy();

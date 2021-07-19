@@ -13,7 +13,11 @@ private:
 	ID3D11Texture2D* m_MSAARenderTargetTex2D;
 
 	ID3D11InputLayout* _inputLayout;
+	ID3D11Buffer* m_ValuesBuffer;
+
 	ObjectMesh		_quad;
+
+	UINT m_MSAACount;
 
 public:
 	RenderToFullscreenQuad();
@@ -31,7 +35,7 @@ public:
 	void SetAsCurrentVertexShader() const;
 	void SetAsCurrentPixelShader() const;
 
-	void Render(ID3D11ShaderResourceView* textureToRender) const;
+	void Render(ID3D11ShaderResourceView* textureToRender);
 
 private:
 	HRESULT InitialiseShaders();

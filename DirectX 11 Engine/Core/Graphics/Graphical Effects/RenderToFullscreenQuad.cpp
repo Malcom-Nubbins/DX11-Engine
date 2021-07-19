@@ -1,5 +1,6 @@
 #include "RenderToFullscreenQuad.h"
 #include "../../ApplicationNew.h"
+#include "../../Loaders/ConfigLoader.h"
 
 RenderToFullscreenQuad::RenderToFullscreenQuad()
 	: _quadVS(nullptr)
@@ -8,6 +9,7 @@ RenderToFullscreenQuad::RenderToFullscreenQuad()
 		, _quad()
 		, m_MSAARTV(nullptr)
 		, m_MSAARenderTargetTex2D(nullptr)
+		, m_MSAACount(0)
 {
 }
 
@@ -24,6 +26,7 @@ void RenderToFullscreenQuad::Cleanup()
 	_inputLayout->Release();
 	_quadVS->Release();
 	_quadPS->Release();
+	m_ValuesBuffer->Release();
 }
 
 HRESULT RenderToFullscreenQuad::Initialise(const float width, const float height)
@@ -35,7 +38,23 @@ HRESULT RenderToFullscreenQuad::Initialise(const float width, const float height
 		return hr;
 	}
 
+	int msaaCount = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "MSAA");
+	if (msaaCount == -1)
+	{
+		msaaCount = 0;
+	}
+
+	m_MSAACount = static_cast<UINT>(msaaCount);
+
 	BuildQuad();
+
+	D3D11_BUFFER_DESC bd;
+	ZeroMemory(&bd, sizeof(bd));
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.ByteWidth = sizeof(FullscreenQuadValues);
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = 0;
+	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &m_ValuesBuffer);
 
 	InitRenderTargets(width, height);
 
@@ -46,13 +65,16 @@ HRESULT RenderToFullscreenQuad::InitRenderTargets(float width, float height)
 {
 	auto device = ApplicationNew::Get().GetDevice();
 
+	UINT sampleQuality;
+	device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, m_MSAACount, &sampleQuality);
+
 	D3D11_TEXTURE2D_DESC msaaTargetTexDesc;
 	msaaTargetTexDesc.Width = static_cast<UINT>(width);
 	msaaTargetTexDesc.Height = static_cast<UINT>(height);
 	msaaTargetTexDesc.MipLevels = 1;
 	msaaTargetTexDesc.ArraySize = 1;
 	msaaTargetTexDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	msaaTargetTexDesc.SampleDesc.Count = 4;
+	msaaTargetTexDesc.SampleDesc.Count = m_MSAACount;
 	msaaTargetTexDesc.SampleDesc.Quality = 0;
 	msaaTargetTexDesc.Usage = D3D11_USAGE_DEFAULT;
 	msaaTargetTexDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
@@ -148,20 +170,26 @@ void RenderToFullscreenQuad::BuildQuad()
 	_quad.vertexBufferStride = sizeof(SimpleQuad);
 }
 
-void RenderToFullscreenQuad::Render(ID3D11ShaderResourceView * textureToRender) const
+void RenderToFullscreenQuad::Render(ID3D11ShaderResourceView * textureToRender)
 {
 	auto context = ApplicationNew::Get().GetContext();
+	FullscreenQuadValues values;
+	values.sampleCount = m_MSAACount;
 
 	RenderClass::SetRasterizerState(NO_CULL);
 	context->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(LINEAR));
 	SetAsCurrentRenderTarget();
 	SetAsCurrentVertexShader();
 	SetAsCurrentPixelShader();
+	BufferClass::SetPixelShaderBuffers(&m_ValuesBuffer, 0);
 	
 	context->IASetVertexBuffers(0, 1, _quad.vertexBuffer.GetAddressOf(), &_quad.vertexBufferStride, &_quad.vertexBufferOffset);
 	context->IASetIndexBuffer(_quad.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	context->PSSetShaderResources(0, 1, &textureToRender);
+
+	context->UpdateSubresource(m_ValuesBuffer, 0, nullptr, &values, 0, 0);
+
 	context->DrawIndexed(static_cast<UINT>(_quad.numberOfIndices), 0, 0);
 
 	auto backBuff = ApplicationNew::Get().GetWindowByName(L"DX11 Engine")->GetBackBufferTex();

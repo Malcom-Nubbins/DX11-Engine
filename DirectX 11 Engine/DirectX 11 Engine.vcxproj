@@ -200,6 +200,10 @@
     <ClInclude Include="Core\Handlers\System Handlers\InputHandler.h" />
     <ClInclude Include="Core\Handlers\SystemHandlers.h" />
     <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h" />
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml.hpp" />
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_iterators.hpp" />
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_print.hpp" />
+    <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_utils.hpp" />
     <ClInclude Include="Core\Scene\Player.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
     <ClInclude Include="Core\Application.h" />

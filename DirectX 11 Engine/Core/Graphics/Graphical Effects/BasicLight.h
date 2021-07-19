@@ -42,6 +42,7 @@ private:
 	XMFLOAT4 _lightColourNightAmbient;
 	XMFLOAT4 _lightColourNightSpecular;
 
+	UINT m_MSAACount;
 	bool _renderWireframe;
 
 public:

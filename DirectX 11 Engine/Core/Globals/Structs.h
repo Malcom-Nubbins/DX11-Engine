@@ -251,3 +251,9 @@ struct HeatHazeValues
 	float blizzard;
 	float padding;;
 };
+
+struct FullscreenQuadValues
+{
+	unsigned int sampleCount;
+	XMFLOAT3 padding;
+};

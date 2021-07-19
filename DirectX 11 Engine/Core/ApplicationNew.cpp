@@ -181,6 +181,9 @@ ApplicationNew::~ApplicationNew()
 
 void ApplicationNew::Initialise()
 {
+	m_ConfigLoader = new C_ConfigLoader(std::string("settings.xml"));
+	m_ConfigLoader->Initialise();
+
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 	
 	WNDCLASSEX windowClass = { 0 };
@@ -206,8 +209,6 @@ void ApplicationNew::Initialise()
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	HRESULT hr = m_Device->QueryInterface(__uuidof(ID3D11Debug), (void**)&m_Debug);
 #endif
-
-	m_ConfigLoader = new C_ConfigLoader();
 }
 
 void ApplicationNew::Cleanup()
