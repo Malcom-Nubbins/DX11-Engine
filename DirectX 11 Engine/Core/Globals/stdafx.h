@@ -78,7 +78,8 @@ enum class MovementState : u8
 enum class SettingType
 {
 	Graphics,
-	Video
+	Video,
+	Engine
 };
 
 inline constexpr MovementState operator~(MovementState a) 

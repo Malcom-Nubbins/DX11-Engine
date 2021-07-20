@@ -1,38 +1,22 @@
 #pragma once
 #include "D3DClass.h"
 #include "../../Loaders/DDSTextureLoader.h"
-#include <map>
+#include <vector>
 
 class TextureHandler
 {
 private:
-	static std::map<char const*, ID3D11ShaderResourceView*> m_Textures;
+	struct S_Texture final
+	{
+		S_Texture(char const* inName, ID3D11ShaderResourceView* inTex)
+			: m_Filename(inName), m_Texture(inTex)
+		{}
 
-	ID3D11ShaderResourceView* m_GroundColourTex;
-	ID3D11ShaderResourceView* m_GroundNormalMap;
-	ID3D11ShaderResourceView* m_GroundDisplacementMap;
-	ID3D11ShaderResourceView* m_GroundSpecularMap;
+		std::string m_Filename;
+		ID3D11ShaderResourceView* m_Texture;
+	};
 
-	ID3D11ShaderResourceView* m_stoneTex;
-	ID3D11ShaderResourceView* m_stoneBumpMap;
-	ID3D11ShaderResourceView* m_stoneDisplacementMap;
-	ID3D11ShaderResourceView* m_stoneSpecularMap;
-
-	ID3D11ShaderResourceView* m_distortionMap;
-	ID3D11ShaderResourceView* m_snowTexture;
-
-	ID3D11ShaderResourceView* m_aircraftTexture;
-	ID3D11ShaderResourceView* m_aircraftNormalMap;
-	ID3D11ShaderResourceView* m_aircraftSpecularMap;
-	ID3D11ShaderResourceView* m_aircraftDisplacementMap;
-
-	ID3D11ShaderResourceView* m_metalFloorColourTex;
-	ID3D11ShaderResourceView* m_metalFloorNormalMap;
-
-	ID3D11ShaderResourceView* m_GrassyColourTex;
-	ID3D11ShaderResourceView* m_GrassyNormalMap;
-	ID3D11ShaderResourceView* m_GrassyDisplacementMap;
-	ID3D11ShaderResourceView* m_GrassySpecularMap;
+	std::vector<S_Texture> m_Textures;
 
 public:
 	TextureHandler();
@@ -40,6 +24,6 @@ public:
 	void Cleanup();
 
 	void LoadAllTextures();
-	static ID3D11ShaderResourceView* GetTextureByName(char const* name);
+	ID3D11ShaderResourceView* GetTextureByName(char const* name) const;
 };
 

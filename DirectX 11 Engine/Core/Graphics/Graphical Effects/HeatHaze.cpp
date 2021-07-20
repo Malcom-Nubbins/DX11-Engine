@@ -1,5 +1,6 @@
 #include "HeatHaze.h"
 #include "../../ApplicationNew.h"
+#include "../../DX11Engine.h"
 
 HeatHaze::HeatHaze()
 	: _quad(), _values()
@@ -166,13 +167,14 @@ void HeatHaze::Update(const float deltaTime)
 void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, std::string season)
 {
 	auto context = ApplicationNew::Get().GetContext();
+	auto texHandler = DX11Engine::Get().GetTextureHandler();
 
 	if (season == "Winter")
 	{
 		_values.blizzard = 1.0f;
 		_values.heatwave = 0.0f;
 
-		ID3D11ShaderResourceView* snowTex = TextureHandler::GetTextureByName("Snow");
+		ID3D11ShaderResourceView* snowTex = texHandler->GetTextureByName("Snow");
 		context->PSSetShaderResources(1, 1, &snowTex);
 	}
 	else if (season == "Summer")
@@ -180,7 +182,7 @@ void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, std::string s
 		_values.blizzard = 0.0f;
 		_values.heatwave = 1.0f;
 
-		ID3D11ShaderResourceView* distortionMap = TextureHandler::GetTextureByName("DistortionMap");
+		ID3D11ShaderResourceView* distortionMap = texHandler->GetTextureByName("DistortionMap");
 		context->PSSetShaderResources(1, 1, &distortionMap);
 	}
 

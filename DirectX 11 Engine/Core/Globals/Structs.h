@@ -257,3 +257,13 @@ struct FullscreenQuadValues
 	unsigned int sampleCount;
 	XMFLOAT3 padding;
 };
+
+struct S_TextureInfo final
+{
+	S_TextureInfo(char const* inTextureName, std::wstring const& inTexFilename)
+		: m_TextureName(inTextureName)
+		, m_TextureFilename(inTexFilename)
+	{}
+	std::string m_TextureName;
+	std::wstring m_TextureFilename;
+};

@@ -1,6 +1,7 @@
 #include "TestingScene.h"
 #include "../Loaders/ModelLoader.h"
 #include "../ApplicationNew.h"
+#include "../DX11Engine.h"
 
 TestingScene::TestingScene(Player& player)
 	: Scene(player)
@@ -21,6 +22,8 @@ TestingScene::~TestingScene()
 
 void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 {
+	auto texHandler = DX11Engine::Get().GetTextureHandler();
+
 	Scene::InitialiseScene(windowWidth, windowHeight);
 
 	InitialiseSceneGraphics(windowWidth, windowHeight);
@@ -84,8 +87,8 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	auto groundAppearance = std::make_shared<Appearance>(planeMesh, concrete);
-	groundAppearance->SetColourTexture(TextureHandler::GetTextureByName("ConcreteColour"));
-	groundAppearance->SetNormalMap(TextureHandler::GetTextureByName("ConcreteNormal"));
+	groundAppearance->SetColourTexture(texHandler->GetTextureByName("ConcreteColour"));
+	groundAppearance->SetNormalMap(texHandler->GetTextureByName("ConcreteNormal"));
 	//groundAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
 	//groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
 

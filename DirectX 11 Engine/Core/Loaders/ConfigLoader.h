@@ -4,6 +4,7 @@
 #include "XMLLoader/rapidxml_utils.hpp"
 #include <string>
 #include "../Globals/stdafx.h"
+#include "../Globals/Structs.h"
 
 class C_ConfigLoader
 {
@@ -14,17 +15,20 @@ public:
 	void Initialise();
 
 	int GetSettingValue(SettingType const settingType, char const* settingName) const;
+	std::string GetSettingStringValue(SettingType const settingType, char const* settingName) const;
+	std::vector<S_TextureInfo> GetAllTextures() const;
 
 private:
 	struct S_SettingNameValuePair final
 	{
-		S_SettingNameValuePair(SettingType const inType, char const* inSettingName, int const inSettingValue)
-			: m_Type(inType), m_SettingName(inSettingName), m_SettingValue(inSettingValue)
+		S_SettingNameValuePair(SettingType const inType, char const* inSettingName, int const inSettingValue, std::string const& inWCharVal)
+			: m_Type(inType), m_SettingName(inSettingName), m_SettingValue(inSettingValue), m_SettingValueString(inWCharVal)
 		{}
 
 		SettingType m_Type;
 		std::string m_SettingName;
 		int m_SettingValue;
+		std::string m_SettingValueString;
 	};
 
 	std::string m_ConfigFilename;

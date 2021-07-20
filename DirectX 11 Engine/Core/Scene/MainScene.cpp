@@ -1,5 +1,6 @@
 #include "MainScene.h"
 #include "../ApplicationNew.h"
+#include "../DX11Engine.h"
 
 MainScene::MainScene(Player& player)
 	: Scene(player)
@@ -108,6 +109,8 @@ void MainScene::ResizeViews(float windowWidth, float windowHeight)
 
 void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 {
+	auto texHandler = DX11Engine::Get().GetTextureHandler();
+
 	Scene::InitialiseScene(windowWidth, windowHeight);
 
 	InitialiseSceneGraphics(windowWidth, windowHeight);
@@ -224,15 +227,15 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 	// Appearances
 	std::shared_ptr<Appearance> groundAppearance = std::make_shared<Appearance>(diamondSquareMesh, concrete);
-	groundAppearance->SetColourTexture(TextureHandler::GetTextureByName("GrassyStoneColour"));
-	groundAppearance->SetNormalMap(TextureHandler::GetTextureByName("GrassyStoneNormal"));
-	groundAppearance->SetDisplacementMap(TextureHandler::GetTextureByName("GrassyStoneDisplacement"));
+	groundAppearance->SetColourTexture(texHandler->GetTextureByName("GrassyStoneColour"));
+	groundAppearance->SetNormalMap(texHandler->GetTextureByName("GrassyStoneNormal"));
+	groundAppearance->SetDisplacementMap(texHandler->GetTextureByName("GrassyStoneDisplacement"));
 	//groundAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetGroundSpecularMap());
 
 	std::shared_ptr<Appearance> underworldAppearance = std::make_shared<Appearance>(planeMesh, shiny);
-	underworldAppearance->SetColourTexture(TextureHandler::GetTextureByName("StoneColour"));
-	underworldAppearance->SetNormalMap(TextureHandler::GetTextureByName("StoneNormal"));
-	underworldAppearance->SetDisplacementMap(TextureHandler::GetTextureByName("StoneDisplacement"));
+	underworldAppearance->SetColourTexture(texHandler->GetTextureByName("StoneColour"));
+	underworldAppearance->SetNormalMap(texHandler->GetTextureByName("StoneNormal"));
+	underworldAppearance->SetDisplacementMap(texHandler->GetTextureByName("StoneDisplacement"));
 
 	std::shared_ptr<Appearance> sphereAppearance = std::make_shared<Appearance>(sphere, charcoal);
 	//sphereAppearance->SetColourTexture(_systemHandlers->GetTextureHandler()->GetStoneTexture());
@@ -240,8 +243,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	//sphereAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetStoneDisplacementMap());
 
 	std::shared_ptr<Appearance> aircraftAppearance = std::make_shared<Appearance>(aircraftMesh, aircraftMat);
-	aircraftAppearance->SetColourTexture(TextureHandler::GetTextureByName("AircraftColour"));
-	aircraftAppearance->SetNormalMap(TextureHandler::GetTextureByName("AircraftNormal"));
+	aircraftAppearance->SetColourTexture(texHandler->GetTextureByName("AircraftColour"));
+	aircraftAppearance->SetNormalMap(texHandler->GetTextureByName("AircraftNormal"));
 	//aircraftAppearance->SetSpecularMap(_systemHandlers->GetTextureHandler()->GetAircraftSpecularMap());
 	//aircraftAppearance->SetDisplacementMap(_systemHandlers->GetTextureHandler()->GetAircraftDisplacementMap());
 

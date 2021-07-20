@@ -26,6 +26,8 @@ public:
 
 	static DX11Engine& Get();
 
+	TextureHandler const* GetTextureHandler() const { return m_TextureHandler; }
+
 protected:
 	virtual void OnUpdate(UpdateEvent& e) override;
 	virtual void OnRender(RenderEvent& e) override;
