@@ -1,7 +1,11 @@
 ﻿#include "UserInterface.h"
 
 #include "../../ApplicationNew.h"
+#include "../../DX11Engine.h"
 #include "../../Handlers/System Handlers/WindowClass.h"
+#include "../../Loaders/ConfigLoader.h"
+#include <vector>
+#include <codecvt>
 
 UserInterface::UserInterface(Camera& camera)
 	: _camera(camera), _inputLayout(nullptr), _vertexShader(nullptr),
@@ -64,6 +68,8 @@ void UserInterface::Initialise()
 
 	ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/UIVertexShader.cso", &_vertexShader, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
 	ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/UIPixelShader.cso", &_pixelShader);
+
+	LoadUIFromConfig();
 }
 
 void UserInterface::AddBitmapToUI(XMFLOAT2 const bitmapSize, UIAnchorPoint const anchorPoint, 
@@ -117,4 +123,44 @@ void UserInterface::Draw()
 
 	RenderClass::EnableZBuffer();
 	RenderClass::DisableAlphaBlending();
+}
+
+void UserInterface::LoadUIFromConfig()
+{
+	using namespace rapidxml;
+	using namespace std;
+	auto configLoader = ApplicationNew::Get().GetConfigLoader();
+	auto textureHandler = DX11Engine::Get().GetTextureHandler();
+
+	S_ConfigInfo const uiConfig = configLoader->GetConfigByName("UIConfig");
+	if (!uiConfig.m_ConfigFilename.empty())
+	{
+		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		string configFileName(converter.to_bytes(uiConfig.m_ConfigFilename));
+		string filePath(configLoader->GetSettingStringValue(SettingType::Engine, "ConfigDir"));
+
+		string const fullPath(filePath + configFileName);
+
+		file<> xmlFile(fullPath.c_str());
+		xml_document<> doc;
+
+		doc.parse<0>(xmlFile.data());
+
+		xml_node<>* rootNode = doc.first_node("UIConfig");
+
+		for (xml_node<>* uiElementNode = rootNode->first_node("UIElement"); uiElementNode; uiElementNode = uiElementNode->next_sibling())
+		{
+			std::string const textureName(uiElementNode->first_node("Texture")->value());
+			float const texWidth = strtof(uiElementNode->first_node("Width")->value(), nullptr);
+			float const texHeight = strtof(uiElementNode->first_node("Height")->value(), nullptr);
+			
+			std::string anchorPointStr(uiElementNode->first_node("Anchor")->value());
+			UIAnchorPoint const anchorPoint(GetAnchorEnumValueFromString(anchorPointStr));
+
+			std::string originPointStr(uiElementNode->first_node("Origin")->value());
+			UIOriginPoint const originPoint(GetOriginEnumValueFromString(originPointStr));
+
+			AddBitmapToUI(XMFLOAT2(texWidth, texHeight), anchorPoint, originPoint, textureHandler->GetTextureByName(textureName.c_str()));
+		}
+	}
 }

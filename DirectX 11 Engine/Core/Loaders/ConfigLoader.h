@@ -18,7 +18,12 @@ public:
 	std::string GetSettingStringValue(SettingType const settingType, char const* settingName) const;
 	std::vector<S_TextureInfo> GetAllTextures() const;
 
+	S_ConfigInfo GetConfigByName(char const* const inConfigName) const;
+
 private:
+
+	void InitConfigsList();
+
 	struct S_SettingNameValuePair final
 	{
 		S_SettingNameValuePair(SettingType const inType, char const* inSettingName, int const inSettingValue, std::string const& inWCharVal)
@@ -34,5 +39,7 @@ private:
 	std::string m_ConfigFilename;
 
 	std::vector<S_SettingNameValuePair> m_AllSettings;
+
+	std::vector<S_ConfigInfo> m_AllConfigs;
 };
 

@@ -51,6 +51,7 @@ void Player::OnMouseButtonDown(MouseButtonEvent& e)
 
 	if (e.MiddleMouseButton)
 	{
+		ShowCursor(false);
 		m_LockMouse = true;
 	}
 }
@@ -159,6 +160,7 @@ void Player::Update(double delta)
 
 	if (InputHandler::IsKeyDown(Keys::M))
 	{
+		ShowCursor(true);
 		m_LockMouse = false;
 	}
 

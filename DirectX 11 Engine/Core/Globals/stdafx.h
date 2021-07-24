@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <stdexcept>
+#include <map>
 
 #include <dxgi1_6.h>
 
@@ -95,6 +96,26 @@ enum class UIOriginPoint
 	BottomRight
 };
 
+extern std::map<std::string, UIOriginPoint> g_OriginEnumStrings;
+
+inline void BuildOriginPointEnumStrings()
+{
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("TopLeft"), UIOriginPoint::TopLeft));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("TopMiddle"), UIOriginPoint::TopMiddle));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("TopRight"), UIOriginPoint::TopRight));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("CentreLeft"), UIOriginPoint::CentreLeft));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("Centre"), UIOriginPoint::Centre));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("CentreRight"), UIOriginPoint::CentreRight));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("BottomLeft"), UIOriginPoint::BottomLeft));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("BottomCentre"), UIOriginPoint::BottomCentre));
+	g_OriginEnumStrings.emplace(std::make_pair(std::string("BottomRight"), UIOriginPoint::BottomRight));
+}
+
+inline UIOriginPoint GetOriginEnumValueFromString(std::string& inString)
+{
+	return g_OriginEnumStrings[inString];
+}
+
 enum class UIAnchorPoint
 {
 	TopLeft,
@@ -107,6 +128,26 @@ enum class UIAnchorPoint
 	BottomCentre,
 	BottomRight
 };
+
+extern std::map<std::string, UIAnchorPoint> g_AnchorEnumStrings;
+
+inline void BuildAnchorPointEnumStrings()
+{
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("TopLeft"), UIAnchorPoint::TopLeft));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("TopMiddle"), UIAnchorPoint::TopMiddle));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("TopRight"), UIAnchorPoint::TopRight));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("CentreLeft"), UIAnchorPoint::CentreLeft));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("Centre"), UIAnchorPoint::Centre));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("CentreRight"), UIAnchorPoint::CentreRight));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("BottomLeft"), UIAnchorPoint::BottomLeft));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("BottomCentre"), UIAnchorPoint::BottomCentre));
+	g_AnchorEnumStrings.emplace(std::make_pair(std::string("BottomRight"), UIAnchorPoint::BottomRight));
+}
+
+inline UIAnchorPoint GetAnchorEnumValueFromString(std::string& inString)
+{
+	return g_AnchorEnumStrings[inString];
+}
 
 inline constexpr MovementState operator~(MovementState a) 
 {

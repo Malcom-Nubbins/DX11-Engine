@@ -30,4 +30,8 @@ public:
 
 	void Update(double delta);
 	void Draw();
+
+private:
+
+	void LoadUIFromConfig();
 };

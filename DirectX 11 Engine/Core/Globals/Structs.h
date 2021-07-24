@@ -267,3 +267,16 @@ struct S_TextureInfo final
 	std::string m_TextureName;
 	std::wstring m_TextureFilename;
 };
+
+struct S_ConfigInfo final 
+{
+	S_ConfigInfo() : m_ConfigName(""), m_ConfigFilename(L"")
+	{}
+
+	S_ConfigInfo(char const* inConfigName, std::wstring const& inConfigFilename)
+		: m_ConfigName(inConfigName), m_ConfigFilename(inConfigFilename)
+	{}
+
+	std::string m_ConfigName;
+	std::wstring m_ConfigFilename;
+};

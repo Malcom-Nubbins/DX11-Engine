@@ -64,6 +64,8 @@ void C_ConfigLoader::Initialise()
 			m_AllSettings.emplace_back(move(videoSetting));
 		}
 	}	
+
+	InitConfigsList();
 }
 
 int C_ConfigLoader::GetSettingValue(SettingType const settingType, char const* settingName) const
@@ -128,4 +130,48 @@ std::vector<S_TextureInfo> C_ConfigLoader::GetAllTextures() const
 	}
 
 	return allTextures;
+}
+
+S_ConfigInfo C_ConfigLoader::GetConfigByName(char const* const inConfigName) const
+{
+	auto const it = std::find_if(m_AllConfigs.cbegin(), m_AllConfigs.cend(), [inConfigName](S_ConfigInfo const& configInfo)
+		{
+			std::string const configNameStr(inConfigName);
+			return configNameStr == configInfo.m_ConfigName;
+		});
+
+	if (it != m_AllConfigs.cend())
+	{
+		return (*it);
+	}
+
+	return S_ConfigInfo();
+}
+
+void C_ConfigLoader::InitConfigsList()
+{
+	using namespace rapidxml;
+	using namespace std;
+
+	string configListFilename(GetSettingStringValue(SettingType::Engine, "ConfigListFile"));
+	string filePath(GetSettingStringValue(SettingType::Engine, "ConfigDir"));
+
+	string fullPath(filePath + configListFilename);
+
+	file<> xmlFile(fullPath.c_str());
+	xml_document<> doc;
+
+	doc.parse<0>(xmlFile.data());
+
+	xml_node<>* rootNode = doc.first_node("Configs");
+
+	for (xml_node<>* configNode = rootNode->first_node("Config"); configNode; configNode = configNode->next_sibling())
+	{
+		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		wstring nodeValue(converter.from_bytes(configNode->value()));
+
+		S_ConfigInfo configInfo(configNode->first_attribute("name")->value(), nodeValue);
+
+		m_AllConfigs.emplace_back(move(configInfo));
+	}
 }

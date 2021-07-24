@@ -54,10 +54,9 @@ bool DX11Engine::LoadContent()
 	m_UI = new UserInterface(m_Player->GetCamera());
 	m_UI->Initialise();
 
-	m_UI->AddBitmapToUI(XMFLOAT2(200, 200), UIAnchorPoint::BottomRight, UIOriginPoint::BottomRight, m_TextureHandler->GetTextureByName("Snow"));
-	//m_UI->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), UIOriginPoint::TopRight, m_TextureHandler->GetTextureByName("StoneColour"));
-
 	m_ContentLoaded = true;
+
+	ShowCursor(false);
 
 	return m_ContentLoaded;
 }

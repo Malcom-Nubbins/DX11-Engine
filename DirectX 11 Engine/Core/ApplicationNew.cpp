@@ -163,6 +163,7 @@ int ApplicationNew::Run(std::shared_ptr<EngineBase> pEngineBase)
 
 void ApplicationNew::Quit(int exitCode)
 {
+	ShowCursor(true);
 	PostQuitMessage(exitCode);
 }
 
@@ -181,6 +182,9 @@ ApplicationNew::~ApplicationNew()
 
 void ApplicationNew::Initialise()
 {
+	BuildOriginPointEnumStrings();
+	BuildAnchorPointEnumStrings();
+
 	m_ConfigLoader = new C_ConfigLoader(std::string("settings.xml"));
 	m_ConfigLoader->Initialise();
 

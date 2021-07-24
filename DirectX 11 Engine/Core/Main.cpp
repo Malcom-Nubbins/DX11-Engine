@@ -6,6 +6,9 @@
 #include <Shlwapi.h>
 #include <dxgidebug.h>
 
+std::map<std::string, UIOriginPoint> g_OriginEnumStrings;
+std::map<std::string, UIAnchorPoint> g_AnchorEnumStrings;
+
 void ReportLiveObjects()
 {
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
