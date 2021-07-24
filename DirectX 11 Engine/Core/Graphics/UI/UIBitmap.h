@@ -9,7 +9,9 @@ class UIBitmap
 private:
 	XMFLOAT2 _screenSize;
 	XMFLOAT2 _bitmapSize;
-	XMFLOAT2 _bitmapPrevPosition;
+
+	XMFLOAT2 m_Position;
+
 	ID3D11ShaderResourceView* _texture;
 
 	VertexBuffer _vertexBuffer;
@@ -18,7 +20,9 @@ private:
 	ObjectMesh	_uiQuad;
 	SceneElement* _uiElement;
 
+	UIAnchorPoint m_Anchor;
 	UIOriginPoint m_Origin;
+
 public:
 
 	UIBitmap();
@@ -26,10 +30,10 @@ public:
 
 	void Cleanup();
 
-	void Initialise(XMFLOAT2 const screenSize, XMFLOAT2 const bitmapSize, UIOriginPoint const anchorPoint, ID3D11ShaderResourceView* const texture);
+	void Initialise(XMFLOAT2 const screenSize, XMFLOAT2 const bitmapSize, UIAnchorPoint const anchorPoint, UIOriginPoint const originPoint, ID3D11ShaderResourceView* const texture);
+	void SetPosition();
 
 	void UpdateScreenSize(XMFLOAT2 newScreenSize);
-	void MoveBitmap(XMFLOAT2 newPos);
 
 	SceneElement* GetUIElement() { return _uiElement; }
 
@@ -38,6 +42,6 @@ public:
 
 private:
 	void UpdateBuffers(XMFLOAT4 const& inVertsPos);
-	XMFLOAT4 CalculatePosition();
+	XMFLOAT4 CalculateFinalPosition();
 
 };

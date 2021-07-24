@@ -52,12 +52,9 @@ bool DX11Engine::LoadContent()
 	m_TestingScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());
 
 	m_UI = new UserInterface(m_Player->GetCamera());
-	m_UI->Initialise();m
+	m_UI->Initialise();
 
-	float const uiPosX = m_AppWindow->GetWindowWidth() / 2.0f;
-	float const uiPosY = m_AppWindow->GetWindowHeight() / 2.0f;
-
-	m_UI->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(uiPosX, uiPosY), UIOriginPoint::TopLeft, m_TextureHandler->GetTextureByName("Snow"));
+	m_UI->AddBitmapToUI(XMFLOAT2(200, 200), UIAnchorPoint::BottomRight, UIOriginPoint::BottomRight, m_TextureHandler->GetTextureByName("Snow"));
 	//m_UI->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), UIOriginPoint::TopRight, m_TextureHandler->GetTextureByName("StoneColour"));
 
 	m_ContentLoaded = true;

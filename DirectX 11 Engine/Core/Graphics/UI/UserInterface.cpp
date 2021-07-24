@@ -66,15 +66,14 @@ void UserInterface::Initialise()
 	ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/UIPixelShader.cso", &_pixelShader);
 }
 
-void UserInterface::AddBitmapToUI(XMFLOAT2 const bitmapSize, XMFLOAT2 const bitmapPos, 
-					UIOriginPoint const originPoint, ID3D11ShaderResourceView* const bitmapTexture)
+void UserInterface::AddBitmapToUI(XMFLOAT2 const bitmapSize, UIAnchorPoint const anchorPoint, 
+						UIOriginPoint const originPoint, ID3D11ShaderResourceView* const bitmapTexture)
 {
 	auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
 
 	auto screenSize = XMFLOAT2(window->GetWindowWidth(), window->GetWindowHeight());
 	UIBitmap* bitmap = new UIBitmap();
-	bitmap->Initialise(screenSize, bitmapSize, originPoint, bitmapTexture);
-	bitmap->MoveBitmap(bitmapPos);
+	bitmap->Initialise(screenSize, bitmapSize, anchorPoint, originPoint, bitmapTexture);
 
 	_bitmaps.push_back(bitmap);
 }

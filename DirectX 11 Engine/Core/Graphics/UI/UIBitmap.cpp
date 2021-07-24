@@ -20,14 +20,14 @@ void UIBitmap::Cleanup()
 }
 
 void UIBitmap::Initialise(XMFLOAT2 const screenSize, XMFLOAT2 const bitmapSize, 
-						UIOriginPoint const originPoint,
+						UIAnchorPoint const anchorPoint, UIOriginPoint const originPoint,
 						ID3D11ShaderResourceView* const texture)
 {
 	_screenSize = screenSize;
 	_bitmapSize = bitmapSize;
+	m_Anchor = anchorPoint;
 	m_Origin = originPoint;
 	_texture = texture;
-	_bitmapPrevPosition = XMFLOAT2(-1, -1);
 
 	BufferClass::CreateQuadDynamic(&_vertexBuffer, &_indexBuffer);
 
@@ -55,6 +55,65 @@ void UIBitmap::Initialise(XMFLOAT2 const screenSize, XMFLOAT2 const bitmapSize,
 	auto uiAppearance = std::make_shared<Appearance>(_uiQuad, ObjectMaterial{});
 
 	_uiElement = new SceneElement("UI Square", *uiTransform, *uiAppearance);
+
+	SetPosition();
+
+	XMFLOAT4 const finalPos = CalculateFinalPosition();
+	UpdateBuffers(finalPos);
+}
+
+void UIBitmap::SetPosition()
+{
+	switch (m_Anchor)
+	{
+	case UIAnchorPoint::TopLeft:
+	{
+		m_Position = XMFLOAT2(0.0f, 0.0f);
+	}
+	break;
+	case UIAnchorPoint::TopMiddle:
+	{
+		m_Position = XMFLOAT2(_screenSize.x / 2.0f, 0.0f);
+	}
+	break;
+	case UIAnchorPoint::TopRight:
+	{
+		m_Position = XMFLOAT2(_screenSize.x, 0.0f);
+	}
+	break;
+	case UIAnchorPoint::CentreLeft:
+	{
+		m_Position = XMFLOAT2(0.0f, _screenSize.y / 2.0f);
+	}
+	break;
+	case UIAnchorPoint::Centre:
+	{
+		m_Position = XMFLOAT2(_screenSize.x / 2.0f, _screenSize.y / 2.0f);
+	}
+	break;
+	case UIAnchorPoint::CentreRight:
+	{
+		m_Position = XMFLOAT2(_screenSize.x, _screenSize.y / 2.0f);
+	}
+	break;
+	case UIAnchorPoint::BottomLeft:
+	{
+		m_Position = XMFLOAT2(0.0f, _screenSize.y);
+	}
+	break;
+	case UIAnchorPoint::BottomCentre:
+	{
+		m_Position = XMFLOAT2(_screenSize.x / 2.0f, _screenSize.y);
+	}
+	break;
+	case UIAnchorPoint::BottomRight:
+	{
+		m_Position = XMFLOAT2(_screenSize.x, _screenSize.y);
+	}
+	break;
+	default:
+		break;
+	}
 }
 
 void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
@@ -66,28 +125,15 @@ void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 
 	_screenSize = newScreenSize;
 
-	XMFLOAT4 const bitmapPos = CalculatePosition();
+	SetPosition();
 
-	UpdateBuffers(bitmapPos);
-}
-
-void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
-{
-	if(newPos.x == _bitmapPrevPosition.x && newPos.y == _bitmapPrevPosition.y)
-	{
-		return;
-	}
-
-	_bitmapPrevPosition = newPos;
-
-	XMFLOAT4 const bitmapPos = CalculatePosition();
+	XMFLOAT4 const bitmapPos = CalculateFinalPosition();
 
 	UpdateBuffers(bitmapPos);
 }
 
 void UIBitmap::Update(double delta)
 {
-	MoveBitmap(_bitmapPrevPosition);
 	_uiElement->Update(delta);
 }
 
@@ -127,15 +173,15 @@ void UIBitmap::UpdateBuffers(XMFLOAT4 const& inVertsPos)
 	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0);
 }
 
-XMFLOAT4 UIBitmap::CalculatePosition()
+XMFLOAT4 UIBitmap::CalculateFinalPosition()
 {
 	auto aspectRatio = _screenSize.x / _screenSize.y;
 
 	float left, right, top, bottom;
 
-	left = ((_screenSize.x / 2.0f) * -1.0f) + _bitmapPrevPosition.x;
+	left = ((_screenSize.x / 2.0f) * -1.0f) + m_Position.x;
 	right = left + _bitmapSize.x;
-	top = (_screenSize.y / 2.0f) - _bitmapPrevPosition.y;
+	top = (_screenSize.y / 2.0f) - m_Position.y;
 	bottom = top - _bitmapSize.y;
 
 	switch (m_Origin)
