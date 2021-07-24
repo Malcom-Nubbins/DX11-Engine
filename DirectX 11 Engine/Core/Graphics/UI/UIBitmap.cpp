@@ -19,10 +19,13 @@ void UIBitmap::Cleanup()
 	_uiElement->Cleanup();
 }
 
-void UIBitmap::Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11ShaderResourceView* texture)
+void UIBitmap::Initialise(XMFLOAT2 const screenSize, XMFLOAT2 const bitmapSize, 
+						UIOriginPoint const originPoint,
+						ID3D11ShaderResourceView* const texture)
 {
 	_screenSize = screenSize;
 	_bitmapSize = bitmapSize;
+	m_Origin = originPoint;
 	_texture = texture;
 	_bitmapPrevPosition = XMFLOAT2(-1, -1);
 
@@ -46,7 +49,7 @@ void UIBitmap::Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11Shader
 
 	auto uiTransform = std::make_shared<Transform>();
 	uiTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	uiTransform->SetScale(XMFLOAT3(1, 1, 1.0f));
+	uiTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	uiTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 	auto uiAppearance = std::make_shared<Appearance>(_uiQuad, ObjectMaterial{});
@@ -56,11 +59,6 @@ void UIBitmap::Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11Shader
 
 void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 {
-	auto context = ApplicationNew::Get().GetContext();
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr;
-
 	if (newScreenSize.x == _screenSize.x && newScreenSize.y == _screenSize.y)
 	{
 		return;
@@ -68,41 +66,13 @@ void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 
 	_screenSize = newScreenSize;
 
-	auto aspectRatio = _screenSize.x / _screenSize.y;
+	XMFLOAT4 const bitmapPos = CalculatePosition();
 
-	float left = (_screenSize.x / 2) * -1 + _bitmapPrevPosition.x;
-	float right = left + _bitmapSize.x;
-	float top = (_screenSize.y / 2) - _bitmapPrevPosition.y;
-	float bottom = top - _bitmapSize.y;
-
-	SimpleQuad verts[] =
-	{
-		{ XMFLOAT3(left, bottom, 0.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(left, top, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(right, top, 0.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(right, bottom, 0.0f),XMFLOAT2(1.0f, 1.0f) }
-	};
-
-	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if (FAILED(hr))
-	{
-		return;
-	}
-
-	auto* vertsPtr = reinterpret_cast<SimpleQuad*>(mappedResource.pData);
-
-	memcpy(vertsPtr, verts, sizeof(SimpleQuad) * 4);
-
-	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0);
+	UpdateBuffers(bitmapPos);
 }
 
 void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
 {
-	auto context = ApplicationNew::Get().GetContext();
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr;
-
 	if(newPos.x == _bitmapPrevPosition.x && newPos.y == _bitmapPrevPosition.y)
 	{
 		return;
@@ -110,32 +80,9 @@ void UIBitmap::MoveBitmap(XMFLOAT2 newPos)
 
 	_bitmapPrevPosition = newPos;
 
-	auto aspectRatio = _screenSize.x / _screenSize.y;
+	XMFLOAT4 const bitmapPos = CalculatePosition();
 
-	float left = (_screenSize.x / 2) * -1 + newPos.x;
-	float right = left + _bitmapSize.x;
-	float top = (_screenSize.y / 2) - newPos.y;
-	float bottom = top - _bitmapSize.y;
-
-	SimpleQuad verts[] =
-	{
-		{ XMFLOAT3(left, bottom, 0.0f), XMFLOAT2(0.0f, 1.0f) },
-		{ XMFLOAT3(left, top, 0.0f), XMFLOAT2(0.0f, 0.0f) },
-		{ XMFLOAT3(right, top, 0.0f), XMFLOAT2(1.0f, 0.0f) },
-		{ XMFLOAT3(right, bottom, 0.0f),XMFLOAT2(1.0f, 1.0f) }
-	};
-
-	hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if (FAILED(hr))
-	{
-		return;
-	}
-
-	auto* vertsPtr = reinterpret_cast<SimpleQuad*>(mappedResource.pData);
-
-	memcpy(vertsPtr, verts, sizeof(SimpleQuad) * 4);
-
-	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0);
+	UpdateBuffers(bitmapPos);
 }
 
 void UIBitmap::Update(double delta)
@@ -151,4 +98,126 @@ void UIBitmap::Draw()
 	context->PSSetShaderResources(0, 1, &_texture);
 
 	_uiElement->Draw();
+}
+
+void UIBitmap::UpdateBuffers(XMFLOAT4 const& inVertsPos)
+{
+	auto context = ApplicationNew::Get().GetContext();
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	SimpleQuad verts[] =
+	{
+		{ XMFLOAT3(inVertsPos.x, inVertsPos.w, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+		{ XMFLOAT3(inVertsPos.x, inVertsPos.z, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+		{ XMFLOAT3(inVertsPos.y, inVertsPos.z, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+		{ XMFLOAT3(inVertsPos.y, inVertsPos.w, 0.0f),XMFLOAT2(1.0f, 1.0f) }
+	};
+
+	HRESULT hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr))
+	{
+		return;
+	}
+
+	auto* vertsPtr = reinterpret_cast<SimpleQuad*>(mappedResource.pData);
+
+	memcpy(vertsPtr, verts, sizeof(SimpleQuad) * 4);
+
+	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0);
+}
+
+XMFLOAT4 UIBitmap::CalculatePosition()
+{
+	auto aspectRatio = _screenSize.x / _screenSize.y;
+
+	float left, right, top, bottom;
+
+	left = ((_screenSize.x / 2.0f) * -1.0f) + _bitmapPrevPosition.x;
+	right = left + _bitmapSize.x;
+	top = (_screenSize.y / 2.0f) - _bitmapPrevPosition.y;
+	bottom = top - _bitmapSize.y;
+
+	switch (m_Origin)
+	{
+	case UIOriginPoint::TopLeft:
+	{
+		// UI bitmaps are top-left default
+	}
+	break;
+	case UIOriginPoint::TopMiddle:
+	{
+		// Offset element to the left by half the bitmap width
+		float const bitmapHalfWidth = (_bitmapSize.x / 2.f);
+		left -= bitmapHalfWidth;
+		right -= bitmapHalfWidth;
+	}
+	break;
+	case UIOriginPoint::TopRight:
+	{
+		// Offset element to the left by full bitmap width
+		left -= _bitmapSize.x;
+		right -= _bitmapSize.x;
+	}
+	break;
+	case UIOriginPoint::CentreLeft:
+	{
+		// Offset element up by half bitmap height
+		float const bitmapHalfHeight = (_bitmapSize.y / 2.f);
+		top += bitmapHalfHeight;
+		bottom += bitmapHalfHeight;
+	}
+	break;
+	case UIOriginPoint::Centre:
+	{
+		float const bitmapHalfHeight = (_bitmapSize.y / 2.f);
+		float const bitmapHalfWidth = (_bitmapSize.x / 2.f);
+		// Offset element up and to the left by half bitmap width + half bitmap height
+		left -= bitmapHalfWidth;
+		right -= bitmapHalfWidth;
+		top += bitmapHalfHeight;
+		bottom += bitmapHalfHeight;
+	}
+	break;
+	case UIOriginPoint::CentreRight:
+	{
+		float const bitmapHalfHeight = (_bitmapSize.y / 2.f);
+		// Offset element up and to the left by full bitmap width + half bitmap height
+		left -= _bitmapSize.x;
+		right -= _bitmapSize.x;
+		top += bitmapHalfHeight;
+		bottom += bitmapHalfHeight;
+	}
+	break;
+	case UIOriginPoint::BottomLeft:
+	{
+		// Offset element up by full bitmap height
+		top += _bitmapSize.y;
+		bottom += _bitmapSize.y;
+	}
+	break;
+	case UIOriginPoint::BottomCentre:
+	{
+		float const bitmapHalfWidth = (_bitmapSize.x / 2.f);
+		// Offset element up and to the left by half bitmap width + full bitmap height
+		left -= bitmapHalfWidth;
+		right -= bitmapHalfWidth;
+		top += _bitmapSize.y;
+		bottom += _bitmapSize.y;
+	}
+	break;
+	case UIOriginPoint::BottomRight:
+	{
+		// Offset element up and to the left by full bitmap width + full bitmap height
+		left -= _bitmapSize.x;
+		right -= _bitmapSize.x;
+		top += _bitmapSize.y;
+		bottom += _bitmapSize.y;
+	}
+	break;
+	default:
+		break;
+	}
+
+	return XMFLOAT4(left, right, top, bottom);
 }

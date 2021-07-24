@@ -26,7 +26,7 @@ public:
 
 	void Initialise();
 
-	void AddBitmapToUI(XMFLOAT2 bitmapSize, XMFLOAT2 bitmapPos, ID3D11ShaderResourceView* bitmapTexture);
+	void AddBitmapToUI(XMFLOAT2 const bitmapSize, XMFLOAT2 const bitmapPos, UIOriginPoint const originPoint, ID3D11ShaderResourceView* const bitmapTexture);
 
 	void Update(double delta);
 	void Draw();

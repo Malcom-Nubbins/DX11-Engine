@@ -82,6 +82,19 @@ enum class SettingType
 	Engine
 };
 
+enum class UIOriginPoint
+{
+	TopLeft,
+	TopMiddle,
+	TopRight,
+	CentreLeft,
+	Centre,
+	CentreRight,
+	BottomLeft,
+	BottomCentre,
+	BottomRight
+};
+
 inline constexpr MovementState operator~(MovementState a) 
 {
 	return static_cast<MovementState>(~static_cast<u8>(a));

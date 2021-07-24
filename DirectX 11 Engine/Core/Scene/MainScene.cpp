@@ -1,6 +1,7 @@
 #include "MainScene.h"
 #include "../ApplicationNew.h"
 #include "../DX11Engine.h"
+#include "../Handlers/System Handlers/InputHandler.h"
 
 MainScene::MainScene(Player& player)
 	: Scene(player)
@@ -187,8 +188,8 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 	NewObjectMesh aircraftMesh, sphere, plant0, plant1;
 	ModelLoader::LoadModel(device.Get(), L"Core/Resources/Objects/Hercules.obj", aircraftMesh, false);
 	ModelLoader::LoadModel(device.Get(), L"Core/Resources/Objects/spherex.obj", sphere, false);
-	ModelLoader::LoadModel(device.Get(), L"Core/Resources/Objects/plant0.obj", plant0, true);
-	ModelLoader::LoadModel(device.Get(), L"Core/Resources/Objects/plant1.obj", plant1, true);
+	ModelLoader::LoadModel(device.Get(), L"Core/Resources/Objects/plant0.obj", plant0, false);
+	ModelLoader::LoadModel(device.Get(), L"Core/Resources/Objects/plant1.obj", plant1, false);
 
 	_diamondSquareTerrain = new DiamondSquareTerrain();
 	_diamondSquareTerrain->SetTerrainValues(256, 256, 512);
@@ -506,7 +507,7 @@ void MainScene::Update(UpdateEvent& e)
 
 	_heatHaze->Update(e.TotalTime / 2.0);
 
-	if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('R'))
+	if (InputHandler::IsKeyDown(Keys::LeftControl) && InputHandler::IsKeyDown(Keys::R))
 	{
 		if (_currentCooldown <= 0.0f)
 		{

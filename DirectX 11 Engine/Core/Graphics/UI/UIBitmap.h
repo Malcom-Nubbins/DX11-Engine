@@ -17,6 +17,8 @@ private:
 
 	ObjectMesh	_uiQuad;
 	SceneElement* _uiElement;
+
+	UIOriginPoint m_Origin;
 public:
 
 	UIBitmap();
@@ -24,7 +26,7 @@ public:
 
 	void Cleanup();
 
-	void Initialise(XMFLOAT2 screenSize, XMFLOAT2 bitmapSize, ID3D11ShaderResourceView* texture);
+	void Initialise(XMFLOAT2 const screenSize, XMFLOAT2 const bitmapSize, UIOriginPoint const anchorPoint, ID3D11ShaderResourceView* const texture);
 
 	void UpdateScreenSize(XMFLOAT2 newScreenSize);
 	void MoveBitmap(XMFLOAT2 newPos);
@@ -33,5 +35,9 @@ public:
 
 	void Update(double delta);
 	void Draw();
+
+private:
+	void UpdateBuffers(XMFLOAT4 const& inVertsPos);
+	XMFLOAT4 CalculatePosition();
 
 };

@@ -52,10 +52,13 @@ bool DX11Engine::LoadContent()
 	m_TestingScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());
 
 	m_UI = new UserInterface(m_Player->GetCamera());
-	m_UI->Initialise();
+	m_UI->Initialise();m
 
-	m_UI->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 5), m_TextureHandler->GetTextureByName("Snow"));
-	m_UI->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), m_TextureHandler->GetTextureByName("StoneColour"));
+	float const uiPosX = m_AppWindow->GetWindowWidth() / 2.0f;
+	float const uiPosY = m_AppWindow->GetWindowHeight() / 2.0f;
+
+	m_UI->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(uiPosX, uiPosY), UIOriginPoint::TopLeft, m_TextureHandler->GetTextureByName("Snow"));
+	//m_UI->AddBitmapToUI(XMFLOAT2(200, 200), XMFLOAT2(5, 210), UIOriginPoint::TopRight, m_TextureHandler->GetTextureByName("StoneColour"));
 
 	m_ContentLoaded = true;
 
@@ -179,6 +182,7 @@ void DX11Engine::PreOnResize()
 
 void DX11Engine::OnResize(UINT width, UINT height)
 {
+	super::OnResize(width, height);
 	if (m_TestingScene != nullptr)
 	{
 		m_TestingScene->ResizeViews(static_cast<float>(width), static_cast<float>(height));
