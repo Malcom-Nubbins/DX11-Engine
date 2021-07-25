@@ -148,6 +148,12 @@ S_ConfigInfo C_ConfigLoader::GetConfigByName(char const* const inConfigName) con
 	return S_ConfigInfo();
 }
 
+void C_ConfigLoader::ReloadAllConfigs()
+{
+	m_AllConfigs.clear();
+	InitConfigsList();
+}
+
 void C_ConfigLoader::InitConfigsList()
 {
 	using namespace rapidxml;

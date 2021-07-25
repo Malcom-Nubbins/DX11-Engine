@@ -20,6 +20,8 @@ public:
 
 	S_ConfigInfo GetConfigByName(char const* const inConfigName) const;
 
+	void ReloadAllConfigs();
+
 private:
 
 	void InitConfigsList();

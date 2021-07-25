@@ -31,6 +31,8 @@ public:
 #endif
 	C_ConfigLoader const* GetConfigLoader() const { return m_ConfigLoader; }
 
+	void ReloadConfigs();
+
 protected:
 	ApplicationNew(HINSTANCE hinst);
 	virtual ~ApplicationNew();

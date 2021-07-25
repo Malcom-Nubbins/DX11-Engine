@@ -1,6 +1,7 @@
 ﻿#include "UIBitmap.h"
 
 #include "../../ApplicationNew.h"
+#include "../../DX11Engine.h"
 
 UIBitmap::UIBitmap()
 {
@@ -13,36 +14,32 @@ UIBitmap::~UIBitmap()
 void UIBitmap::Cleanup()
 {
 	_texture->Release();
-	_vertexBuffer->Release();
-	_indexBuffer->Release();
-
+	
 	_uiElement->Cleanup();
 }
 
-void UIBitmap::Initialise(XMFLOAT2 const screenSize, XMFLOAT2 const bitmapSize, 
-						UIAnchorPoint const anchorPoint, UIOriginPoint const originPoint,
-						ID3D11ShaderResourceView* const texture)
+void UIBitmap::Initialise(XMFLOAT2 const screenSize, S_UIElementInfo const inElementInfo)
 {
-	_screenSize = screenSize;
-	_bitmapSize = bitmapSize;
-	m_Anchor = anchorPoint;
-	m_Origin = originPoint;
-	_texture = texture;
+	auto textureHandler = DX11Engine::Get().GetTextureHandler();
 
-	BufferClass::CreateQuadDynamic(&_vertexBuffer, &_indexBuffer);
+	_screenSize = screenSize;
+	_bitmapSize = inElementInfo.m_Size;
+	m_Anchor = inElementInfo.m_AnchorPoint;
+	m_Origin = inElementInfo.m_OriginPoint;
+	m_ElementName = inElementInfo.m_ElementName;
+	m_Offset = inElementInfo.m_Offset;
+	_texture = textureHandler->GetTextureByName(inElementInfo.m_TextureName.c_str());
+
+	BufferClass::CreateQuadDynamic(&_uiQuad.vertexBuffer, &_uiQuad.indexBuffer);
 
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	char const uiQuadVBName[] = "UI Quad VB";
 	char const uiQuadIBName[] = "UI Quad IB";
 
-	_vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadVBName) - 1, uiQuadVBName);
-	_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadIBName) - 1, uiQuadIBName);
+	_uiQuad.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadVBName) - 1, uiQuadVBName);
+	_uiQuad.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadIBName) - 1, uiQuadIBName);
 #endif
 
-	_uiQuad.vertexBuffer = _vertexBuffer;
-	_uiQuad.vertexBuffer->AddRef();
-	_uiQuad.indexBuffer = _indexBuffer;
-	_uiQuad.indexBuffer->AddRef();
 	_uiQuad.numberOfIndices = 6;
 	_uiQuad.vertexBufferOffset = 0;
 	_uiQuad.vertexBufferStride = sizeof(SimpleQuad);
@@ -264,6 +261,11 @@ XMFLOAT4 UIBitmap::CalculateFinalPosition()
 	default:
 		break;
 	}
+
+	left += m_Offset.x;
+	right += m_Offset.x;
+	top += m_Offset.y;
+	bottom += m_Offset.y;
 
 	return XMFLOAT4(left, right, top, bottom);
 }

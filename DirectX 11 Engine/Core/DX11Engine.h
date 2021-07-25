@@ -41,6 +41,8 @@ protected:
 	virtual void OnMouseButtonDown(MouseButtonEvent& e) override;
 	virtual void OnMouseButtonUp(MouseButtonEvent& e) override;
 
+	virtual void OnConfigsReloaded() override;
+
 private:
 	bool m_ContentLoaded;
 

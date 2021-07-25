@@ -41,6 +41,8 @@ protected:
 
 	virtual void OnWindowDestroyed();
 
+	virtual void OnConfigsReloaded();
+
 	std::shared_ptr<WindowClass> m_AppWindow;
 
 private:

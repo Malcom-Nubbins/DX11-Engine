@@ -20,13 +20,15 @@ public:
 	UserInterface(Camera& camera);
 	~UserInterface();
 
+	void ReloadUI();
+
 	void Cleanup();
 
 	void Resize(float width, float height);
 
 	void Initialise();
 
-	void AddBitmapToUI(XMFLOAT2 const bitmapSize, UIAnchorPoint const anchorPoint, UIOriginPoint const originPoint, ID3D11ShaderResourceView* const bitmapTexture);
+	void AddBitmapToUI(S_UIElementInfo const inElementInfo);
 
 	void Update(double delta);
 	void Draw();

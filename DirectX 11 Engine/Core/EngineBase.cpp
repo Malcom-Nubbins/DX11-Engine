@@ -52,6 +52,12 @@ void EngineBase::OnKeyPressed(KeyEvent& e)
 	{
 		ApplicationNew::Get().Quit();
 	}
+
+	if (e.Key == KeyCode::Key::F1)
+	{
+		ApplicationNew::Get().ReloadConfigs();
+		OnConfigsReloaded();
+	}
 }
 
 void EngineBase::OnKeyReleased(KeyEvent& e)
@@ -87,4 +93,8 @@ void EngineBase::OnResize(UINT width, UINT height)
 void EngineBase::OnWindowDestroyed()
 {
 	UnloadContent();
+}
+
+void EngineBase::OnConfigsReloaded()
+{
 }

@@ -212,3 +212,12 @@ void DX11Engine::OnMouseButtonUp(MouseButtonEvent& e)
 	super::OnMouseButtonUp(e);
 	m_Player->OnMouseButtonUp(e);
 }
+
+void DX11Engine::OnConfigsReloaded()
+{
+	super::OnConfigsReloaded();
+	if (m_UI != nullptr)
+	{
+		m_UI->ReloadUI();
+	}
+}

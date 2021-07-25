@@ -1,7 +1,6 @@
 ﻿#include "UserInterface.h"
 
 #include "../../ApplicationNew.h"
-#include "../../DX11Engine.h"
 #include "../../Handlers/System Handlers/WindowClass.h"
 #include "../../Loaders/ConfigLoader.h"
 #include <vector>
@@ -16,6 +15,19 @@ UserInterface::UserInterface(Camera& camera)
 
 UserInterface::~UserInterface()
 {
+}
+
+void UserInterface::ReloadUI()
+{
+	for (auto uiElement : _bitmaps)
+	{
+		uiElement->Cleanup();
+		delete uiElement;
+	}
+
+	_bitmaps.clear();
+
+	LoadUIFromConfig();
 }
 
 void UserInterface::Cleanup()
@@ -72,14 +84,13 @@ void UserInterface::Initialise()
 	LoadUIFromConfig();
 }
 
-void UserInterface::AddBitmapToUI(XMFLOAT2 const bitmapSize, UIAnchorPoint const anchorPoint, 
-						UIOriginPoint const originPoint, ID3D11ShaderResourceView* const bitmapTexture)
+void UserInterface::AddBitmapToUI(S_UIElementInfo const inElementInfo)
 {
 	auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
 
 	auto screenSize = XMFLOAT2(window->GetWindowWidth(), window->GetWindowHeight());
 	UIBitmap* bitmap = new UIBitmap();
-	bitmap->Initialise(screenSize, bitmapSize, anchorPoint, originPoint, bitmapTexture);
+	bitmap->Initialise(screenSize, inElementInfo);
 
 	_bitmaps.push_back(bitmap);
 }
@@ -130,8 +141,7 @@ void UserInterface::LoadUIFromConfig()
 	using namespace rapidxml;
 	using namespace std;
 	auto configLoader = ApplicationNew::Get().GetConfigLoader();
-	auto textureHandler = DX11Engine::Get().GetTextureHandler();
-
+	
 	S_ConfigInfo const uiConfig = configLoader->GetConfigByName("UIConfig");
 	if (!uiConfig.m_ConfigFilename.empty())
 	{
@@ -150,9 +160,13 @@ void UserInterface::LoadUIFromConfig()
 
 		for (xml_node<>* uiElementNode = rootNode->first_node("UIElement"); uiElementNode; uiElementNode = uiElementNode->next_sibling())
 		{
+			std::string const elementName(uiElementNode->first_attribute("name")->value());
 			std::string const textureName(uiElementNode->first_node("Texture")->value());
 			float const texWidth = strtof(uiElementNode->first_node("Width")->value(), nullptr);
 			float const texHeight = strtof(uiElementNode->first_node("Height")->value(), nullptr);
+
+			float const offsetX = strtof(uiElementNode->first_node("OffsetX")->value(), nullptr);
+			float const offsetY = strtof(uiElementNode->first_node("OffsetY")->value(), nullptr);
 			
 			std::string anchorPointStr(uiElementNode->first_node("Anchor")->value());
 			UIAnchorPoint const anchorPoint(GetAnchorEnumValueFromString(anchorPointStr));
@@ -160,7 +174,7 @@ void UserInterface::LoadUIFromConfig()
 			std::string originPointStr(uiElementNode->first_node("Origin")->value());
 			UIOriginPoint const originPoint(GetOriginEnumValueFromString(originPointStr));
 
-			AddBitmapToUI(XMFLOAT2(texWidth, texHeight), anchorPoint, originPoint, textureHandler->GetTextureByName(textureName.c_str()));
+			AddBitmapToUI(S_UIElementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName));
 		}
 	}
 }

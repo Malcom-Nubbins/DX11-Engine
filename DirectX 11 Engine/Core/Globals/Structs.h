@@ -280,3 +280,24 @@ struct S_ConfigInfo final
 	std::string m_ConfigName;
 	std::wstring m_ConfigFilename;
 };
+
+struct S_UIElementInfo final
+{
+	S_UIElementInfo(std::string const& const inName,
+		XMFLOAT2 const& const inSize, XMFLOAT2 const& const offset, UIAnchorPoint const inAnchor, UIOriginPoint const inOrigin,
+		std::string const& const inTexName)
+		: m_ElementName(inName)
+		, m_Size(inSize)
+		, m_Offset(offset)
+		, m_AnchorPoint(inAnchor)
+		, m_OriginPoint(inOrigin)
+		, m_TextureName(inTexName)
+	{}
+
+	XMFLOAT2 m_Size;
+	XMFLOAT2 m_Offset;
+	UIAnchorPoint m_AnchorPoint;
+	UIOriginPoint m_OriginPoint;
+	std::string m_TextureName;
+	std::string m_ElementName;
+};

@@ -167,6 +167,14 @@ void ApplicationNew::Quit(int exitCode)
 	PostQuitMessage(exitCode);
 }
 
+void ApplicationNew::ReloadConfigs()
+{
+	if (m_ConfigLoader != nullptr)
+	{
+		m_ConfigLoader->ReloadAllConfigs();
+	}
+}
+
 ApplicationNew::ApplicationNew(HINSTANCE hinst)
 	: m_hInstance(hinst)
 	, m_ConfigLoader(nullptr)
