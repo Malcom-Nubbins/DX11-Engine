@@ -7,6 +7,7 @@ UIBitmap::UIBitmap()
 	: m_ShouldDraw(true)
 	, m_IsPositionDynamic(false)
 	, m_DynamicPos(0.0f, 0.0f)
+	, m_Order(0)
 {
 }
 
@@ -32,6 +33,7 @@ void UIBitmap::Initialise(XMFLOAT2 const screenSize, S_UIElementInfo const inEle
 	m_ElementName = inElementInfo.m_ElementName;
 	m_Offset = inElementInfo.m_Offset;
 	_texture = textureHandler->GetTextureByName(inElementInfo.m_TextureName.c_str());
+	m_Order = inElementInfo.m_Order;
 
 	BufferClass::CreateQuadDynamic(&_uiQuad.vertexBuffer, &_uiQuad.indexBuffer);
 

@@ -23,6 +23,8 @@ private:
 	UIAnchorPoint m_Anchor;
 	UIOriginPoint m_Origin;
 
+	u32 m_Order;
+
 	std::string m_ElementName;
 
 public:
@@ -48,6 +50,8 @@ public:
 	void Draw();
 
 	StringHash GetName() const { return _uiElement->GetElementName(); }
+
+	u32 GetOrder() const { return m_Order; }
 
 private:
 	void UpdateBuffers(XMFLOAT4 const& inVertsPos);

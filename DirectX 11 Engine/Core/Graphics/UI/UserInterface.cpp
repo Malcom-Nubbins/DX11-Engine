@@ -191,10 +191,17 @@ void UserInterface::LoadUIFromConfig()
 
 			std::string originPointStr(uiElementNode->first_node("Origin")->value());
 			UIOriginPoint const originPoint(GetOriginEnumValueFromString(originPointStr));
+			
+			float const order = strtof(uiElementNode->first_node("Order")->value(), nullptr);
 
-			S_UIElementInfo const elementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName);
+			S_UIElementInfo const elementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName, static_cast<u32>(order));
 
 			AddBitmapToUI(elementInfo);
 		}
+
+		std::sort(_bitmaps.begin(), _bitmaps.end(), [](UIBitmap* bitmapA, UIBitmap* bitmapB)
+			{
+				return bitmapA->GetOrder() > bitmapB->GetOrder();
+			});
 	}
 }

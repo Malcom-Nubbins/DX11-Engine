@@ -285,13 +285,14 @@ struct S_UIElementInfo final
 {
 	S_UIElementInfo(std::string const& inName,
 		XMFLOAT2 const& inSize, XMFLOAT2 const& offset, UIAnchorPoint const inAnchor, UIOriginPoint const inOrigin,
-		std::string const& inTexName)
+		std::string const& inTexName, u32 order)
 		: m_ElementName(inName)
 		, m_Size(inSize)
 		, m_Offset(offset)
 		, m_AnchorPoint(inAnchor)
 		, m_OriginPoint(inOrigin)
 		, m_TextureName(inTexName)
+		, m_Order(order)
 	{}
 
 	XMFLOAT2 m_Size;
@@ -300,4 +301,5 @@ struct S_UIElementInfo final
 	UIOriginPoint m_OriginPoint;
 	std::string m_TextureName;
 	std::string m_ElementName;
+	u32 m_Order;
 };
