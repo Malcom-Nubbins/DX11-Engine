@@ -283,9 +283,9 @@ struct S_ConfigInfo final
 
 struct S_UIElementInfo final
 {
-	S_UIElementInfo(std::string const& const inName,
-		XMFLOAT2 const& const inSize, XMFLOAT2 const& const offset, UIAnchorPoint const inAnchor, UIOriginPoint const inOrigin,
-		std::string const& const inTexName)
+	S_UIElementInfo(std::string const& inName,
+		XMFLOAT2 const& inSize, XMFLOAT2 const& offset, UIAnchorPoint const inAnchor, UIOriginPoint const inOrigin,
+		std::string const& inTexName)
 		: m_ElementName(inName)
 		, m_Size(inSize)
 		, m_Offset(offset)

@@ -56,6 +56,16 @@ void Camera::SetPosition(const XMFLOAT3 position)
 	m_Eye = position;
 }
 
+void Camera::SetViewProjection()
+{
+	XMMATRIX view = XMLoadFloat4x4(&m_View);
+	XMMATRIX proj = XMLoadFloat4x4(&m_PerspectiveProj);
+
+	XMMATRIX viewProj = XMMatrixMultiply(proj, view);
+
+	XMStoreFloat4x4(&m_ViewProjection, viewProj);
+}
+
 void Camera::SetFOV(float fov)
 {
 	m_FovY = fov;
@@ -74,23 +84,23 @@ void Camera::Reset(float fov, float nearZ, float farZ, float aspect)
 	SetLens();
 }
 
-void Camera::Strafe(const double amount)
+void Camera::Strafe(double const amount)
 {
-	const auto strafe = XMVectorReplicate(amount);
+	const auto strafe = XMVectorReplicate(static_cast<float>(amount));
 	const auto right = XMLoadFloat3(&m_Right);
 	const auto eye = XMLoadFloat3(&m_Eye);
 	XMStoreFloat3(&m_Eye, XMVectorMultiplyAdd(strafe, right, eye));
 }
 
-void Camera::Walk(double amount)
+void Camera::Walk(double const amount)
 {
-	const auto walk = XMVectorReplicate(amount);
+	const auto walk = XMVectorReplicate(static_cast<float>(amount));
 	const auto at = XMLoadFloat3(&m_At);
 	const auto eye = XMLoadFloat3(&m_Eye);
 	XMStoreFloat3(&m_Eye, XMVectorMultiplyAdd(walk, at, eye));
 }
 
-void Camera::Pitch(const float angle)
+void Camera::Pitch(float const angle)
 {
 	if(m_Up.y < 0)
 	{
@@ -109,7 +119,7 @@ void Camera::Pitch(const float angle)
 	XMStoreFloat3(&m_At, XMVector3TransformNormal(XMLoadFloat3(&m_At), pitch));
 }
 
-void Camera::Yaw(const float angle)
+void Camera::Yaw(float const angle)
 {
 	const auto yaw = XMMatrixRotationY(angle);
 
@@ -118,9 +128,10 @@ void Camera::Yaw(const float angle)
 	XMStoreFloat3(&m_At, XMVector3TransformNormal(XMLoadFloat3(&m_At), yaw));
 }
 
-void Camera::Update(const float deltaTime)
+void Camera::Update(float deltaTime)
 {
 	UpdateViewMatrix();
+	SetViewProjection();
 }
 
 void Camera::UpdateViewMatrix()

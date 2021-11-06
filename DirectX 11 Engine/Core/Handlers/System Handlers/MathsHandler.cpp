@@ -135,6 +135,53 @@ XMFLOAT3 MathsHandler::CalculateBinormal(TempVertex v1, TempVertex v2, TempVerte
 	return outBinorm;
 }
 
+float MathsHandler::Magnitude(XMFLOAT3& const inVec)
+{
+	return sqrtf((inVec.x * inVec.x) + (inVec.y * inVec.y) + (inVec.z * inVec.z));
+}
+
+float MathsHandler::DotProduct(XMFLOAT3& const src, XMFLOAT3& const dst)
+{
+	return (src.x * dst.x) + (src.y * dst.y) + (src.z * dst.z);
+}
+
+XMFLOAT4 MathsHandler::Make4x4(XMFLOAT3 const& inPos, XMFLOAT4X4 const& inMatrix)
+{
+	XMFLOAT4 ret;
+
+	ret.x = (inMatrix)(0, 0) * inPos.x + (inMatrix)(0, 1) * inPos.y + (inMatrix)(0, 2) * inPos.z + (inMatrix)(0, 3);
+	ret.y = (inMatrix)(1, 0) * inPos.x + (inMatrix)(1, 1) * inPos.y + (inMatrix)(1, 2) * inPos.z + (inMatrix)(1, 3);
+	ret.z = (inMatrix)(2, 0) * inPos.x + (inMatrix)(2, 1) * inPos.y + (inMatrix)(2, 2) * inPos.z + (inMatrix)(2, 3);
+	ret.w = (inMatrix)(3, 0) * inPos.x + (inMatrix)(3, 1) * inPos.y + (inMatrix)(3, 2) * inPos.z + (inMatrix)(3, 3);
+
+	return ret;
+}
+
+bool MathsHandler::WorldToScreen(XMFLOAT3 const inPos, XMFLOAT2& outScreenPos, XMFLOAT4X4 const world, XMFLOAT4X4 const view, XMFLOAT4X4 const proj, XMFLOAT2 const screenSize)
+{
+	XMMATRIX viewMat = XMLoadFloat4x4(&view);
+	XMMATRIX projMat = XMLoadFloat4x4(&proj);
+	XMMATRIX worldMat = XMLoadFloat4x4(&world);
+
+	XMVECTOR worldPos = XMLoadFloat3(&inPos);
+	XMVECTOR screenPosVector = XMVector3Project(worldPos,
+		0.0f, 0.0f,
+		screenSize.x, screenSize.y,
+		0.0f, 1.0f,
+		projMat, viewMat, worldMat);
+
+	XMFLOAT3 outPos;
+	XMStoreFloat3(&outPos, screenPosVector);
+
+	if (outPos.z < 1.0f)
+	{
+		outScreenPos = XMFLOAT2(outPos.x, outPos.y);
+		return true;
+	}
+
+	return false;
+}
+
 float MathsHandler::RandomFloat(float one, float two)
 {
 	float random = one + static_cast<float>(rand()) / RAND_MAX * (two - one);

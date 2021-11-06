@@ -4,6 +4,9 @@
 #include "../../DX11Engine.h"
 
 UIBitmap::UIBitmap()
+	: m_ShouldDraw(true)
+	, m_IsPositionDynamic(false)
+	, m_DynamicPos(0.0f, 0.0f)
 {
 }
 
@@ -51,7 +54,7 @@ void UIBitmap::Initialise(XMFLOAT2 const screenSize, S_UIElementInfo const inEle
 
 	auto uiAppearance = std::make_shared<Appearance>(_uiQuad, ObjectMaterial{});
 
-	_uiElement = new SceneElement("UI Square", *uiTransform, *uiAppearance);
+	_uiElement = new SceneElement(GetStringHash(m_ElementName), *uiTransform, *uiAppearance);
 
 	SetPosition();
 
@@ -113,6 +116,11 @@ void UIBitmap::SetPosition()
 	}
 }
 
+void UIBitmap::SetDynamicPos(XMFLOAT2 const pos)
+{
+	m_DynamicPos = pos;
+}
+
 void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 {
 	if (newScreenSize.x == _screenSize.x && newScreenSize.y == _screenSize.y)
@@ -131,16 +139,25 @@ void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 
 void UIBitmap::Update(double delta)
 {
+	if (m_IsPositionDynamic)
+	{
+		XMFLOAT4 const bitmapPos = CalculateFinalPosition();
+		UpdateBuffers(bitmapPos);
+	}
+
 	_uiElement->Update(delta);
 }
 
 void UIBitmap::Draw()
 {
-	auto context = ApplicationNew::Get().GetContext();
+	if (m_ShouldDraw)
+	{
+		auto context = ApplicationNew::Get().GetContext();
 
-	context->PSSetShaderResources(0, 1, &_texture);
+		context->PSSetShaderResources(0, 1, &_texture);
 
-	_uiElement->Draw();
+		_uiElement->Draw();
+	}
 }
 
 void UIBitmap::UpdateBuffers(XMFLOAT4 const& inVertsPos)
@@ -176,9 +193,11 @@ XMFLOAT4 UIBitmap::CalculateFinalPosition()
 
 	float left, right, top, bottom;
 
-	left = ((_screenSize.x / 2.0f) * -1.0f) + m_Position.x;
+	XMFLOAT2 pos = m_IsPositionDynamic ? m_DynamicPos : m_Position;
+
+	left = ((_screenSize.x / 2.0f) * -1.0f) + pos.x;
 	right = left + _bitmapSize.x;
-	top = (_screenSize.y / 2.0f) - m_Position.y;
+	top = (_screenSize.y / 2.0f) - pos.y;
 	bottom = top - _bitmapSize.y;
 
 	switch (m_Origin)
@@ -266,6 +285,14 @@ XMFLOAT4 UIBitmap::CalculateFinalPosition()
 	right += m_Offset.x;
 	top += m_Offset.y;
 	bottom += m_Offset.y;
+
+	/*if (m_IsPositionDynamic)
+	{
+		left += m_DynamicPos.x;
+		right += m_DynamicPos.x;
+		top += m_DynamicPos.y;
+		bottom += m_DynamicPos.y;
+	}*/
 
 	return XMFLOAT4(left, right, top, bottom);
 }

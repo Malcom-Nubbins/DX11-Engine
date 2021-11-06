@@ -84,7 +84,7 @@ void UserInterface::Initialise()
 	LoadUIFromConfig();
 }
 
-void UserInterface::AddBitmapToUI(S_UIElementInfo const inElementInfo)
+void UserInterface::AddBitmapToUI(S_UIElementInfo const& inElementInfo)
 {
 	auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
 
@@ -92,7 +92,25 @@ void UserInterface::AddBitmapToUI(S_UIElementInfo const inElementInfo)
 	UIBitmap* bitmap = new UIBitmap();
 	bitmap->Initialise(screenSize, inElementInfo);
 
+	if (bitmap->GetName() == GetStringHash("GrassyTest"))
+	{
+		bitmap->SetIsDynamicPos(true);
+	}
+
 	_bitmaps.push_back(bitmap);
+}
+
+UIBitmap* UserInterface::GetUIElement(StringHash const elementNameHash) const
+{
+	auto const it = std::find_if(_bitmaps.cbegin(), _bitmaps.cend(), [elementNameHash](UIBitmap const* element)
+		{
+			return element->GetName() == elementNameHash;
+		});
+
+	if (it != _bitmaps.cend())
+	{
+		return (*it);
+	}
 }
 
 void UserInterface::Update(double delta)
@@ -161,7 +179,7 @@ void UserInterface::LoadUIFromConfig()
 		for (xml_node<>* uiElementNode = rootNode->first_node("UIElement"); uiElementNode; uiElementNode = uiElementNode->next_sibling())
 		{
 			std::string const elementName(uiElementNode->first_attribute("name")->value());
-			std::string const textureName(uiElementNode->first_node("Texture")->value());
+			std::string textureName(uiElementNode->first_node("Texture")->value());
 			float const texWidth = strtof(uiElementNode->first_node("Width")->value(), nullptr);
 			float const texHeight = strtof(uiElementNode->first_node("Height")->value(), nullptr);
 
@@ -174,7 +192,9 @@ void UserInterface::LoadUIFromConfig()
 			std::string originPointStr(uiElementNode->first_node("Origin")->value());
 			UIOriginPoint const originPoint(GetOriginEnumValueFromString(originPointStr));
 
-			AddBitmapToUI(S_UIElementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName));
+			S_UIElementInfo const elementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName);
+
+			AddBitmapToUI(elementInfo);
 		}
 	}
 }

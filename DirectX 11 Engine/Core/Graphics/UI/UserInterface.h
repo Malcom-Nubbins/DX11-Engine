@@ -28,7 +28,9 @@ public:
 
 	void Initialise();
 
-	void AddBitmapToUI(S_UIElementInfo const inElementInfo);
+	void AddBitmapToUI(S_UIElementInfo const& inElementInfo);
+
+	UIBitmap* GetUIElement(StringHash const elementNameHash) const;
 
 	void Update(double delta);
 	void Draw();

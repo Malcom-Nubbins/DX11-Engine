@@ -1,6 +1,7 @@
 #include "ModelLoader.h"
 #include <iterator>
 #include <map>
+#include <codecvt>
 #include "../Globals/AppValues.h"
 #include "../ApplicationNew.h"
 
@@ -166,9 +167,12 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING)
 		std::wstring const filenameWStr(filename.c_str());
-		std::string const filenameStr(filenameWStr.begin(), filenameWStr.end());
+
+		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+		
+		std::string const filenameStr(converter.to_bytes(filenameWStr));
 		std::string const indexBufferName = FormatCString("Index Buffer: %s", filenameStr.c_str());
-		subset.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, indexBufferName.length(), indexBufferName.c_str());
+		subset.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(indexBufferName.length()), indexBufferName.c_str());
 #endif
 
 		modelMesh.subsets.push_back(subset);
@@ -658,9 +662,11 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 
 #if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
 	std::wstring const filenameWStr(filename.c_str());
-	std::string const filenameStr(filenameWStr.begin(), filenameWStr.end());
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+
+	std::string const filenameStr(converter.to_bytes(filenameWStr));
 	std::string const vertexBufferName = FormatCString("Vertex Buffer: %s", filenameStr.c_str());
-	modelMesh.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, vertexBufferName.length(), vertexBufferName.c_str());
+	modelMesh.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(vertexBufferName.length()), vertexBufferName.c_str());
 #endif
 
 	_modelCache.insert(std::make_pair(filename, modelMesh));

@@ -188,6 +188,7 @@
     <ClCompile Include="Core\EngineBase.cpp" />
     <ClCompile Include="Core\DX11Engine.cpp" />
     <ClCompile Include="Core\Handlers\FileReaderWriter.cpp" />
+    <ClCompile Include="Core\Scene\SceneHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Globals\Bitmask.h" />
@@ -237,6 +238,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
     <ClInclude Include="Core\Scene\TestingScene.h" />
+    <ClInclude Include="Core\Scene\SceneHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FYP - Seasonal Day Night Cycle.rc" />

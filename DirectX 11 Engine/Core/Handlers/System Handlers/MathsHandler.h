@@ -26,6 +26,13 @@ public:
 	static XMFLOAT3 CalculateTangent(TempVertex v1, TempVertex v2, TempVertex v3);
 	static XMFLOAT3 CalculateBinormal(TempVertex v1, TempVertex v2, TempVertex v3);
 
+	static float Magnitude(XMFLOAT3& const inVec);
+
+	static float DotProduct(XMFLOAT3& const src, XMFLOAT3& const dst);
+
+	static XMFLOAT4 Make4x4(XMFLOAT3 const& inPos, XMFLOAT4X4 const& inMatrix);
+	static bool WorldToScreen(XMFLOAT3 const inPos, XMFLOAT2& outScreenPos, XMFLOAT4X4 const world, XMFLOAT4X4 const view, XMFLOAT4X4 const proj, XMFLOAT2 const screenSize);
+
 	static float RandomFloat(float one, float two);
 };
 

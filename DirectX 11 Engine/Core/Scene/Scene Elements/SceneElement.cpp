@@ -1,6 +1,6 @@
 #include "SceneElement.h"
 
-SceneElement::SceneElement(std::string elementName, Transform const& transform, Appearance const& appearance)
+SceneElement::SceneElement(StringHash elementName, Transform const& transform, Appearance const& appearance)
 	: _transform(std::make_unique<Transform>(transform)), _appearance(std::make_unique<Appearance>(appearance)), _name(elementName), _castShadows(false), _affectedByLight(false)
 {
 }
@@ -49,7 +49,7 @@ void SceneElement::Update(double deltaTime)
 
 void SceneElement::Draw()
 {
-	if(_name == "Aircraft")
+	if(_name == GetStringHash("Aircraft"))
 	{
 		auto temp = 1;
 	}

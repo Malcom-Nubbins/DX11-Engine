@@ -24,6 +24,8 @@ private:
 	XMFLOAT4X4 m_PerspectiveProj;
 	XMFLOAT4X4 m_OthographicProj;
 
+	XMFLOAT4X4 m_ViewProjection;
+
 	bool m_OrthographicMode;
 public:
 	Camera(XMFLOAT3 eye, XMFLOAT3 right, XMFLOAT3 up, XMFLOAT3 at, 
@@ -34,6 +36,7 @@ public:
 	XMFLOAT4X4& GetDefaultView() { return m_DefaultView; }
 	XMFLOAT4X4& GetPerspectiveProj() { return m_PerspectiveProj; }
 	XMFLOAT4X4& GetOthographicProj() { return m_OthographicProj; }
+	XMFLOAT4X4& GetViewProjection() { return m_ViewProjection; }
 	XMFLOAT3 GetPosition() const { return m_Eye; }
 	XMFLOAT3 GetLookDirection()const { return m_At; }
 
@@ -42,14 +45,16 @@ public:
 	void LookAt();
 	void SetPosition(XMFLOAT3 position);
 
+	void SetViewProjection();
+
 	void SetFOV(float fov);
 	void Reset(float fov, float nearZ, float farZ, float aspect);
 
-	void Strafe(double amount);
-	void Walk(double amount);
+	void Strafe(double const amount);
+	void Walk(double const amount);
 
-	void Pitch(float angle);
-	void Yaw(float angle);
+	void Pitch(float const angle);
+	void Yaw(float const angle);
 
 	void Update(float deltaTime);
 

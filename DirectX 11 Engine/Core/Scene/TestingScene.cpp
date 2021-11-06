@@ -101,13 +101,13 @@ void TestingScene::InitialiseScene(float windowWidth, float windowHeight)
 
 	//Scene elements
 	{
-		auto* groundPlaneElement = new SceneElement("Ground Plane", *groundTransform, *groundAppearance);
+		auto* groundPlaneElement = new SceneElement(GetStringHash("Ground Plane"), *groundTransform, *groundAppearance);
 		groundPlaneElement->SetCastShadows(false);
 		groundPlaneElement->SetAffectedByLight(true);
 		//_flatPlane->SetGameObject(groundPlaneElement);
 		_sceneElements.push_back(groundPlaneElement);
 
-		auto* sphereElement = new SceneElement("Sphere", *sphereTransform, *sphereAppearance);
+		auto* sphereElement = new SceneElement(GetStringHash("Sphere"), *sphereTransform, *sphereAppearance);
 		sphereElement->SetCastShadows(true);
 		sphereElement->SetAffectedByLight(true);
 		_sceneElements.push_back(sphereElement);
@@ -192,14 +192,14 @@ void TestingScene::Update(UpdateEvent& e)
 	_shadows->SetSceneCentre(m_Player->GetPlayerPosition());
 	_shadows->BuildShadowTransform();
 
-	if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('R'))
+	/*if (GetAsyncKeyState(VK_CONTROL) && GetAsyncKeyState('R'))
 	{
 		if (_currentCooldown <= 0.0f)
 		{
 			_basicLight->SetWireframeMode(!_basicLight->GetWireframeState());
 			_currentCooldown = _buttonCooldown;
 		}
-	}
+	}*/
 
 	_skyGradient->SetSceneCentre(m_Player->GetPlayerPosition());
 	_skyGradient->Update(e.ElapsedTime);
@@ -207,6 +207,28 @@ void TestingScene::Update(UpdateEvent& e)
 	for (auto element : _sceneElements)
 	{
 		element->Update(e.ElapsedTime);
+
+		if (element->GetElementName() == GetStringHash("Sphere"))
+		{
+			DX11Engine const& engine = DX11Engine::Get();
+			XMFLOAT2 screenSize(engine.GetClientWidth(), engine.GetClientHeight());
+			XMFLOAT2 screenPos(0.0f, 0.0f);
+			bool isOnScreen = MathsHandler::WorldToScreen(element->GetTransform()->GetPosition(), 
+				screenPos, 
+				element->GetTransform()->GetWorld(), m_Player->GetCamera().GetView(), m_Player->GetCamera().GetPerspectiveProj(), 
+				screenSize);
+			
+			UIBitmap* uiElement = engine.GetUI()->GetUIElement(GetStringHash("GrassyTest"));
+			if (uiElement != nullptr)
+			{
+				uiElement->SetShouldDraw(isOnScreen);
+
+				if (isOnScreen)
+				{
+					uiElement->SetDynamicPos(screenPos);
+				}
+			}
+		}
 	}
 
 	if (_currentCooldown > 0.0f)

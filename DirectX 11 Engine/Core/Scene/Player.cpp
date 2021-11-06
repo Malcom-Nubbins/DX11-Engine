@@ -184,8 +184,8 @@ void Player::Update(double delta)
 		m_Camera->Walk(-moveSpeed);
 	}
 
-	m_Camera->Pitch(m_CurrCamPitch * delta);
-	m_Camera->Yaw(m_CurrCamYaw * delta);
+	m_Camera->Pitch(m_CurrCamPitch * static_cast<float>(delta));
+	m_Camera->Yaw(m_CurrCamYaw * static_cast<float>(delta));
 
-	m_Camera->Update(delta);
+	m_Camera->Update(static_cast<float>(delta));
 }

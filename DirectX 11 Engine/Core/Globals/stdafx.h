@@ -37,6 +37,8 @@ typedef unsigned __int64 u64;
 typedef unsigned __int32 u32;
 typedef unsigned char u8;
 
+typedef size_t StringHash;
+
 enum SAMPLER_TYPE
 {
 	LINEAR,
@@ -220,4 +222,10 @@ std::string FormatCString(char const* const format, Args ... args)
 	_snprintf(buff.get(), size, format, args...);
 
 	return std::string(buff.get(), buff.get() + size - 1);
+}
+
+inline StringHash GetStringHash(std::string const str)
+{
+	std::hash<std::string> hasher;
+	return hasher(str);
 }

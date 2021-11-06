@@ -129,6 +129,9 @@
     <ClCompile Include="Core\Globals\Bitmask.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Scene\SceneHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h">
@@ -270,6 +273,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Scene\SceneHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

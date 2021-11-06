@@ -14,7 +14,7 @@ private:
 	std::unique_ptr<Transform> _transform;
 	std::unique_ptr<Appearance> _appearance;
 
-	std::string _name;
+	StringHash _name;
 
 	bool _castShadows;
 	bool _affectedByLight;
@@ -22,7 +22,7 @@ private:
 	std::vector<SceneElement*> _children;
 
 public:
-	SceneElement(std::string elementName, Transform const& transform, Appearance const& appearance);
+	SceneElement(StringHash elementName, Transform const& transform, Appearance const& appearance);
 	~SceneElement();
 
 	void Cleanup();
@@ -41,7 +41,7 @@ public:
 	void SetAffectedByLight(bool affected) { _affectedByLight = affected; }
 	bool IsAffectedByLight() const { return _affectedByLight; }
 
-	std::string GetElementName() const { return _name; }
+	StringHash GetElementName() const { return _name; }
 
 	void AddChild(SceneElement* child);
 	std::vector<SceneElement*> GetChildren() { return _children; }

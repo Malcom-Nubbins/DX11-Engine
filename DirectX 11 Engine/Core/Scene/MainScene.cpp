@@ -253,13 +253,13 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 
 	// Scene Elements
 	{
-		SceneElement* element = new SceneElement("Ground Plane", *groundTransform, *groundAppearance);
+		SceneElement* element = new SceneElement(GetStringHash("Ground Plane"), *groundTransform, *groundAppearance);
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
 		_diamondSquareTerrain->SetTerrainFinishedBuilding(true);
 		_sceneElements.push_back(element);
 
-		element = new SceneElement("Underworld", *underworldTransform, *underworldAppearance);
+		element = new SceneElement(GetStringHash("Underworld"), *underworldTransform, *underworldAppearance);
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
 		_sceneElements.push_back(element);
@@ -272,7 +272,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			sphereTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 			sphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-			std::string sphereElementName = FormatCString("Spheres %d", i);
+			StringHash sphereElementName = GetStringHash(FormatCString("Spheres %d", i));
 			element = new SceneElement(sphereElementName, *sphereTransform, *sphereAppearance);
 			const float randomX = MathsHandler::RandomFloat(-128, 128);
 			const float randomZ = MathsHandler::RandomFloat(-128, 128);
@@ -284,7 +284,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			_sceneElements.push_back(element);
 		}
 
-		element = new SceneElement("Aircraft", *aircraftTransform, *aircraftAppearance);
+		element = new SceneElement(GetStringHash("Aircraft"), *aircraftTransform, *aircraftAppearance);
 		element->SetCastShadows(true);
 		element->SetAffectedByLight(true);
 		_sceneElements.push_back(element);
@@ -312,7 +312,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			float randomX = MathsHandler::RandomFloat(-90, 90);
 			float randomZ = MathsHandler::RandomFloat(-90, 90);
 
-			std::string plantName = FormatCString("Plant %d", i);
+			StringHash plantName = GetStringHash(FormatCString("Plant %d", i));
 			element = new SceneElement(plantName, *plantTransform, *plantAppearance);
 			element->GetTransform()->SetPosition(XMFLOAT3(randomX, _diamondSquareTerrain->GetHeight(randomX, randomZ), randomZ));
 			element->GetTransform()->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
@@ -341,7 +341,7 @@ void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 			_sceneElements.push_back(element);
 		}
 
-		element = new SceneElement("Light Source Sphere", *sunSphereTransform, *sunSphereAppearance);
+		element = new SceneElement(GetStringHash("Light Source Sphere"), *sunSphereTransform, *sunSphereAppearance);
 		element->SetCastShadows(false);
 		element->SetAffectedByLight(false);
 		_sceneElements.push_back(element);
@@ -380,13 +380,13 @@ void MainScene::Update(UpdateEvent& e)
 	// Rotate the light at a 45 degree angle
 	XMFLOAT3 rotationAxis = XMFLOAT3(0.0f, -0.5f, 0.5f);
 	XMVECTOR axis = XMLoadFloat3(&rotationAxis);
-	XMVECTOR rotationQuaternion = XMQuaternionRotationAxis(axis, _lightRotationAmount * e.ElapsedTime);
+	XMVECTOR rotationQuaternion = XMQuaternionRotationAxis(axis, _lightRotationAmount * static_cast<float>(e.ElapsedTime));
 	
 	XMVECTOR rotatedLight = XMVector3Rotate(XMLoadFloat3(&lightDir), rotationQuaternion);
 	XMStoreFloat3(&lightDir, rotatedLight);
 	_preOffsetLightDir = lightDir;
 
-	_currentTime += _lightRotationAmount * e.ElapsedTime;
+	_currentTime += _lightRotationAmount * static_cast<float>(e.ElapsedTime);
 	if (_currentTime >= _fullRotationAmount)
 	{
 		// Day has passed
@@ -441,7 +441,7 @@ void MainScene::Update(UpdateEvent& e)
 
 	if (InputHandler::IsKeyDown(Keys::OemPeriod))
 	{
-		_lightRotationAmount += (0.5f * e.ElapsedTime);
+		_lightRotationAmount += (0.5f * static_cast<float>(e.ElapsedTime));
 
 		if (_lightRotationAmount > 2.0f)
 			_lightRotationAmount = 2.0f;
@@ -449,7 +449,7 @@ void MainScene::Update(UpdateEvent& e)
 
 	if (InputHandler::IsKeyDown(Keys::OemComma))
 	{
-		_lightRotationAmount -= (0.5f * e.ElapsedTime);
+		_lightRotationAmount -= (0.5f * static_cast<float>(e.ElapsedTime));
 
 		if (_lightRotationAmount < -2.0f)
 			_lightRotationAmount = -2.0f;
@@ -493,7 +493,7 @@ void MainScene::Update(UpdateEvent& e)
 
 	for (SceneElement* element : _sceneElements)
 	{
-		if (element->GetElementName() == "Light Source Sphere")
+		if (element->GetElementName() == GetStringHash("Light Source Sphere"))
 		{
 			element->GetTransform()->SetPosition(_shadows->GetLightPosition());
 		}
@@ -505,7 +505,7 @@ void MainScene::Update(UpdateEvent& e)
 
 	_basicLight->CalculateLightColour(_sceneLight, _shadows->GetLightPosition().y, _sceneFog);
 
-	_heatHaze->Update(e.TotalTime / 2.0);
+	_heatHaze->Update(static_cast<float>(e.TotalTime / 2.0));
 
 	if (InputHandler::IsKeyDown(Keys::LeftControl) && InputHandler::IsKeyDown(Keys::R))
 	{
@@ -517,7 +517,7 @@ void MainScene::Update(UpdateEvent& e)
 	}
 
 	if(_currentCooldown > 0.0f)
-		_currentCooldown -= e.ElapsedTime;
+		_currentCooldown -= static_cast<float>(e.ElapsedTime);
 
 	/*std::wostringstream out;
 	out.precision(6);

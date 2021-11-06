@@ -111,7 +111,7 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	auto appearance = std::make_shared<Appearance>(sphere, matte);
 	appearance->SetColourTexture(nullptr);
 
-	_skyDomeElement = new SceneElement("Sky dome", *skyDomeTransform, *appearance);
+	_skyDomeElement = new SceneElement(GetStringHash("Sky dome"), *skyDomeTransform, *appearance);
 	_skyDomeElement->SetCastShadows(false);
 	_skyDomeElement->SetAffectedByLight(false);
 }
