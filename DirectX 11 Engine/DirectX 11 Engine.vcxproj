@@ -103,11 +103,13 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;DirectXTK_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)Core\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -137,13 +139,15 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>Inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;DirectXTK.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)Core\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -167,7 +171,6 @@
     <ClCompile Include="Core\Handlers\System Handlers\RenderClass.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\ShaderClass.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\WindowClass.cpp" />
-    <ClCompile Include="Core\Loaders\DDSTextureLoader.cpp" />
     <ClCompile Include="Core\Loaders\OBJLoader.cpp" />
     <ClCompile Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.cpp" />
     <ClCompile Include="Core\Main.cpp" />
@@ -217,7 +220,6 @@
     <ClInclude Include="Core\Handlers\System Handlers\RenderClass.h" />
     <ClInclude Include="Core\Handlers\System Handlers\ShaderClass.h" />
     <ClInclude Include="Core\Handlers\System Handlers\WindowClass.h" />
-    <ClInclude Include="Core\Loaders\DDSTextureLoader.h" />
     <ClInclude Include="Core\Loaders\OBJLoader.h" />
     <ClInclude Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.h" />
     <ClInclude Include="Core\Scene\Camera.h" />
@@ -394,6 +396,9 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="fyp_icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

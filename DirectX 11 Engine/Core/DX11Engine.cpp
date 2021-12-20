@@ -105,6 +105,8 @@ DX11Engine& DX11Engine::Get()
 	{
 		return *g_Engine;
 	}
+
+	throw new std::exception("FATAL: DX11 Engine was not initialised!!");
 }
 
 void DX11Engine::OnUpdate(UpdateEvent& e)

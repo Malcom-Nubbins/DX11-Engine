@@ -36,9 +36,6 @@
     <ClCompile Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Loaders\DDSTextureLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Loaders\OBJLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -150,9 +147,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loaders\Terrain Generation\DiamondSquareTerrain.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Loaders\DDSTextureLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loaders\OBJLoader.h">
@@ -301,5 +295,10 @@
     <FxCompile Include="Core\Shaders\TesselationDS.hlsl" />
     <FxCompile Include="Core\Shaders\UIVertexShader.hlsl" />
     <FxCompile Include="Core\Shaders\UIPixelShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="fyp_icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

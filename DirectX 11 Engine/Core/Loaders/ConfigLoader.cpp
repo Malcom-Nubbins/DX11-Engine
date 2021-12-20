@@ -14,6 +14,18 @@ C_ConfigLoader::~C_ConfigLoader()
 {
 }
 
+void C_ConfigLoader::PreLoadCheck()
+{
+	struct stat buffer;
+	bool const exists = (stat(m_ConfigFilename.c_str(), &buffer));
+
+	if (!exists)
+	{
+		// Main config file doesn't exist for some reason, create on with default values
+
+	}
+}
+
 void C_ConfigLoader::Initialise()
 {
 	using namespace std;

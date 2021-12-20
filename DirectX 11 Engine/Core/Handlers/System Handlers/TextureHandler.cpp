@@ -3,6 +3,7 @@
 #include "../../ApplicationNew.h"
 #include "../../Loaders/ConfigLoader.h"
 #include <codecvt>
+#include <DDSTextureLoader.h>
 
 TextureHandler::TextureHandler() 
 {

@@ -111,6 +111,8 @@ UIBitmap* UserInterface::GetUIElement(StringHash const elementNameHash) const
 	{
 		return (*it);
 	}
+
+	return nullptr;
 }
 
 void UserInterface::Update(double delta)

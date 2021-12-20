@@ -12,6 +12,8 @@ public:
 	C_ConfigLoader(std::string const& inFilename);
 	~C_ConfigLoader();
 
+	void PreLoadCheck();
+
 	void Initialise();
 
 	int GetSettingValue(SettingType const settingType, char const* settingName) const;
