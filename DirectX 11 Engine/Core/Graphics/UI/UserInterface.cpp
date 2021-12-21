@@ -3,6 +3,10 @@
 #include "../../ApplicationNew.h"
 #include "../../Handlers/System Handlers/WindowClass.h"
 #include "../../Loaders/ConfigLoader.h"
+#include "../Core/Loaders/XMLLoader/rapidxml.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_ext.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_print.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_utils.hpp"
 #include <vector>
 #include <codecvt>
 
@@ -171,6 +175,11 @@ void UserInterface::LoadUIFromConfig()
 
 		string const fullPath(filePath + configFileName);
 
+		if (!configLoader->CheckConfigExists(fullPath))
+		{
+			CreateDefaultUIConfig(fullPath);
+		}
+
 		file<> xmlFile(fullPath.c_str());
 		xml_document<> doc;
 
@@ -206,4 +215,65 @@ void UserInterface::LoadUIFromConfig()
 				return bitmapA->GetOrder() > bitmapB->GetOrder();
 			});
 	}
+}
+
+void UserInterface::CreateDefaultUIConfig(std::string const& inConfigFilename)
+{
+	using namespace std;
+	using namespace rapidxml;
+
+	ofstream newDefaultUIConfig(inConfigFilename);
+
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "UIConfig");
+	doc.append_node(root);
+
+	xml_node<>* defaultUIElement = doc.allocate_node(node_element, "UIElement");
+	defaultUIElement->append_attribute(doc.allocate_attribute("name", "Crosshair"));
+	root->append_node(defaultUIElement);
+
+	// Default UI element details
+	{
+		xml_node<>* texture = doc.allocate_node(node_element, "Texture");
+		texture->value("Crosshair");
+		defaultUIElement->append_node(texture);
+
+		xml_node<>* width = doc.allocate_node(node_element, "Width");
+		width->value("64");
+		defaultUIElement->append_node(width);
+
+		xml_node<>* height = doc.allocate_node(node_element, "Height");
+		height->value("64");
+		defaultUIElement->append_node(height);
+
+		xml_node<>* anchor = doc.allocate_node(node_element, "Anchor");
+		anchor->value("Centre");
+		defaultUIElement->append_node(anchor);
+
+		xml_node<>* origin = doc.allocate_node(node_element, "Origin");
+		origin->value("Centre");
+		defaultUIElement->append_node(origin);
+
+		xml_node<>* offsetX = doc.allocate_node(node_element, "OffsetX");
+		offsetX->value("0.0");
+		defaultUIElement->append_node(offsetX);
+
+		xml_node<>* offsetY = doc.allocate_node(node_element, "OffsetY");
+		offsetY->value("0.0");
+		defaultUIElement->append_node(offsetY);
+
+		xml_node<>* order = doc.allocate_node(node_element, "Order");
+		order->value("0");
+		defaultUIElement->append_node(order);
+	}
+
+	newDefaultUIConfig << doc;
+
+	newDefaultUIConfig.close();
+	doc.clear();
 }

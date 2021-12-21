@@ -143,6 +143,34 @@ void C_ConfigLoader::CreateDefaultTexturesConfig(std::string const& inConfigFile
 	doc.clear();
 }
 
+void C_ConfigLoader::CreateDefaultConfigsListConfig(std::string const& inConfigFilename) const
+{
+	using namespace std;
+	using namespace rapidxml;
+
+	ofstream newConfigsList(inConfigFilename);
+
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "Configs");
+	doc.append_node(root);
+
+	xml_node<>* uiConfig = doc.allocate_node(node_element, "Config");
+	uiConfig->append_attribute(doc.allocate_attribute("name", "UIConfig"));
+	uiConfig->append_attribute(doc.allocate_attribute("description", "Config file for controlling UI layout"));
+	uiConfig->value("ui_config.xml");
+	root->append_node(uiConfig);
+
+	newConfigsList << doc;
+
+	newConfigsList.close();
+	doc.clear();
+}
+
 void C_ConfigLoader::Initialise()
 {
 	using namespace std;
@@ -302,6 +330,11 @@ void C_ConfigLoader::InitConfigsList()
 	string filePath(GetSettingStringValue(SettingType::Engine, "ConfigDir"));
 
 	string fullPath(filePath + configListFilename);
+
+	if (!CheckConfigExists(fullPath))
+	{
+		CreateDefaultConfigsListConfig(fullPath);
+	}
 
 	file<> xmlFile(fullPath.c_str());
 	xml_document<> doc;

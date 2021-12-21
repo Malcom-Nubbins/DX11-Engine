@@ -38,4 +38,5 @@ public:
 private:
 
 	void LoadUIFromConfig();
+	void CreateDefaultUIConfig(std::string const& inConfigFilename);
 };
