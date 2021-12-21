@@ -41,6 +41,75 @@ void C_ConfigLoader::CreateDefaultMainConfig()
 	xml_node<>* root = doc.allocate_node(node_element, "Settings");
 	doc.append_node(root);
 
+	xml_node<>* settingEngine = doc.allocate_node(node_element, "Setting");
+	settingEngine->append_attribute(doc.allocate_attribute("name", "Engine"));
+	root->append_node(settingEngine);
+
+	// Engine configs defaults
+	{
+		xml_node<>* configDir = doc.allocate_node(node_element, "EngineSetting");
+		configDir->append_attribute(doc.allocate_attribute("name", "ConfigDir"));
+		configDir->append_attribute(doc.allocate_attribute("description", ""));
+		configDir->value("Core/Config/");
+		settingEngine->append_node(configDir);
+
+		xml_node<>* textureDir = doc.allocate_node(node_element, "EngineSetting");
+		textureDir->append_attribute(doc.allocate_attribute("name", "TextureDir"));
+		textureDir->append_attribute(doc.allocate_attribute("description", "Path to where textures are kept"));
+		textureDir->value("Core/Resources/Textures/");
+		settingEngine->append_node(textureDir);
+
+		xml_node<>* texturesListFile = doc.allocate_node(node_element, "EngineSetting");
+		texturesListFile->append_attribute(doc.allocate_attribute("name", "TexturesListFile"));
+		texturesListFile->append_attribute(doc.allocate_attribute("description", "Filename of the file containing name/filename pairs for all textures"));
+		texturesListFile->value("_textures_list.xml");
+		settingEngine->append_node(texturesListFile);
+
+		xml_node<>* configsListFile = doc.allocate_node(node_element, "EngineSetting");
+		configsListFile->append_attribute(doc.allocate_attribute("name", "ConfigListFile"));
+		configsListFile->append_attribute(doc.allocate_attribute("description", "Filename of the file containing name/filename pairs for config files"));
+		configsListFile->value("_configs_list.xml");
+		settingEngine->append_node(configsListFile);
+	}
+
+	xml_node<>* settingGraphics = doc.allocate_node(node_element, "Setting");
+	settingGraphics->append_attribute(doc.allocate_attribute("name", "Graphics Settings"));
+	root->append_node(settingGraphics);
+
+	// Graphics configs defaults
+	{
+		xml_node<>* msaa = doc.allocate_node(node_element, "Graphics");
+		msaa->append_attribute(doc.allocate_attribute("name", "MSAA"));
+		msaa->append_attribute(doc.allocate_attribute("description", "Multisampled Antialiasing quality. Must be power of 2, up to 8 and no less than 1"));
+		msaa->value("1");
+		settingGraphics->append_node(msaa);
+	}
+
+	xml_node<>* settingsVideo = doc.allocate_node(node_element, "Setting");
+	settingsVideo->append_attribute(doc.allocate_attribute("name", "Video"));
+	root->append_node(settingsVideo);
+
+	// Video configs defaults
+	{
+		xml_node<>* screenWidth = doc.allocate_node(node_element, "VideoSetting");
+		screenWidth->append_attribute(doc.allocate_attribute("name", "ScreenWidth"));
+		screenWidth->append_attribute(doc.allocate_attribute("description", "Horizontal Resolution"));
+		screenWidth->value("1600");
+		settingsVideo->append_node(screenWidth);
+
+		xml_node<>* screenHeight = doc.allocate_node(node_element, "VideoSetting");
+		screenHeight->append_attribute(doc.allocate_attribute("name", "ScreenHeight"));
+		screenHeight->append_attribute(doc.allocate_attribute("description", "Vertical Resolution"));
+		screenHeight->value("900");
+		settingsVideo->append_node(screenHeight);
+
+		xml_node<>* vsync = doc.allocate_node(node_element, "VideoSetting");
+		vsync->append_attribute(doc.allocate_attribute("name", "VSync"));
+		vsync->append_attribute(doc.allocate_attribute("description", "Sync refresh rate to monitor. Set to 0 for no, 1 for yes"));
+		vsync->value("1");
+		settingsVideo->append_node(vsync);
+	}
+
 	newMainConfig << doc;
 
 	newMainConfig.close();
@@ -56,10 +125,10 @@ void C_ConfigLoader::Initialise()
 	using namespace std;
 	using namespace rapidxml;
 
-	/*if (!CheckConfigExists(m_ConfigFilename))
+	if (!CheckConfigExists(m_ConfigFilename))
 	{
 		CreateDefaultMainConfig();
-	}*/
+	}
 
 	file<> xmlFile(m_ConfigFilename.c_str());
 	xml_document<> doc;
