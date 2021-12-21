@@ -1,12 +1,8 @@
 #pragma once
 #include "../Globals/stdafx.h"
 #include "Scene Elements/SceneElement.h"
+#include "../Core/Scene/Scene.h"
 #include <vector>
-
-struct S_Scene final
-{
-	std::vector<SceneElement> m_Elements;
-};
 
 class SceneHandler
 {
@@ -14,12 +10,20 @@ public:
 	SceneHandler();
 	~SceneHandler();
 
-	void LoadScenesFromConfig();
+	void Cleanup();
 
-	//S_Scene GetCurrentScene() const { return m_CurrentScene; }
+	void PreResize();
+	void ResizeViews(float const newWidth, float const newHeight);
+
+	void LoadScenesFromConfig(Player& player, float const width, float const height);
+
+	Scene* GetCurrentScene() const { return m_CurrentScene; }
+
+	void Upate(UpdateEvent& e);
+	void Draw();
 
 private:
-	std::vector<S_Scene> m_Scenes;
-	S_Scene m_CurrentScene;
+	std::vector<Scene*> m_Scenes;
+	Scene* m_CurrentScene;
 };
 

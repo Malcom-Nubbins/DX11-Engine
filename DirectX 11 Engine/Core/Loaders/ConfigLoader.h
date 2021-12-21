@@ -12,7 +12,10 @@ public:
 	C_ConfigLoader(std::string const& inFilename);
 	~C_ConfigLoader();
 
-	void PreLoadCheck();
+	bool CheckConfigExists(std::string const& inConfigFilename);
+
+	void CreateDefaultMainConfig();
+	void CreateDefaultConfigFile(std::string const& inConfigFilename);
 
 	void Initialise();
 

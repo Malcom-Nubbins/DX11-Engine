@@ -39,14 +39,14 @@ void Player::Initialise()
 		XMFLOAT3(0.0f, 1.0f, 0.0f),
 		XMFLOAT3(0.0f, 0.0f, 1.0f),
 		0.01f, 1000.0f,
-		aspect, (85.0f / 180.0f) * XM_PI);
+		aspect, (60.0f / 180.0f) * XM_PI);
 }
 
 void Player::OnMouseButtonDown(MouseButtonEvent& e)
 {
 	if (e.RightMouseButton)
 	{
-		m_Camera->SetFOV((55.0f / 180.0f) * XM_PI);
+		m_Camera->SetFOV((45.0f / 180.0f) * XM_PI);
 	}
 
 	if (e.MiddleMouseButton)
@@ -60,7 +60,7 @@ void Player::OnMouseButtonUp(MouseButtonEvent& e)
 {
 	if (!e.RightMouseButton)
 	{
-		m_Camera->SetFOV((85.0f / 180.0f) * XM_PI);
+		m_Camera->SetFOV((60.0f / 180.0f) * XM_PI);
 	}
 }
 

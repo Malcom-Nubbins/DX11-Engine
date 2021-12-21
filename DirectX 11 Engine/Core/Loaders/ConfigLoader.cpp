@@ -5,6 +5,11 @@
 #include <vector>
 #include <codecvt>
 
+#include "../Core/Loaders/XMLLoader/rapidxml.hpp"
+#include "../Loaders/XMLLoader/rapidxml_ext.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_print.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_utils.hpp"
+
 C_ConfigLoader::C_ConfigLoader(std::string const& inFilename)
 	: m_ConfigFilename(inFilename)
 {
@@ -14,22 +19,47 @@ C_ConfigLoader::~C_ConfigLoader()
 {
 }
 
-void C_ConfigLoader::PreLoadCheck()
+bool C_ConfigLoader::CheckConfigExists(std::string const& inConfigFilename)
 {
 	struct stat buffer;
-	bool const exists = (stat(m_ConfigFilename.c_str(), &buffer));
+	return (stat(inConfigFilename.c_str(), &buffer) == 0);
+}
 
-	if (!exists)
-	{
-		// Main config file doesn't exist for some reason, create on with default values
+void C_ConfigLoader::CreateDefaultMainConfig()
+{
+	using namespace std;
+	using namespace rapidxml;
 
-	}
+	ofstream newMainConfig(m_ConfigFilename);
+
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "Settings");
+	doc.append_node(root);
+
+	newMainConfig << doc;
+
+	newMainConfig.close();
+	doc.clear();
+}
+
+void C_ConfigLoader::CreateDefaultConfigFile(std::string const& inConfigFilename)
+{
 }
 
 void C_ConfigLoader::Initialise()
 {
 	using namespace std;
 	using namespace rapidxml;
+
+	/*if (!CheckConfigExists(m_ConfigFilename))
+	{
+		CreateDefaultMainConfig();
+	}*/
 
 	file<> xmlFile(m_ConfigFilename.c_str());
 	xml_document<> doc;

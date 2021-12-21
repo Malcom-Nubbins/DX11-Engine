@@ -6,12 +6,14 @@
 #include "Scene/Player.h"
 #include "Scene/MainScene.h"
 #include "Scene/TestingScene.h"
+#include "Scene/SceneHandler.h"
 #include "Graphics/UI/UserInterface.h"
 
 #include "Handlers/System Handlers/RenderClass.h"
 #include "Handlers/System Handlers/ShaderClass.h"
 #include "Handlers/System Handlers/BufferClass.h"
 #include "Handlers/System Handlers/TextureHandler.h"
+#include "Handlers/System Handlers/GraphicsHandler.h"
 
 class DX11Engine : public EngineBase
 {
@@ -28,6 +30,7 @@ public:
 
 	TextureHandler const* GetTextureHandler() const { return m_TextureHandler; }
 	UserInterface const* GetUI() const { return m_UI; }
+	SceneHandler const* GetSceneHandler() const { return m_SceneHandler; }
 
 protected:
 	virtual void OnUpdate(UpdateEvent& e) override;
@@ -51,9 +54,12 @@ private:
 	ShaderClass* m_ShaderClass;
 	BufferClass* m_BufferClass;
 	TextureHandler* m_TextureHandler;
+	GraphicsHandler* m_GraphicsHandler;
 
-	MainScene* m_MainScene;
-	TestingScene* m_TestingScene;
+	/*MainScene* m_MainScene;
+	TestingScene* m_TestingScene;*/
+
+	SceneHandler* m_SceneHandler;
 
 	Player* m_Player;
 

@@ -8,10 +8,10 @@ DX11Engine::DX11Engine(const std::wstring& name, UINT width, UINT height, bool v
 	, m_ContentLoaded(false)
 	, m_BufferClass(nullptr)
 	, m_RenderClass(nullptr)
-	, m_MainScene(nullptr)
+	, m_SceneHandler(nullptr)
 	, m_Player(nullptr)
 	, m_ShaderClass(nullptr)
-	, m_TestingScene(nullptr)
+	, m_GraphicsHandler(nullptr)
 	, m_TextureHandler(nullptr)
 	, m_UI(nullptr)
 	, m_ToggleCooldown(0.0f)
@@ -42,14 +42,20 @@ bool DX11Engine::LoadContent()
 	m_TextureHandler = new TextureHandler();
 	m_TextureHandler->LoadAllTextures();
 
+	m_GraphicsHandler = new GraphicsHandler();
+	m_GraphicsHandler->Init(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());
+
 	m_Player = new Player();
 	m_Player->Initialise();
+
+	m_SceneHandler = new SceneHandler();
+	m_SceneHandler->LoadScenesFromConfig(*m_Player, m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());
 
 	/*m_MainScene = new MainScene(*m_Player);
 	m_MainScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());*/
 
-	m_TestingScene = new TestingScene(*m_Player);
-	m_TestingScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());
+	/*m_TestingScene = new TestingScene(*m_Player);
+	m_TestingScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());*/
 
 	m_UI = new UserInterface(m_Player->GetCamera());
 	m_UI->Initialise();
@@ -67,16 +73,10 @@ void DX11Engine::UnloadContent()
 
 void DX11Engine::Cleanup()
 {
-	if (m_MainScene != nullptr)
+	if (m_SceneHandler != nullptr)
 	{
-		m_MainScene->Cleanup();
-		m_MainScene = nullptr;
-	}
-	
-	if (m_TestingScene != nullptr)
-	{
-		m_TestingScene->Cleanup();
-		m_TestingScene = nullptr;
+		m_SceneHandler->Cleanup();
+		m_SceneHandler = nullptr;
 	}
 
 	m_UI->Cleanup();
@@ -84,6 +84,9 @@ void DX11Engine::Cleanup()
 
 	m_Player->Cleanup();
 	m_Player = nullptr;
+
+	m_GraphicsHandler->Cleanup();
+	m_GraphicsHandler = nullptr;
 
 	m_TextureHandler->Cleanup();
 	m_TextureHandler = nullptr;
@@ -117,15 +120,12 @@ void DX11Engine::OnUpdate(UpdateEvent& e)
 		m_Player->Update(e.ElapsedTime);
 		m_UI->Update(e.ElapsedTime);
 
-		if (m_TestingScene != nullptr)
+		if (m_SceneHandler != nullptr)
 		{
-			m_TestingScene->Update(e);
+			m_SceneHandler->Upate(e);
 		}
 
-		if (m_MainScene != nullptr)
-		{
-			m_MainScene->Update(e);
-		}
+		m_GraphicsHandler->Update(e);
 	}
 }
 
@@ -133,15 +133,7 @@ void DX11Engine::OnRender(RenderEvent& e)
 {
 	if (m_ContentLoaded)
 	{
-		if (m_TestingScene != nullptr)
-		{
-			m_TestingScene->Draw();
-		}
-
-		if (m_MainScene != nullptr)
-		{
-			m_MainScene->Draw();
-		}
+		m_GraphicsHandler->Draw();
 
 		m_UI->Draw();
 
@@ -167,28 +159,28 @@ void DX11Engine::OnMouseWheel(MouseWheelEvent& e)
 
 void DX11Engine::PreOnResize()
 {
-	if (m_TestingScene != nullptr)
+	if (m_SceneHandler != nullptr)
 	{
-		m_TestingScene->PreResizeViews();
+		m_SceneHandler->PreResize();
 	}
 
-	if (m_MainScene != nullptr)
+	if (m_GraphicsHandler != nullptr)
 	{
-		m_MainScene->PreResizeViews();
+		m_GraphicsHandler->PreResizeViews();
 	}
 }
 
 void DX11Engine::OnResize(UINT width, UINT height)
 {
 	super::OnResize(width, height);
-	if (m_TestingScene != nullptr)
+	if (m_SceneHandler != nullptr)
 	{
-		m_TestingScene->ResizeViews(static_cast<float>(width), static_cast<float>(height));
+		m_SceneHandler->ResizeViews(static_cast<float>(width), static_cast<float>(height));
 	}
 
-	if (m_MainScene != nullptr)
+	if (m_GraphicsHandler != nullptr)
 	{
-		m_MainScene->ResizeViews(static_cast<float>(width), static_cast<float>(height));
+		m_GraphicsHandler->ResizeViews(static_cast<float>(width), static_cast<float>(height));
 	}
 
 	if (m_UI != nullptr)

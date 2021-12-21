@@ -3,25 +3,36 @@
 #include "../Timer.h"
 #include "Player.h"
 #include "../Handlers/SystemHandlers.h"
+#include "../Loaders/Terrain Generation/FlatTerrain.h"
 
 class Scene
 {
 protected:
-	DirectionalLight _sceneLight;
 	XMFLOAT2 _lastMousePos;
+	
 	Player* m_Player;
+	std::vector<SceneElement*> _sceneElements;
+
+	FlatTerrain* _flatPlane;
+
+	VertexBuffer _planeVertexBuffer;
+	IndexBuffer _planeIndexBuffer;
 
 public:
 	Scene(Player& player);
 	virtual ~Scene();
-	virtual void Cleanup() = 0;
+	void Cleanup();
 
-	virtual void PreResizeViews() = 0;
-	virtual void ResizeViews(float windowWidth, float windowHeight) = 0;
+	void PreResizeViews();
+	void ResizeViews(float windowWidth, float windowHeight);
 
-	virtual void InitialiseScene(float windowWidth, float windowHeight) = 0;
-	virtual void InitialiseSceneGraphics(float windowWidth, float windowHeight) = 0;
+	void InitialiseScene(float windowWidth, float windowHeight);
+	//virtual void InitialiseSceneGraphics(float windowWidth, float windowHeight) = 0;
 
-	virtual void Update(UpdateEvent& e) = 0;
-	virtual void Draw() = 0;
+	void Update(UpdateEvent& e);
+	void Draw();
+
+public:
+	std::vector<SceneElement*> GetAllSceneElements() const { return _sceneElements; }
+	Player* GetPlayer() const { return m_Player; }
 };

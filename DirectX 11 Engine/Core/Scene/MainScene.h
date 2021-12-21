@@ -16,52 +16,22 @@
 class MainScene : Scene
 {
 private:
-	DirectionalLight _sceneLight;
-	FogValuesBuffer _sceneFog;
-
 	ID3D11Buffer* _planeVertexBuffer;
 	ID3D11Buffer* _planeIndexBuffer;
 
-	std::vector<SceneElement*> _sceneElements;
-
-	BasicLight* _basicLight;
-	Shadows* _shadows;
-	SkyColourGradient* _skyGradient;
-	RenderToFullscreenQuad* _renderToQuad;
-	HeatHaze* _heatHaze;
-
 	DiamondSquareTerrain* _diamondSquareTerrain;
-
-	float _lightRotationAmount;
-	XMFLOAT3 _preOffsetLightDir;
-
-	float _fullRotationAmount;
-
-	float _currentTime;
-	int _currentDay;
-	int _currentSeason;
-
-	std::vector<int> _seasonsSunHeightOffset;
-	std::map<int, std::string> _seasonNames;
-
-	std::vector<PointLight> _pointLights;
-	SpotLight _spotLight;
-
-	float _buttonCooldown;
-	float _currentCooldown;
 
 public:
 	MainScene(Player& player);
 	~MainScene() override;
-	void Cleanup() override;
+	/*void Cleanup() override;
 
 	void PreResizeViews() override;
 	void ResizeViews(float windowWidth, float windowHeight) override;
 
 	void InitialiseScene(float windowWidth, float windowHeight) override;
-	void InitialiseSceneGraphics(float windowWidth, float windowHeight) override;
 
 	void Update(UpdateEvent& e) override;
-	void Draw() override;
+	void Draw() override;*/
 };
 

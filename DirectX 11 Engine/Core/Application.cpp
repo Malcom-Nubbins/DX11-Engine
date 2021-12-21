@@ -37,19 +37,19 @@ Application::~Application()
 
 void Application::Cleanup()
 {
-	if(_testingScene != nullptr)
+	/*if(_testingScene != nullptr)
 	{
 		_testingScene->Cleanup();
 		delete _testingScene;
 		_testingScene = nullptr;
-	}
+	}*/
 
-	if (_mainScene != nullptr)
+	/*if (_mainScene != nullptr)
 	{
 		_mainScene->Cleanup();
 		delete _mainScene;
 		_mainScene = nullptr;
-	}
+	}*/
 
 	if(_player != nullptr)
 	{
@@ -190,7 +190,7 @@ LRESULT Application::HandleInput(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 void Application::Resize(float newWidth, float newHeight)
 {
-	if (_mainScene != nullptr)
+	/*if (_mainScene != nullptr)
 	{
 		_mainScene->ResizeViews(newWidth, newHeight);
 	}
@@ -198,7 +198,7 @@ void Application::Resize(float newWidth, float newHeight)
 	if (_testingScene != nullptr)
 	{
 		_testingScene->ResizeViews(newWidth, newHeight);
-	}
+	}*/
 
 	if(_player != nullptr)
 		_player->ResetPlayerCamera(newWidth, newHeight);
@@ -237,7 +237,7 @@ void Application::Update(float deltaTime)
 
 void Application::Draw()
 {
-	if (_testingScene != nullptr)
+	/*if (_testingScene != nullptr)
 	{
 		_testingScene->Draw();
 	}
@@ -245,7 +245,7 @@ void Application::Draw()
 	if (_mainScene != nullptr)
 	{
 		_mainScene->Draw();
-	}
+	}*/
 
 	_ui->Draw();
 
