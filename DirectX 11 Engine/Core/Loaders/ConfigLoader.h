@@ -12,10 +12,10 @@ public:
 	C_ConfigLoader(std::string const& inFilename);
 	~C_ConfigLoader();
 
-	bool CheckConfigExists(std::string const& inConfigFilename);
+	bool CheckConfigExists(std::string const& inConfigFilename) const;
 
 	void CreateDefaultMainConfig();
-	void CreateDefaultConfigFile(std::string const& inConfigFilename);
+	void CreateDefaultTexturesConfig(std::string const& inConfigFilename) const;
 
 	void Initialise();
 

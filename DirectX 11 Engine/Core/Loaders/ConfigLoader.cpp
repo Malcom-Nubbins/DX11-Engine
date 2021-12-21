@@ -19,7 +19,7 @@ C_ConfigLoader::~C_ConfigLoader()
 {
 }
 
-bool C_ConfigLoader::CheckConfigExists(std::string const& inConfigFilename)
+bool C_ConfigLoader::CheckConfigExists(std::string const& inConfigFilename) const
 {
 	struct stat buffer;
 	return (stat(inConfigFilename.c_str(), &buffer) == 0);
@@ -116,8 +116,31 @@ void C_ConfigLoader::CreateDefaultMainConfig()
 	doc.clear();
 }
 
-void C_ConfigLoader::CreateDefaultConfigFile(std::string const& inConfigFilename)
+void C_ConfigLoader::CreateDefaultTexturesConfig(std::string const& inConfigFilename) const
 {
+	using namespace std;
+	using namespace rapidxml;
+
+	ofstream newTexturesListConfig(inConfigFilename);
+
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "Textures");
+	doc.append_node(root);
+
+	xml_node<>* defaultTex = doc.allocate_node(node_element, "Texture");
+	defaultTex->append_attribute(doc.allocate_attribute("name", "Default"));
+	defaultTex->value("Default.dds");
+	root->append_node(defaultTex);
+
+	newTexturesListConfig << doc;
+
+	newTexturesListConfig.close();
+	doc.clear();
 }
 
 void C_ConfigLoader::Initialise()
@@ -220,6 +243,11 @@ std::vector<S_TextureInfo> C_ConfigLoader::GetAllTextures() const
 	string filePath(GetSettingStringValue(SettingType::Engine, "TextureDir"));
 
 	string fullPath(filePath + textureListFilename);
+
+	if (!CheckConfigExists(fullPath))
+	{
+		CreateDefaultTexturesConfig(fullPath);
+	}
 
 	file<> xmlFile(fullPath.c_str());
 	xml_document<> doc;

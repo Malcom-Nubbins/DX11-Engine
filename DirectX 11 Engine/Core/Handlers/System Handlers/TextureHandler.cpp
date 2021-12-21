@@ -65,6 +65,20 @@ ID3D11ShaderResourceView* TextureHandler::GetTextureByName(char const* name) con
 		(*it).m_Texture->AddRef();
 		return (*it).m_Texture;
 	}
+	else
+	{
+		std::string defaultTexName("Default");
+		auto const defaultIt = std::find_if(m_Textures.cbegin(), m_Textures.cend(), [defaultTexName](S_Texture const& tex)
+			{
+				return tex.m_Filename == defaultTexName;
+			});
+
+		if (defaultIt != m_Textures.cend())
+		{
+			(*defaultIt).m_Texture->AddRef();
+			return (*defaultIt).m_Texture;
+		}
+	}
 
 	return nullptr;
 }
