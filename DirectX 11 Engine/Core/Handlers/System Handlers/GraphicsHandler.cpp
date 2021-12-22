@@ -46,9 +46,6 @@ GraphicsHandler::GraphicsHandler()
 		{2, "Autumn"},
 		{3, "Winter"}
 	};
-
-	_buttonCooldown = 1.0f;
-	_currentCooldown = 0.0f;
 }
 
 GraphicsHandler::~GraphicsHandler()
@@ -273,18 +270,10 @@ void GraphicsHandler::Update(UpdateEvent& e)
 
 	_heatHaze->Update(static_cast<float>(e.TotalTime / 2.0));
 
-	if (InputHandler::IsKeyDown(Keys::LeftControl) && InputHandler::IsKeyDown(Keys::R))
+	if (InputHandler::IsKeyDown(Keys::LeftControl) && InputHandler::IsKeyUp(Keys::R))
 	{
-		if (_currentCooldown <= 0.0f)
-		{
-			_basicLight->SetWireframeMode(!_basicLight->GetWireframeState());
-			_currentCooldown = _buttonCooldown;
-		}
+		_basicLight->SetWireframeMode(!_basicLight->GetWireframeState());
 	}
-
-	if (_currentCooldown > 0.0f)
-		_currentCooldown -= static_cast<float>(e.ElapsedTime);
-
 
 	_spotLight.position = currPlayer->GetPlayerPosition();
 	_spotLight.direction = currPlayer->GetPlayerLookDirection();

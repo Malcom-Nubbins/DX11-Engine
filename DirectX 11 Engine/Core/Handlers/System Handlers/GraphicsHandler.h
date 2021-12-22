@@ -55,9 +55,6 @@ private:
 	std::vector<int> _seasonsSunHeightOffset;
 	std::map<int, std::string> _seasonNames;
 
-	float _buttonCooldown;
-	float _currentCooldown;
-
 	std::vector<PointLight> _pointLights;
 
 	std::vector<S_Material> m_AllMaterials;

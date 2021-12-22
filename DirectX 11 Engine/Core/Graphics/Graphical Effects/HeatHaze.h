@@ -13,6 +13,9 @@ private:
 	ID3D11RenderTargetView* _renderTargetView;
 	ID3D11ShaderResourceView* _renderTargetSRV;
 
+	ID3D11ShaderResourceView* m_SnowTex;
+	ID3D11ShaderResourceView* m_HeatTex;
+
 	ObjectMesh		_quad;
 
 	ID3D11Buffer* _heatHazeValues;

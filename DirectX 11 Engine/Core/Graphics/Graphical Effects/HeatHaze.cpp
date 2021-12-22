@@ -28,6 +28,9 @@ void HeatHaze::Cleanup() const
 	_renderTargetView->Release();
 	_renderTargetSRV->Release();
 
+	m_SnowTex->Release();
+	m_HeatTex->Release();
+
 	_heatHazeValues->Release();
 }
 
@@ -57,6 +60,10 @@ HRESULT HeatHaze::Initialise(const float width, const float height)
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
 	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &_heatHazeValues);
+
+	auto texHandler = DX11Engine::Get().GetTextureHandler();
+	m_SnowTex = texHandler->GetTextureByName("Snow");
+	m_HeatTex = texHandler->GetTextureByName("DistortionMap");
 
 	return S_OK;
 }
@@ -167,23 +174,20 @@ void HeatHaze::Update(const float deltaTime)
 void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, std::string season)
 {
 	auto context = ApplicationNew::Get().GetContext();
-	auto texHandler = DX11Engine::Get().GetTextureHandler();
 
 	if (season == "Winter")
 	{
 		_values.blizzard = 1.0f;
 		_values.heatwave = 0.0f;
 
-		ID3D11ShaderResourceView* snowTex = texHandler->GetTextureByName("Snow");
-		context->PSSetShaderResources(1, 1, &snowTex);
+		context->PSSetShaderResources(1, 1, &m_SnowTex);
 	}
 	else if (season == "Summer")
 	{
 		_values.blizzard = 0.0f;
 		_values.heatwave = 1.0f;
 
-		ID3D11ShaderResourceView* distortionMap = texHandler->GetTextureByName("DistortionMap");
-		context->PSSetShaderResources(1, 1, &distortionMap);
+		context->PSSetShaderResources(1, 1, &m_HeatTex);
 	}
 
 	BufferClass::SetPixelShaderBuffers(&_heatHazeValues);
