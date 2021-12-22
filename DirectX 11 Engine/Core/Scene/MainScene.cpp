@@ -4,10 +4,8 @@
 #include "../Handlers/System Handlers/InputHandler.h"
 
 MainScene::MainScene(Player& player)
-	: Scene(player)
+	//: Scene(player)
 
-	
-	
 {
 	_planeVertexBuffer = nullptr;
 	_planeIndexBuffer = nullptr;
@@ -44,41 +42,6 @@ MainScene::~MainScene()
 //void MainScene::InitialiseScene(float windowWidth, float windowHeight)
 //{
 //	
-//	Scene::InitialiseScene(windowWidth, windowHeight);
-//
-//	ObjectMaterial aircraftMat;
-//	aircraftMat.ambient = XMFLOAT4(1.000f, 0.766f, 0.336f, 1.0f);
-//	aircraftMat.diffuse = XMFLOAT4(1.000f, 0.766f, 0.336f, 1.0f);
-//	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
-//
-//	ObjectMaterial concrete;
-//	concrete.ambient = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
-//	concrete.diffuse = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
-//	concrete.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.6f);
-//
-//	ObjectMaterial shiny;
-//	shiny.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-//	shiny.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-//	shiny.specular = XMFLOAT4(0.560f, 0.570f, 0.580f, 0.3f);
-//
-//	ObjectMaterial charcoal;
-//	charcoal.ambient = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
-//	charcoal.diffuse = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
-//	charcoal.specular = XMFLOAT4(0.02f, 0.02f, 0.02f, 0.3f);
-//
-//	ObjectMaterial matte;
-//	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-//	matte.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-//	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.3f);
-//
-//	BufferClass::CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
-//
-//#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
-//	char const vbName[] = "Main Scene plane VB";
-//	char const ibName[] = "Main scene plane IB";
-//	_planeVertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(vbName) - 1, vbName);
-//	_planeIndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(ibName) - 1, ibName);
-//#endif
 //
 //	ObjectMesh planeMesh;
 //	planeMesh.vertexBuffer = _planeVertexBuffer;

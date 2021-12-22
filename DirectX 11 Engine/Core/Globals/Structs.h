@@ -161,6 +161,14 @@ struct SpotLight
 
 struct ObjectMaterial
 {
+	ObjectMaterial(XMFLOAT4 const inAmb, XMFLOAT4 const inDiff, XMFLOAT4 const inSpec)
+		: diffuse(inDiff), ambient(inAmb), specular(inSpec)
+	{}
+
+	ObjectMaterial()
+		: diffuse(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)), ambient(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)), specular(XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f))
+	{}
+
 	XMFLOAT4 diffuse;
 	XMFLOAT4 ambient;
 	XMFLOAT4 specular;
@@ -266,6 +274,18 @@ struct S_TextureInfo final
 	{}
 	std::string m_TextureName;
 	std::wstring m_TextureFilename;
+};
+
+struct S_MaterialInfo final
+{
+	S_MaterialInfo(char const* inMaterialName, XMFLOAT4 const inMatAmbient, XMFLOAT4 const inMatDiffuse, XMFLOAT4 const inMatSpecular)
+		: m_MaterialName(inMaterialName), m_MaterialAmbient(inMatAmbient), m_MaterialDiffuse(inMatDiffuse), m_MaterialSpecular(inMatSpecular)
+	{}
+
+	std::string m_MaterialName;
+	XMFLOAT4 m_MaterialAmbient;
+	XMFLOAT4 m_MaterialDiffuse;
+	XMFLOAT4 m_MaterialSpecular;
 };
 
 struct S_ConfigInfo final 

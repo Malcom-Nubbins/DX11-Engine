@@ -299,6 +299,62 @@ std::vector<S_TextureInfo> C_ConfigLoader::GetAllTextures() const
 	return allTextures;
 }
 
+std::vector<S_MaterialInfo> C_ConfigLoader::GetAllMaterials() const
+{
+	using namespace rapidxml;
+	using namespace std;
+
+	string materialsListFilename(GetSettingStringValue(SettingType::Engine, "MaterialsListFile"));
+	string filePath(GetSettingStringValue(SettingType::Engine, "TextureDir"));
+
+	string fullPath(filePath + materialsListFilename);
+
+	if (!CheckConfigExists(fullPath))
+	{
+		//CreateDefaultTexturesConfig(fullPath);
+	}
+
+	file<> xmlFile(fullPath.c_str());
+	xml_document<> doc;
+
+	doc.parse<0>(xmlFile.data());
+
+	xml_node<>* rootNode = doc.first_node("Materials");
+
+	std::vector<S_MaterialInfo> allMaterials;
+
+	for (xml_node<>* materialNode = rootNode->first_node("Material"); materialNode; materialNode = materialNode->next_sibling())
+	{
+		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		wstring nodeValue(converter.from_bytes(materialNode->value()));
+
+		string const materialName(materialNode->first_attribute("name")->value());
+		
+		xml_node<>* ambientNode = materialNode->first_node("Ambient");
+		xml_node<>* diffuseNode = materialNode->first_node("Diffuse");
+		xml_node<>* specularNode = materialNode->first_node("Specular");
+
+		XMFLOAT4 ambient(strtof(ambientNode->first_attribute("red")->value(), nullptr), 
+			strtof(ambientNode->first_attribute("green")->value(), nullptr),
+			strtof(ambientNode->first_attribute("blue")->value(), nullptr), 1.0f);
+
+		XMFLOAT4 diffuse(strtof(diffuseNode->first_attribute("red")->value(), nullptr),
+			strtof(diffuseNode->first_attribute("green")->value(), nullptr),
+			strtof(diffuseNode->first_attribute("blue")->value(), nullptr), 1.0f);
+
+		XMFLOAT4 specular(strtof(specularNode->first_attribute("red")->value(), nullptr),
+			strtof(specularNode->first_attribute("green")->value(), nullptr),
+			strtof(specularNode->first_attribute("blue")->value(), nullptr), 
+			strtof(specularNode->first_attribute("shinyness")->value(), nullptr));
+
+		S_MaterialInfo matInfo(materialName.c_str(), ambient, diffuse, specular);
+
+		allMaterials.emplace_back(move(matInfo));
+	}
+
+	return allMaterials;
+}
+
 S_ConfigInfo C_ConfigLoader::GetConfigByName(char const* const inConfigName) const
 {
 	auto const it = std::find_if(m_AllConfigs.cbegin(), m_AllConfigs.cend(), [inConfigName](S_ConfigInfo const& configInfo)

@@ -13,7 +13,7 @@
 #include "../Graphics/Graphical Effects/RenderToFullscreenQuad.h"
 #include "../Graphics/Graphical Effects/HeatHaze.h"
 
-class MainScene : Scene
+class MainScene //: Scene
 {
 private:
 	ID3D11Buffer* _planeVertexBuffer;
@@ -23,7 +23,7 @@ private:
 
 public:
 	MainScene(Player& player);
-	~MainScene() override;
+	~MainScene();
 	/*void Cleanup() override;
 
 	void PreResizeViews() override;

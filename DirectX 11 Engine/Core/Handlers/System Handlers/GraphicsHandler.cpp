@@ -1,10 +1,18 @@
 #include "GraphicsHandler.h"
 
+#include "../Core/ApplicationNew.h"
 #include "../Core/Handlers/System Handlers/RenderClass.h"
 #include "../Core/Handlers/System Handlers/InputHandler.h"
 #include "../Core/Scene/SceneHandler.h"
 #include "../Core/Scene/Scene.h"
 #include "../Core/DX11Engine.h"
+#include "../Core/Loaders/ConfigLoader.h"
+#include "../Core/Loaders/XMLLoader/rapidxml.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_ext.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_print.hpp"
+#include "../Core/Loaders/XMLLoader/rapidxml_utils.hpp"
+#include <vector>
+#include <codecvt>
 
 GraphicsHandler::GraphicsHandler() 
 	: _basicLight(nullptr)
@@ -100,6 +108,8 @@ void GraphicsHandler::Init(float const windowWidth, float const windowHeight)
 	_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
 	_spotLight.spot = 20.0f;
 	_spotLight.range = 1000.0f;
+
+	LoadMaterialsConfig();
 }
 
 void GraphicsHandler::Cleanup()
@@ -242,8 +252,9 @@ void GraphicsHandler::Update(UpdateEvent& e)
 	_shadows->UpdateLightDirection(_sceneLight.lightDirection);
 
 	Scene* currScene = DX11Engine::Get().GetSceneHandler()->GetCurrentScene();
+	Player const* currPlayer = DX11Engine::Get().GetPlayer();
 
-	_shadows->SetSceneCentre(currScene->GetPlayer()->GetPlayerPosition());
+	_shadows->SetSceneCentre(currPlayer->GetPlayerPosition());
 	_shadows->BuildShadowTransform();
 
 	for (SceneElement* element : currScene->GetAllSceneElements())
@@ -255,7 +266,7 @@ void GraphicsHandler::Update(UpdateEvent& e)
 		element->Update(e.ElapsedTime);
 	}
 
-	_skyGradient->SetSceneCentre(currScene->GetPlayer()->GetPlayerPosition());
+	_skyGradient->SetSceneCentre(currPlayer->GetPlayerPosition());
 	_skyGradient->Update(e.ElapsedTime);
 
 	_basicLight->CalculateLightColour(_sceneLight, _shadows->GetLightPosition().y, _sceneFog);
@@ -275,14 +286,14 @@ void GraphicsHandler::Update(UpdateEvent& e)
 		_currentCooldown -= static_cast<float>(e.ElapsedTime);
 
 
-	_spotLight.position = currScene->GetPlayer()->GetPlayerPosition();
-	_spotLight.direction = currScene->GetPlayer()->GetPlayerLookDirection();
+	_spotLight.position = currPlayer->GetPlayerPosition();
+	_spotLight.direction = currPlayer->GetPlayerLookDirection();
 }
 
 void GraphicsHandler::Draw()
 {
 	Scene* currScene = DX11Engine::Get().GetSceneHandler()->GetCurrentScene();
-	Player* currPlayer = currScene->GetPlayer();
+	Player const* currPlayer = DX11Engine::Get().GetPlayer();
 
 	XMFLOAT3 sunPos = _shadows->GetLightPosition();
 	_sceneFog.sunHeight = sunPos.y;
@@ -291,7 +302,7 @@ void GraphicsHandler::Draw()
 	_basicLight->SetAsCurrentViewport();
 	RenderClass::DisableRtvClearing();
 
-	_skyGradient->Render(currScene->GetPlayer()->GetCamera(), sunPos);
+	_skyGradient->Render(currPlayer->GetCamera(), sunPos);
 	RenderClass::EnableZBuffer();
 	_shadows->Render(currScene->GetAllSceneElements());
 
@@ -309,3 +320,38 @@ void GraphicsHandler::Draw()
 		_renderToQuad->Render(_basicLight->GetRenderTargetSRV());
 	}
 }
+
+ObjectMaterial GraphicsHandler::GetMaterialByName(char const* name) const
+{
+	std::string matName(name);
+
+	auto const it = std::find_if(m_AllMaterials.cbegin(), m_AllMaterials.cend(), [matName](S_Material const& material)
+		{
+			return material.m_MaterialName == matName;
+		});
+
+	if (it != m_AllMaterials.cend())
+	{
+		return (*it).m_Material;
+	}
+
+	return ObjectMaterial();
+}
+
+void GraphicsHandler::LoadMaterialsConfig()
+{
+	auto configLoader = ApplicationNew::Get().GetConfigLoader();
+	std::vector<S_MaterialInfo> const allMaterials = configLoader->GetAllMaterials();
+	assert(!allMaterials.empty());
+
+	for (auto const& matInfo : allMaterials)
+	{
+		S_Material material(matInfo.m_MaterialName.c_str(), ObjectMaterial(matInfo.m_MaterialAmbient, matInfo.m_MaterialDiffuse, matInfo.m_MaterialSpecular));
+		
+		m_AllMaterials.emplace_back(std::move(material));
+	}
+}
+
+//void GraphicsHandler::CreateDefaultMaterialsConfig(std::string const& inConfigFilename)
+//{
+//}

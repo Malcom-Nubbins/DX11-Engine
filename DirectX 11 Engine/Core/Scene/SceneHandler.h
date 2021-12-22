@@ -23,6 +23,8 @@ public:
 	void Draw();
 
 private:
+	void CreateDefaultSceneConfig(std::string const& inConfigFilename);
+
 	std::vector<Scene*> m_Scenes;
 	Scene* m_CurrentScene;
 };

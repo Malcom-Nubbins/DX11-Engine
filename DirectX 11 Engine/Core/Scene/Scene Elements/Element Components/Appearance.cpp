@@ -52,19 +52,19 @@ void Appearance::Cleanup()
 	if (_normalMap)
 	{
 		_normalMap->Release();
-		_colourTex = nullptr;
+		_normalMap = nullptr;
 	}
 	
 	if (_displacementMap)
 	{
 		_displacementMap->Release();
-		_colourTex = nullptr;
+		_displacementMap = nullptr;
 	}
 	
 	if (_specularMap)
 	{
 		_specularMap->Release();
-		_colourTex = nullptr;
+		_specularMap = nullptr;
 	}
 }
 

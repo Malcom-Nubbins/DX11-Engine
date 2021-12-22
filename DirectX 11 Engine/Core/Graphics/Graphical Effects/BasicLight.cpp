@@ -29,6 +29,7 @@ BasicLight::~BasicLight()
 void BasicLight::Cleanup() const
 {
 	_lightVS->Release();
+	m_TesselationVS->Release();
 	_tesselationHS->Release();
 	_tesselationDS->Release();
 	_lightPS->Release();
@@ -178,6 +179,12 @@ HRESULT BasicLight::InitialiseShaders()
 	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/LightVS.cso", &_lightVS, &_simpleVertexInputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
+
+	hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/TesselationVS.cso", &m_TesselationVS, &_simpleVertexInputLayout, layout, ARRAYSIZE(layout));
+	if (FAILED(hr))
+	{
+		return hr;
+	}
 
 	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/LightPS.cso", &_lightPS);
 	if (FAILED(hr))
@@ -463,6 +470,8 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 
 		if (appearance->HasDisplacementMap())
 		{
+			ShaderClass::SetShadersAndInputLayout(m_TesselationVS, _lightPS, _simpleVertexInputLayout);
+
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 			ID3D11ShaderResourceView* displacementMap = appearance->GetDisplacementMap();
@@ -510,6 +519,9 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 		context->UpdateSubresource(_camLightBuffer, 0, nullptr, &camLightValues, 0, 0);
 
 		element->Draw();
+
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		ShaderClass::UnbindTesselationStages();
 	}
 
 	// Clear out the resource slots

@@ -173,6 +173,12 @@ void DX11Engine::PreOnResize()
 void DX11Engine::OnResize(UINT width, UINT height)
 {
 	super::OnResize(width, height);
+
+	if (m_Player != nullptr)
+	{
+		m_Player->ResetPlayerCamera(static_cast<float>(width), static_cast<float>(height));
+	}
+
 	if (m_SceneHandler != nullptr)
 	{
 		m_SceneHandler->ResizeViews(static_cast<float>(width), static_cast<float>(height));

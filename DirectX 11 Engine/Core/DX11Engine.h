@@ -31,6 +31,8 @@ public:
 	TextureHandler const* GetTextureHandler() const { return m_TextureHandler; }
 	UserInterface const* GetUI() const { return m_UI; }
 	SceneHandler const* GetSceneHandler() const { return m_SceneHandler; }
+	GraphicsHandler const* GetGraphicsHandler() const { return m_GraphicsHandler; }
+	Player const* GetPlayer() const { return m_Player; }
 
 protected:
 	virtual void OnUpdate(UpdateEvent& e) override;

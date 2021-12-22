@@ -4,7 +4,7 @@
 #include "../DX11Engine.h"
 
 TestingScene::TestingScene(Player& player)
-	: Scene(player)
+	//: Scene(player)
 {}
 
 TestingScene::~TestingScene()

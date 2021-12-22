@@ -304,6 +304,7 @@
     <FxCompile Include="Core\Shaders\TesselationDS.hlsl" />
     <FxCompile Include="Core\Shaders\UIVertexShader.hlsl" />
     <FxCompile Include="Core\Shaders\UIPixelShader.hlsl" />
+    <FxCompile Include="Core\Shaders\TesselationVS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="fyp_icon.ico">

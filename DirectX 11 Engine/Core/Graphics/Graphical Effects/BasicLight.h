@@ -10,6 +10,7 @@ class BasicLight
 {
 private:
 	ID3D11VertexShader* _lightVS;
+	ID3D11VertexShader* m_TesselationVS;
 	ID3D11HullShader* _tesselationHS;
 	ID3D11DomainShader* _tesselationDS;
 	ID3D11PixelShader*	_lightPS;

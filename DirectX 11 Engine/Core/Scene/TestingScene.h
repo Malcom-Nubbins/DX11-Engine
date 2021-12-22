@@ -6,7 +6,7 @@
 #include "../Graphics/Graphical Effects/Shadows.h"
 #include "../Graphics/Graphical Effects/BasicLight.h"
 
-class TestingScene : public Scene
+class TestingScene //: public Scene
 {
 private:
 	

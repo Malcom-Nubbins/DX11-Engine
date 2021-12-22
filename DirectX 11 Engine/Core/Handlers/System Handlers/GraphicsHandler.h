@@ -19,7 +19,21 @@ public:
 	void Update(UpdateEvent& e);
 	void Draw();
 
+	ObjectMaterial GetMaterialByName(char const* name) const;
+
 private:
+	struct S_Material final
+	{
+		S_Material(char const* inName, ObjectMaterial const material)
+			: m_MaterialName(inName), m_Material(material)
+		{}
+
+		std::string m_MaterialName;
+		ObjectMaterial m_Material;
+	};
+
+	void LoadMaterialsConfig();
+
 	DirectionalLight _sceneLight;
 	FogValuesBuffer _sceneFog;
 
@@ -45,6 +59,8 @@ private:
 	float _currentCooldown;
 
 	std::vector<PointLight> _pointLights;
+
+	std::vector<S_Material> m_AllMaterials;
 
 	// Move spotlight to player
 	SpotLight _spotLight;

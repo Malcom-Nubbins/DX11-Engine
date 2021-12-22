@@ -22,7 +22,9 @@ public:
 
 	int GetSettingValue(SettingType const settingType, char const* settingName) const;
 	std::string GetSettingStringValue(SettingType const settingType, char const* settingName) const;
+	
 	std::vector<S_TextureInfo> GetAllTextures() const;
+	std::vector<S_MaterialInfo> GetAllMaterials() const;
 
 	S_ConfigInfo GetConfigByName(char const* const inConfigName) const;
 

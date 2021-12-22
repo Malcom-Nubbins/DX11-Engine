@@ -2,11 +2,10 @@
 
 #include "../DX11Engine.h"
 #include "../ApplicationNew.h"
+#include <codecvt>
 
-Scene::Scene(Player& player) : m_Player(&player)
+Scene::Scene(char const* sceneName) : m_SceneName(sceneName)
 {
-	_planeVertexBuffer = nullptr;
-	_planeIndexBuffer = nullptr;
 }
 
 Scene::~Scene()
@@ -16,13 +15,7 @@ Scene::~Scene()
 
 void Scene::Cleanup()
 {
-	_flatPlane->Cleanup();
-	_flatPlane = nullptr;
-
-	_planeVertexBuffer->Release();
-	_planeIndexBuffer->Release();
-
-	for (auto const sceneElement : _sceneElements)
+	for (auto const sceneElement : m_SceneElements)
 	{
 		if (sceneElement)
 		{
@@ -30,7 +23,7 @@ void Scene::Cleanup()
 		}
 	}
 
-	_sceneElements.clear();
+	m_SceneElements.clear();
 }
 
 void Scene::PreResizeViews()
@@ -40,93 +33,201 @@ void Scene::PreResizeViews()
 
 void Scene::ResizeViews(float windowWidth, float windowHeight)
 {
-	m_Player->ResetPlayerCamera(windowWidth, windowHeight);
 }
 
-void Scene::InitialiseScene(float windowWidth, float windowHeight)
+void Scene::InitialiseScene(rapidxml::xml_document<>& doc, rapidxml::xml_node<>& sceneNode)
 {
+	using namespace std;
+	using namespace rapidxml;
+
 	auto texHandler = DX11Engine::Get().GetTextureHandler();
-	ObjectMaterial aircraftMat{};
-	aircraftMat.ambient = XMFLOAT4(1.000f, 0.766f, 0.336f, 1.0f);
-	aircraftMat.diffuse = XMFLOAT4(1.000f, 0.766f, 0.336f, 1.0f);
-	aircraftMat.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.3f);
+	auto graphicsHandler = DX11Engine::Get().GetGraphicsHandler();
 
-	ObjectMaterial concrete{};
-	concrete.ambient = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
-	concrete.diffuse = XMFLOAT4(0.51f, 0.51f, 0.51f, 1.0f);
-	concrete.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 0.6f);
+	xml_node<>* elements = sceneNode.first_node("Elements");
 
-	ObjectMaterial shiny{};
-	shiny.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	shiny.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	shiny.specular = XMFLOAT4(0.560f, 0.570f, 0.580f, 0.3f);
-
-	ObjectMaterial charcoal{};
-	charcoal.ambient = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
-	charcoal.diffuse = XMFLOAT4(0.02f, 0.02f, 0.02f, 1.0f);
-	charcoal.specular = XMFLOAT4(0.02f, 0.02f, 0.02f, 0.3f);
-
-	ObjectMaterial matte{};
-	matte.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	matte.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	matte.specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.3f);
-
-	_flatPlane = new FlatTerrain();
-	_flatPlane->SetTerrainValues(50, 50, 64);
-	_flatPlane->GenerateTerrain();
-
-	BufferClass::CreateGroundPlane(&_planeVertexBuffer, &_planeIndexBuffer);
-
-	ObjectMesh planeMesh;
-	planeMesh.vertexBuffer = _flatPlane->GetVertexBuffer();
-	planeMesh.indexBuffer = _flatPlane->GetIndexBuffer();
-	planeMesh.numberOfIndices = static_cast<int>(_flatPlane->GetMeshData()->Indices.size());
-	planeMesh.vertexBufferOffset = 0;
-	planeMesh.vertexBufferStride = sizeof(SimpleVertex);
-
-	NewObjectMesh sphere;
-	ModelLoader::LoadModel(ApplicationNew::Get().GetDevice().Get(), L"Core/Resources/Objects/spherex.obj", sphere, false);
-
-	auto groundTransform = std::make_shared<Transform>();
-	groundTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	groundTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	groundTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-
-	auto groundAppearance = std::make_shared<Appearance>(planeMesh, concrete);
-	groundAppearance->SetColourTexture(texHandler->GetTextureByName("ConcreteColour"));
-	groundAppearance->SetNormalMap(texHandler->GetTextureByName("ConcreteNormal"));
-	//groundAppearance->SetDisplacementMap(_textureHandler->GetStoneDisplacementMap());
-	//groundAppearance->SetSpecularMap(_textureHandler->GetGroundSpecularMap());
-
-	auto sphereTransform = std::make_shared<Transform>();
-	sphereTransform->SetPosition(XMFLOAT3(0.0f, 1.0f, 0.0f));
-	sphereTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
-	sphereTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
-
-	auto sphereAppearance = std::make_shared<Appearance>(sphere, shiny);
-
-	//Scene elements
+	for (xml_node<>* object = elements->first_node("Object"); object; object = object->next_sibling())
 	{
-		auto* groundPlaneElement = new SceneElement(GetStringHash("Ground Plane"), *groundTransform, *groundAppearance);
-		groundPlaneElement->SetCastShadows(false);
-		groundPlaneElement->SetAffectedByLight(true);
-		//_flatPlane->SetGameObject(groundPlaneElement);
-		_sceneElements.push_back(groundPlaneElement);
+		std::string const objectName(object->first_attribute("name")->value());
+		bool const isFlatPlane = stoi(object->first_attribute("IsFlatPlane")->value());
+		bool const isTerrain = stoi(object->first_attribute("IsTerrain")->value());
 
-		auto* sphereElement = new SceneElement(GetStringHash("Sphere"), *sphereTransform, *sphereAppearance);
-		sphereElement->SetCastShadows(true);
-		sphereElement->SetAffectedByLight(true);
-		_sceneElements.push_back(sphereElement);
+		xml_node<>* transform = object->first_node("Transform");
+
+		xml_node<>* positionNode = transform->first_node("Position");
+		xml_node<>* scaleNode = transform->first_node("Scale");
+		xml_node<>* rotationNode = transform->first_node("Rotation");
+
+		XMFLOAT3 position(strtof(positionNode->first_attribute("x")->value(), nullptr),
+			strtof(positionNode->first_attribute("y")->value(), nullptr),
+			strtof(positionNode->first_attribute("z")->value(), nullptr));
+
+		XMFLOAT3 scale(strtof(scaleNode->first_attribute("x")->value(), nullptr),
+			strtof(scaleNode->first_attribute("y")->value(), nullptr),
+			strtof(scaleNode->first_attribute("z")->value(), nullptr));
+
+		XMFLOAT3 rotation(strtof(rotationNode->first_attribute("x")->value(), nullptr),
+			strtof(rotationNode->first_attribute("y")->value(), nullptr),
+			strtof(rotationNode->first_attribute("z")->value(), nullptr));
+
+		auto objectTransform = std::make_shared<Transform>();
+		objectTransform->SetPosition(position);
+		objectTransform->SetScale(scale);
+		objectTransform->SetRotation(rotation);
+
+		xml_node<>* appearance = object->first_node("Appearance");
+
+		std::string const materialName(appearance->first_attribute("material")->value());
+		std::string const modelName(appearance->first_attribute("model")->value());
+		std::string const textureName(appearance->first_attribute("texture")->value());
+		std::string const normalMapName(appearance->first_attribute("normalmap")->value());
+		std::string const displacementMapName(appearance->first_attribute("displacementmap")->value());
+		std::string const specularMapName(appearance->first_attribute("specularmap")->value());
+
+		ObjectMaterial mat = graphicsHandler->GetMaterialByName(materialName.c_str());
+
+		if (!modelName.empty())
+		{
+			wstring modelFilePath = L"Core/Resources/Objects/";
+
+			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+			std::wstring modelPath(converter.from_bytes(modelName));
+
+			wstring fullModelPath(modelFilePath + modelPath);
+
+			NewObjectMesh objectMesh;
+			ModelLoader::LoadModel(ApplicationNew::Get().GetDevice().Get(), fullModelPath, objectMesh, false);
+		
+			auto objectAppearance = std::make_shared<Appearance>(objectMesh, mat);
+			
+			if (!textureName.empty())
+			{
+				objectAppearance->SetColourTexture(texHandler->GetTextureByName(textureName.c_str()));
+			}
+			
+			if (!normalMapName.empty())
+			{
+				objectAppearance->SetNormalMap(texHandler->GetTextureByName(normalMapName.c_str()));
+			}
+
+			if (!displacementMapName.empty())
+			{
+				objectAppearance->SetDisplacementMap(texHandler->GetTextureByName(displacementMapName.c_str()));
+			}
+
+			if (!specularMapName.empty())
+			{
+				objectAppearance->SetSpecularMap(texHandler->GetTextureByName(specularMapName.c_str()));
+			}
+			
+			SceneElement* newSceneElement = new SceneElement(GetStringHash(objectName), *objectTransform, *objectAppearance);
+			newSceneElement->SetCastShadows(true);
+			newSceneElement->SetAffectedByLight(true);
+
+			m_SceneElements.emplace_back(std::move(newSceneElement));
+		}
+		else
+		{
+			int const generatorWidth = stoi(object->first_attribute("GenWidth")->value());
+			int const generatorHeight = stoi(object->first_attribute("GenHeight")->value());
+			int const generatorSize = stoi(object->first_attribute("GenSize")->value());
+
+			if (isFlatPlane)
+			{
+				FlatTerrain* flatPlane = new FlatTerrain();
+				flatPlane->SetTerrainValues(generatorWidth, generatorHeight, generatorSize);
+				flatPlane->GenerateTerrain();
+
+				ObjectMesh planeMesh;
+				planeMesh.vertexBuffer = flatPlane->GetVertexBuffer();
+				planeMesh.indexBuffer = flatPlane->GetIndexBuffer();
+				planeMesh.numberOfIndices = static_cast<int>(flatPlane->GetMeshData()->Indices.size());
+				planeMesh.vertexBufferOffset = 0;
+				planeMesh.vertexBufferStride = sizeof(SimpleVertex);
+
+				auto objectAppearance = std::make_shared<Appearance>(planeMesh, mat);
+				if (!textureName.empty())
+				{
+					objectAppearance->SetColourTexture(texHandler->GetTextureByName(textureName.c_str()));
+				}
+
+				if (!normalMapName.empty())
+				{
+					objectAppearance->SetNormalMap(texHandler->GetTextureByName(normalMapName.c_str()));
+				}
+
+				if (!displacementMapName.empty())
+				{
+					objectAppearance->SetDisplacementMap(texHandler->GetTextureByName(displacementMapName.c_str()));
+				}
+
+				if (!specularMapName.empty())
+				{
+					objectAppearance->SetSpecularMap(texHandler->GetTextureByName(specularMapName.c_str()));
+				}
+
+				SceneElement* newSceneElement = new SceneElement(GetStringHash(objectName), *objectTransform, *objectAppearance);
+				newSceneElement->SetCastShadows(true);
+				newSceneElement->SetAffectedByLight(true);
+
+				m_SceneElements.emplace_back(std::move(newSceneElement));
+
+				flatPlane->Cleanup();
+				flatPlane = nullptr;
+			}
+			else if (isTerrain)
+			{
+				DiamondSquareTerrain* terrain = new DiamondSquareTerrain();
+				terrain->SetTerrainValues(generatorWidth, generatorHeight, generatorSize);
+				terrain->GenerateTerrain();
+
+				ObjectMesh terrainMesh;
+				terrainMesh.vertexBuffer = terrain->GetVertexBuffer();
+				terrainMesh.indexBuffer = terrain->GetIndexBuffer();
+				terrainMesh.numberOfIndices = static_cast<int>(terrain->GetMeshData()->Indices.size());
+				terrainMesh.vertexBufferOffset = 0;
+				terrainMesh.vertexBufferStride = sizeof(SimpleVertex);
+
+				auto objectAppearance = std::make_shared<Appearance>(terrainMesh, mat);
+				if (!textureName.empty())
+				{
+					objectAppearance->SetColourTexture(texHandler->GetTextureByName(textureName.c_str()));
+				}
+
+				if (!normalMapName.empty())
+				{
+					objectAppearance->SetNormalMap(texHandler->GetTextureByName(normalMapName.c_str()));
+				}
+
+				if (!displacementMapName.empty())
+				{
+					objectAppearance->SetDisplacementMap(texHandler->GetTextureByName(displacementMapName.c_str()));
+				}
+
+				if (!specularMapName.empty())
+				{
+					objectAppearance->SetSpecularMap(texHandler->GetTextureByName(specularMapName.c_str()));
+				}
+
+				SceneElement* newSceneElement = new SceneElement(GetStringHash(objectName), *objectTransform, *objectAppearance);
+				newSceneElement->SetCastShadows(true);
+				newSceneElement->SetAffectedByLight(true);
+
+				m_SceneElements.emplace_back(std::move(newSceneElement));
+
+				terrain->Cleanup();
+				terrain = nullptr;
+			}
+		}
 	}
 }
 
 void Scene::Update(UpdateEvent& e)
 {
-	for (auto element : _sceneElements)
+	for (auto element : m_SceneElements)
 	{
 		element->Update(e.ElapsedTime);
 
-		if (element->GetElementName() == GetStringHash("Sphere"))
+		/*if (element->GetElementName() == GetStringHash("Sphere"))
 		{
 			DX11Engine const& engine = DX11Engine::Get();
 			XMFLOAT2 screenSize(engine.GetClientWidth(), engine.GetClientHeight());
@@ -146,7 +247,7 @@ void Scene::Update(UpdateEvent& e)
 					uiElement->SetDynamicPos(screenPos);
 				}
 			}
-		}
+		}*/
 	}
 }
 
