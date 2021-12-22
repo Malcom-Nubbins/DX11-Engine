@@ -19,6 +19,9 @@ public:
 
 	Scene* GetCurrentScene() const { return m_CurrentScene; }
 
+	void GoToNextScene();
+	void GoToPreviousScene();
+
 	void Upate(UpdateEvent& e);
 	void Draw();
 
@@ -27,5 +30,7 @@ private:
 
 	std::vector<Scene*> m_Scenes;
 	Scene* m_CurrentScene;
+
+	int m_CurrSceneIndex;
 };
 

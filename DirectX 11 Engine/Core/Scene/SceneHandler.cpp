@@ -9,7 +9,7 @@
 #include <vector>
 #include <codecvt>
 
-SceneHandler::SceneHandler()
+SceneHandler::SceneHandler() : m_CurrentScene(nullptr), m_CurrSceneIndex(0)
 {
 }
 
@@ -91,8 +91,41 @@ void SceneHandler::LoadScenesFromConfig(Player& player, float const width, float
 	m_CurrentScene = m_Scenes.front();
 }
 
+void SceneHandler::GoToNextScene()
+{
+	++m_CurrSceneIndex;
+
+	if (m_CurrSceneIndex > m_Scenes.size() - 1)
+	{
+		m_CurrSceneIndex = 0;
+	}
+
+	m_CurrentScene = m_Scenes.at(m_CurrSceneIndex);
+}
+
+void SceneHandler::GoToPreviousScene()
+{
+	--m_CurrSceneIndex;
+
+	if (m_CurrSceneIndex < 0)
+	{
+		m_CurrSceneIndex = m_Scenes.size() - 1;
+	}
+
+	m_CurrentScene = m_Scenes.at(m_CurrSceneIndex);
+}
+
 void SceneHandler::Upate(UpdateEvent& e)
 {
+	if (InputHandler::IsKeyUp(Keys::OemCloseBrackets))
+	{
+		GoToNextScene();
+	}
+	else if (InputHandler::IsKeyUp(Keys::OemOpenBrackets))
+	{
+		GoToPreviousScene();
+	}
+
 	if (m_CurrentScene != nullptr)
 	{
 		m_CurrentScene->Update(e);
