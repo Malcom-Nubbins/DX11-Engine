@@ -522,6 +522,7 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		ShaderClass::UnbindTesselationStages();
+		ShaderClass::SetShadersAndInputLayout(_lightVS, _lightPS, _simpleVertexInputLayout);
 	}
 
 	// Clear out the resource slots

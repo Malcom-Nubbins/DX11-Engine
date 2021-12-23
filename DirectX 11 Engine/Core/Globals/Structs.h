@@ -257,7 +257,7 @@ struct HeatHazeValues
 	float time;
 	float heatwave;
 	float blizzard;
-	float padding;;
+	unsigned int sampleCount;;
 };
 
 struct FullscreenQuadValues

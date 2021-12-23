@@ -47,32 +47,10 @@ void Scene::InitialiseScene(rapidxml::xml_document<>& doc, rapidxml::xml_node<>&
 
 	for (xml_node<>* object = elements->first_node("Object"); object; object = object->next_sibling())
 	{
-		std::string const objectName(object->first_attribute("name")->value());
+		std::string objectName(object->first_attribute("name")->value());
+		int const numOfObject = stoi(object->first_attribute("Amount")->value());
 		bool const isFlatPlane = stoi(object->first_attribute("IsFlatPlane")->value());
 		bool const isTerrain = stoi(object->first_attribute("IsTerrain")->value());
-
-		xml_node<>* transform = object->first_node("Transform");
-
-		xml_node<>* positionNode = transform->first_node("Position");
-		xml_node<>* scaleNode = transform->first_node("Scale");
-		xml_node<>* rotationNode = transform->first_node("Rotation");
-
-		XMFLOAT3 position(strtof(positionNode->first_attribute("x")->value(), nullptr),
-			strtof(positionNode->first_attribute("y")->value(), nullptr),
-			strtof(positionNode->first_attribute("z")->value(), nullptr));
-
-		XMFLOAT3 scale(strtof(scaleNode->first_attribute("x")->value(), nullptr),
-			strtof(scaleNode->first_attribute("y")->value(), nullptr),
-			strtof(scaleNode->first_attribute("z")->value(), nullptr));
-
-		XMFLOAT3 rotation(strtof(rotationNode->first_attribute("x")->value(), nullptr),
-			strtof(rotationNode->first_attribute("y")->value(), nullptr),
-			strtof(rotationNode->first_attribute("z")->value(), nullptr));
-
-		auto objectTransform = std::make_shared<Transform>();
-		objectTransform->SetPosition(position);
-		objectTransform->SetScale(scale);
-		objectTransform->SetRotation(rotation);
 
 		xml_node<>* appearance = object->first_node("Appearance");
 
@@ -84,6 +62,8 @@ void Scene::InitialiseScene(rapidxml::xml_document<>& doc, rapidxml::xml_node<>&
 		std::string const specularMapName(appearance->first_attribute("specularmap")->value());
 
 		ObjectMaterial mat = graphicsHandler->GetMaterialByName(materialName.c_str());
+
+		std::shared_ptr<Appearance> objectAppearance;
 
 		if (!modelName.empty())
 		{
@@ -97,33 +77,7 @@ void Scene::InitialiseScene(rapidxml::xml_document<>& doc, rapidxml::xml_node<>&
 			NewObjectMesh objectMesh;
 			ModelLoader::LoadModel(ApplicationNew::Get().GetDevice().Get(), fullModelPath, objectMesh, false);
 		
-			auto objectAppearance = std::make_shared<Appearance>(objectMesh, mat);
-			
-			if (!textureName.empty())
-			{
-				objectAppearance->SetColourTexture(texHandler->GetTextureByName(textureName.c_str()));
-			}
-			
-			if (!normalMapName.empty())
-			{
-				objectAppearance->SetNormalMap(texHandler->GetTextureByName(normalMapName.c_str()));
-			}
-
-			if (!displacementMapName.empty())
-			{
-				objectAppearance->SetDisplacementMap(texHandler->GetTextureByName(displacementMapName.c_str()));
-			}
-
-			if (!specularMapName.empty())
-			{
-				objectAppearance->SetSpecularMap(texHandler->GetTextureByName(specularMapName.c_str()));
-			}
-			
-			SceneElement* newSceneElement = new SceneElement(GetStringHash(objectName), *objectTransform, *objectAppearance);
-			newSceneElement->SetCastShadows(true);
-			newSceneElement->SetAffectedByLight(true);
-
-			m_SceneElements.emplace_back(std::move(newSceneElement));
+			objectAppearance = std::make_shared<Appearance>(objectMesh, mat);
 		}
 		else
 		{
@@ -144,33 +98,8 @@ void Scene::InitialiseScene(rapidxml::xml_document<>& doc, rapidxml::xml_node<>&
 				planeMesh.vertexBufferOffset = 0;
 				planeMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-				auto objectAppearance = std::make_shared<Appearance>(planeMesh, mat);
-				if (!textureName.empty())
-				{
-					objectAppearance->SetColourTexture(texHandler->GetTextureByName(textureName.c_str()));
-				}
-
-				if (!normalMapName.empty())
-				{
-					objectAppearance->SetNormalMap(texHandler->GetTextureByName(normalMapName.c_str()));
-				}
-
-				if (!displacementMapName.empty())
-				{
-					objectAppearance->SetDisplacementMap(texHandler->GetTextureByName(displacementMapName.c_str()));
-				}
-
-				if (!specularMapName.empty())
-				{
-					objectAppearance->SetSpecularMap(texHandler->GetTextureByName(specularMapName.c_str()));
-				}
-
-				SceneElement* newSceneElement = new SceneElement(GetStringHash(objectName), *objectTransform, *objectAppearance);
-				newSceneElement->SetCastShadows(true);
-				newSceneElement->SetAffectedByLight(true);
-
-				m_SceneElements.emplace_back(std::move(newSceneElement));
-
+				objectAppearance = std::make_shared<Appearance>(planeMesh, mat);
+				
 				flatPlane->Cleanup();
 				flatPlane = nullptr;
 			}
@@ -187,36 +116,74 @@ void Scene::InitialiseScene(rapidxml::xml_document<>& doc, rapidxml::xml_node<>&
 				terrainMesh.vertexBufferOffset = 0;
 				terrainMesh.vertexBufferStride = sizeof(SimpleVertex);
 
-				auto objectAppearance = std::make_shared<Appearance>(terrainMesh, mat);
-				if (!textureName.empty())
-				{
-					objectAppearance->SetColourTexture(texHandler->GetTextureByName(textureName.c_str()));
-				}
-
-				if (!normalMapName.empty())
-				{
-					objectAppearance->SetNormalMap(texHandler->GetTextureByName(normalMapName.c_str()));
-				}
-
-				if (!displacementMapName.empty())
-				{
-					objectAppearance->SetDisplacementMap(texHandler->GetTextureByName(displacementMapName.c_str()));
-				}
-
-				if (!specularMapName.empty())
-				{
-					objectAppearance->SetSpecularMap(texHandler->GetTextureByName(specularMapName.c_str()));
-				}
-
-				SceneElement* newSceneElement = new SceneElement(GetStringHash(objectName), *objectTransform, *objectAppearance);
-				newSceneElement->SetCastShadows(true);
-				newSceneElement->SetAffectedByLight(true);
-
-				m_SceneElements.emplace_back(std::move(newSceneElement));
+				objectAppearance = std::make_shared<Appearance>(terrainMesh, mat);
 
 				terrain->Cleanup();
 				terrain = nullptr;
 			}
+		}
+
+		if (!textureName.empty())
+		{
+			objectAppearance->SetColourTexture(texHandler->GetTextureByName(textureName.c_str()));
+		}
+
+		if (!normalMapName.empty())
+		{
+			objectAppearance->SetNormalMap(texHandler->GetTextureByName(normalMapName.c_str()));
+		}
+
+		if (!displacementMapName.empty())
+		{
+			objectAppearance->SetDisplacementMap(texHandler->GetTextureByName(displacementMapName.c_str()));
+		}
+
+		if (!specularMapName.empty())
+		{
+			objectAppearance->SetSpecularMap(texHandler->GetTextureByName(specularMapName.c_str()));
+		}
+
+		xml_node<>* transform = object->first_node("Transform");
+
+		xml_node<>* positionNode = transform->first_node("Position");
+		xml_node<>* scaleNode = transform->first_node("Scale");
+		xml_node<>* rotationNode = transform->first_node("Rotation");
+
+		XMFLOAT3 scale(strtof(scaleNode->first_attribute("x")->value(), nullptr),
+			strtof(scaleNode->first_attribute("y")->value(), nullptr),
+			strtof(scaleNode->first_attribute("z")->value(), nullptr));
+
+		XMFLOAT3 rotation(strtof(rotationNode->first_attribute("x")->value(), nullptr),
+			strtof(rotationNode->first_attribute("y")->value(), nullptr),
+			strtof(rotationNode->first_attribute("z")->value(), nullptr));
+
+		std::string const xPos(positionNode->first_attribute("x")->value());
+		std::string const yPos(positionNode->first_attribute("y")->value());
+		std::string const zPos(positionNode->first_attribute("z")->value());
+
+		StringHash const randPosStr(GetStringHash("rand"));
+
+		for (u32 idx = 0; idx < numOfObject; ++idx)
+		{
+			float finalXPos = (GetStringHash(xPos) == randPosStr) ? MathsHandler::RandomFloat(-50, 50) : strtof(xPos.c_str(), nullptr);
+			float finalYPos = strtof(yPos.c_str(), nullptr);
+			float finalZPos = (GetStringHash(zPos) == randPosStr) ? MathsHandler::RandomFloat(-50, 50) : strtof(zPos.c_str(), nullptr);
+
+			XMFLOAT3 position(finalXPos, finalYPos, finalZPos);
+
+			auto objectTransform = std::make_shared<Transform>();
+			objectTransform->SetPosition(position);
+			objectTransform->SetScale(scale);
+			objectTransform->SetRotation(rotation);
+
+			std::string finalObjName = objectName + " %d";
+			finalObjName = FormatCString(finalObjName.c_str(), idx);
+
+			SceneElement* newSceneElement = new SceneElement(GetStringHash(finalObjName), *objectTransform, *objectAppearance);
+			newSceneElement->SetCastShadows(true);
+			newSceneElement->SetAffectedByLight(true);
+
+			m_SceneElements.emplace_back(std::move(newSceneElement));
 		}
 	}
 }

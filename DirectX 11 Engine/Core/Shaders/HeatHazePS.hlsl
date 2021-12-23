@@ -1,4 +1,4 @@
-Texture2D texToOffset : register(t0);
+Texture2DMS<float4> texToOffset : register(t0);
 Texture2D texDistortionMap : register(t1);
 SamplerState linearSampler : register(s0);
 
@@ -14,20 +14,27 @@ cbuffer HeatHazeValues : register(b0)
     float time;
     float heatwave;
     float blizzard;
-    float padding;
+    unsigned int sampleCount;
 };
 
 float4 main(VertexOutput input) : SV_TARGET
 {
     if(heatwave == 1.0f)
-    {
-        float4 distortionSample;
-        distortionSample = texDistortionMap.Sample(linearSampler, float2(input.Tex.x, input.Tex.y + time));
-        distortionSample.x = ((distortionSample.x * 2.0f) - 1.0f) * 0.005f;
-        distortionSample.y = ((distortionSample.y * 2.0f) - 1.0f) * 0.005f;
-        return texToOffset.Sample(linearSampler, input.Tex + distortionSample.xy);
-    }
-
+	{
+		float4 distortionSample;
+		distortionSample = texDistortionMap.Sample(linearSampler, float2(input.Tex.x, input.Tex.y + time));
+		distortionSample.x = ((distortionSample.x * 2.0f) - 1.0f) * 0.005f;
+		distortionSample.y = ((distortionSample.y * 2.0f) - 1.0f) * 0.005f;
+        
+		float4 returnCol = float4(0.0f, 0.0f, 0.0f, 1.0f);
+		for (uint i = 0; i < sampleCount; ++i)
+		{
+			returnCol += texToOffset.Load(input.PosH, i);
+		}
+        
+		return returnCol / sampleCount;
+	}
+    
     if(blizzard == 1.0f)
     {
         float wavetime = sin(time) - 1.1f;
@@ -36,15 +43,26 @@ float4 main(VertexOutput input) : SV_TARGET
         float4 snowForeground = texDistortionMap.Sample(linearSampler, float2(input.Tex.x - time, input.Tex.y - time)) * 0.5f;
         float4 snowBackground = texDistortionMap.Sample(linearSampler, float2(input.Tex.x + wavetime, input.Tex.y - time / 2) * 3) * 0.5f;
 
+		float4 returnCol = float4(0.0f, 0.0f, 0.0f, 1.0f);
+		for (uint i = 0; i < sampleCount; ++i)
+		{
+			returnCol += texToOffset.Load(input.PosH, i);
+		}
+        
         // Texture to overlay with snow
-        float4 mainTexture = texToOffset.Sample(linearSampler, input.Tex);
 
         // Add back layer of snow, then front layer
-        float4 combined = lerp(mainTexture, snowBackground, snowBackground.w);
+		float4 combined = lerp((returnCol / sampleCount), snowBackground, snowBackground.w);
         combined = lerp(combined, snowForeground, snowForeground.w);
 
         return combined;
     }
+    
+	float4 returnCol = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	for (uint i = 0; i < sampleCount; ++i)
+	{
+		returnCol += texToOffset.Load(input.Tex, i);
+	}
 
-    return texToOffset.Sample(linearSampler, input.Tex);
+    return returnCol / sampleCount;
 }

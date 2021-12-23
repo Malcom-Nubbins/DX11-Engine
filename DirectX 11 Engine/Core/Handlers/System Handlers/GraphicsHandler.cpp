@@ -64,7 +64,10 @@ void GraphicsHandler::ResizeViews(float const windowWidth, float const windowHei
 {
 	_basicLight->Resize(windowWidth, windowHeight);
 	_heatHaze->Resize(windowWidth, windowHeight);
-	_shadows->OnResize(4096, 4096);
+
+	int const shadowQuality = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "Shadows");
+
+	_shadows->OnResize(static_cast<float>(shadowQuality), static_cast<float>(shadowQuality));
 	_renderToQuad->OnResize(windowWidth, windowHeight);
 }
 
@@ -73,8 +76,10 @@ void GraphicsHandler::Init(float const windowWidth, float const windowHeight)
 	_basicLight = new BasicLight();
 	_basicLight->Initialise(windowWidth, windowHeight);
 
+	int const shadowQuality = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "Shadows");
+
 	_shadows = new Shadows();
-	_shadows->Initialise(4096, 4096);
+	_shadows->Initialise(static_cast<float>(shadowQuality), static_cast<float>(shadowQuality));
 
 	_skyGradient = new SkyColourGradient();
 	_skyGradient->Initialise();
@@ -253,15 +258,6 @@ void GraphicsHandler::Update(UpdateEvent& e)
 
 	_shadows->SetSceneCentre(currPlayer->GetPlayerPosition());
 	_shadows->BuildShadowTransform();
-
-	for (SceneElement* element : currScene->GetAllSceneElements())
-	{
-		if (element->GetElementName() == GetStringHash("Light Source Sphere"))
-		{
-			element->GetTransform()->SetPosition(_shadows->GetLightPosition());
-		}
-		element->Update(e.ElapsedTime);
-	}
 
 	_skyGradient->SetSceneCentre(currPlayer->GetPlayerPosition());
 	_skyGradient->Update(e.ElapsedTime);

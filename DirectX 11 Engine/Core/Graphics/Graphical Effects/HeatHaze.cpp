@@ -1,6 +1,7 @@
 #include "HeatHaze.h"
 #include "../../ApplicationNew.h"
 #include "../../DX11Engine.h"
+#include "../Core/Loaders/ConfigLoader.h"
 
 HeatHaze::HeatHaze()
 	: _quad(), _values()
@@ -64,6 +65,14 @@ HRESULT HeatHaze::Initialise(const float width, const float height)
 	auto texHandler = DX11Engine::Get().GetTextureHandler();
 	m_SnowTex = texHandler->GetTextureByName("Snow");
 	m_HeatTex = texHandler->GetTextureByName("DistortionMap");
+
+	int msaaCount = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "MSAA");
+	if (msaaCount == -1)
+	{
+		msaaCount = 0;
+	}
+
+	_values.sampleCount = static_cast<UINT>(msaaCount);
 
 	return S_OK;
 }
