@@ -6,7 +6,6 @@
 #include "../Core/Loaders/XMLLoader/rapidxml_ext.hpp"
 #include "../Core/Loaders/XMLLoader/rapidxml_print.hpp"
 #include "../Core/Loaders/XMLLoader/rapidxml_utils.hpp"
-#include <vector>
 #include <codecvt>
 
 SceneHandler::SceneHandler() : m_CurrentScene(nullptr), m_CurrSceneIndex(0)
@@ -19,12 +18,6 @@ SceneHandler::~SceneHandler()
 
 void SceneHandler::Cleanup()
 {
-	for (auto& scene : m_Scenes)
-	{
-		scene->Cleanup();
-		scene = nullptr;
-	}
-
 	if (m_CurrentScene != nullptr)
 	{
 		m_CurrentScene->Cleanup();
@@ -50,7 +43,7 @@ void SceneHandler::ResizeViews(float const newWidth, float const newHeight)
 	}
 }
 
-void SceneHandler::LoadScenesFromConfig(Player& player, float const width, float const height)
+void SceneHandler::FindAllScenes()
 {
 	using namespace rapidxml;
 	using namespace std;
@@ -81,14 +74,32 @@ void SceneHandler::LoadScenesFromConfig(Player& player, float const width, float
 		{
 			std::string const sceneName(sceneNode->first_attribute("name")->value());
 
-			Scene* newScene = new Scene(sceneName.c_str());
-			newScene->InitialiseScene(doc, *sceneNode);
+			//Scene* newScene = new Scene(sceneName.c_str());
+			//newScene->InitialiseScene(doc, *sceneNode);
 
-			m_Scenes.emplace_back(move(newScene));
+			m_Scenes.emplace_back(move(sceneName));
 		}
 	}
 
-	m_CurrentScene = m_Scenes.front();
+	if (m_Scenes.size() > 0)
+	{
+		LoadScenesFromName(m_Scenes.front());
+	}
+}
+
+void SceneHandler::LoadScenesFromName(const std::string SceneToLoad)
+{	
+	if (m_CurrentScene != nullptr)
+	{
+		// Unload and nullify
+		m_CurrentScene->Unload();
+		m_CurrentScene->Cleanup();
+
+		m_CurrentScene = nullptr;
+	}
+
+	m_CurrentScene = new Scene(SceneToLoad.c_str());
+	m_CurrentScene->InitialiseScene();
 }
 
 void SceneHandler::GoToNextScene()
@@ -100,7 +111,7 @@ void SceneHandler::GoToNextScene()
 		m_CurrSceneIndex = 0;
 	}
 
-	m_CurrentScene = m_Scenes.at(m_CurrSceneIndex);
+	LoadScenesFromName(m_Scenes[m_CurrSceneIndex]);
 }
 
 void SceneHandler::GoToPreviousScene()
@@ -112,7 +123,7 @@ void SceneHandler::GoToPreviousScene()
 		m_CurrSceneIndex = m_Scenes.size() - 1;
 	}
 
-	m_CurrentScene = m_Scenes.at(m_CurrSceneIndex);
+	LoadScenesFromName(m_Scenes[m_CurrSceneIndex]);
 }
 
 void SceneHandler::Upate(UpdateEvent& e)
@@ -138,4 +149,92 @@ void SceneHandler::Draw()
 
 void SceneHandler::CreateDefaultSceneConfig(std::string const& inConfigFilename)
 {
+	using namespace rapidxml;
+	using namespace std;
+
+	ofstream newDefaultScenesConfig(inConfigFilename);
+
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "Scenes");
+	doc.append_node(root);
+
+	// Default scene
+	{
+		xml_node<>* defaultScene = doc.allocate_node(node_element, "Scene");
+		defaultScene->append_attribute(doc.allocate_attribute("name", "Default"));
+		root->append_node(defaultScene);
+
+		// Default scene elements
+		{
+			xml_node<>* defaultElements = doc.allocate_node(node_element, "Elements");
+			defaultScene->append_node(defaultElements);
+
+			xml_node<>* defaultSphereObject = doc.allocate_node(node_element, "Object");
+			defaultSphereObject->append_attribute(doc.allocate_attribute("name", "Sphere"));
+			defaultSphereObject->append_attribute(doc.allocate_attribute("Amount", "1"));
+			defaultSphereObject->append_attribute(doc.allocate_attribute("IsFlatPlane", "0"));
+			defaultSphereObject->append_attribute(doc.allocate_attribute("IsTerrain", "0"));
+			defaultSphereObject->append_attribute(doc.allocate_attribute("GenWidth", "0"));
+			defaultSphereObject->append_attribute(doc.allocate_attribute("GenHeight", "0"));
+			defaultSphereObject->append_attribute(doc.allocate_attribute("GenSize", "0"));
+			defaultElements->append_node(defaultSphereObject);
+
+			// Sphere details
+			{
+				xml_node<>* transform = doc.allocate_node(node_element, "Transform");
+				defaultSphereObject->append_node(transform);
+				
+				// Transform
+				{
+					xml_node<>* Position = doc.allocate_node(node_element, "Position");
+					Position->append_attribute(doc.allocate_attribute("x", "0.0"));
+					Position->append_attribute(doc.allocate_attribute("y", "1.0"));
+					Position->append_attribute(doc.allocate_attribute("z", "0.0"));
+					transform->append_node(Position);
+
+					xml_node<>* Scale = doc.allocate_node(node_element, "Scale");
+					Scale->append_attribute(doc.allocate_attribute("x", "1.0"));
+					Scale->append_attribute(doc.allocate_attribute("y", "1.0"));
+					Scale->append_attribute(doc.allocate_attribute("z", "1.0"));
+					transform->append_node(Scale);
+
+					xml_node<>* Rotation = doc.allocate_node(node_element, "Rotation");
+					Rotation->append_attribute(doc.allocate_attribute("x", "0.0"));
+					Rotation->append_attribute(doc.allocate_attribute("y", "0.0"));
+					Rotation->append_attribute(doc.allocate_attribute("z", "0.0"));
+					transform->append_node(Rotation);
+				}
+
+				xml_node<>* appearance = doc.allocate_node(node_element, "Appearance");
+				appearance->append_attribute(doc.allocate_attribute("material", "Default"));
+				appearance->append_attribute(doc.allocate_attribute("model", "spherex.obj"));
+				appearance->append_attribute(doc.allocate_attribute("texture", "Default"));
+				appearance->append_attribute(doc.allocate_attribute("normalmap", ""));
+				appearance->append_attribute(doc.allocate_attribute("displacementmap", ""));
+				appearance->append_attribute(doc.allocate_attribute("specularmap", ""));
+				defaultSphereObject->append_node(appearance);
+			}
+
+			//xml_node<>* defaultPlaneObject = doc.allocate_node(node_element, "Object");
+			//defaultPlaneObject->append_attribute(doc.allocate_attribute("name", "Plane"));
+			//defaultPlaneObject->append_attribute(doc.allocate_attribute("IsFlatPlane", "1"));
+			//defaultPlaneObject->append_attribute(doc.allocate_attribute("IsTerrain", "0"));
+			//defaultElements->append_node(defaultPlaneObject);
+
+			//// Plane Details
+			//{
+
+			//}
+		}
+	}
+
+	newDefaultScenesConfig << doc;
+
+	newDefaultScenesConfig.close();
+	doc.clear();
 }

@@ -12,6 +12,7 @@ protected:
 	std::string m_SceneName;
 	std::vector<SceneElement*> m_SceneElements;
 
+	bool IsUnloading = false;
 public:
 	Scene(char const* sceneName);
 	virtual ~Scene();
@@ -20,7 +21,9 @@ public:
 	void PreResizeViews();
 	void ResizeViews(float windowWidth, float windowHeight);
 
-	void InitialiseScene(rapidxml::xml_document<>& doc, rapidxml::xml_node<>& sceneNode);
+	void Unload();
+
+	void InitialiseScene();
 
 	void Update(UpdateEvent& e);
 	void Draw();

@@ -3,6 +3,7 @@
 #include "Scene Elements/SceneElement.h"
 #include "../Core/Scene/Scene.h"
 #include <vector>
+#include <thread>
 
 class SceneHandler
 {
@@ -15,7 +16,9 @@ public:
 	void PreResize();
 	void ResizeViews(float const newWidth, float const newHeight);
 
-	void LoadScenesFromConfig(Player& player, float const width, float const height);
+	void FindAllScenes();
+
+	void LoadScenesFromName(const std::string SceneToLoad);
 
 	Scene* GetCurrentScene() const { return m_CurrentScene; }
 
@@ -28,7 +31,7 @@ public:
 private:
 	void CreateDefaultSceneConfig(std::string const& inConfigFilename);
 
-	std::vector<Scene*> m_Scenes;
+	std::vector<std::string> m_Scenes;
 	Scene* m_CurrentScene;
 
 	int m_CurrSceneIndex;

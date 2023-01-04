@@ -65,6 +65,12 @@ void C_ConfigLoader::CreateDefaultMainConfig()
 		texturesListFile->value("_textures_list.xml");
 		settingEngine->append_node(texturesListFile);
 
+		xml_node<>* materialsListFile = doc.allocate_node(node_element, "EngineSetting");
+		materialsListFile->append_attribute(doc.allocate_attribute("name", "MaterialsListFile"));
+		materialsListFile->append_attribute(doc.allocate_attribute("description", "Filename of the file containing info on each material"));
+		materialsListFile->value("_materials.xml");
+		settingEngine->append_node(materialsListFile);
+
 		xml_node<>* configsListFile = doc.allocate_node(node_element, "EngineSetting");
 		configsListFile->append_attribute(doc.allocate_attribute("name", "ConfigListFile"));
 		configsListFile->append_attribute(doc.allocate_attribute("description", "Filename of the file containing name/filename pairs for config files"));
@@ -83,6 +89,12 @@ void C_ConfigLoader::CreateDefaultMainConfig()
 		msaa->append_attribute(doc.allocate_attribute("description", "Multisampled Antialiasing quality. Must be power of 2, up to 8 and no less than 1"));
 		msaa->value("1");
 		settingGraphics->append_node(msaa);
+
+		xml_node<>* shadows = doc.allocate_node(node_element, "Graphics");
+		shadows->append_attribute(doc.allocate_attribute("name", "Shadows"));
+		shadows->append_attribute(doc.allocate_attribute("description", "Controls the quality of directional shadows"));
+		shadows->value("1024");
+		settingGraphics->append_node(shadows);
 	}
 
 	xml_node<>* settingsVideo = doc.allocate_node(node_element, "Setting");
@@ -165,9 +177,65 @@ void C_ConfigLoader::CreateDefaultConfigsListConfig(std::string const& inConfigF
 	uiConfig->value("ui_config.xml");
 	root->append_node(uiConfig);
 
+	xml_node<>* scenesConfig = doc.allocate_node(node_element, "Config");
+	scenesConfig->append_attribute(doc.allocate_attribute("name", "ScenesConfig"));
+	scenesConfig->append_attribute(doc.allocate_attribute("description", "Config file containing all game scenes"));
+	scenesConfig->value("scenes_config.xml");
+	root->append_node(scenesConfig);
+
 	newConfigsList << doc;
 
 	newConfigsList.close();
+	doc.clear();
+}
+
+void C_ConfigLoader::CreateDefaultMaterialsConfig(std::string const& inConfigFilename) const
+{
+	using namespace std;
+	using namespace rapidxml;
+
+	ofstream newMaterialsListConfig(inConfigFilename);
+
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "Materials");
+	doc.append_node(root);
+
+	xml_node<>* defaultMat = doc.allocate_node(node_element, "Material");
+	defaultMat->append_attribute(doc.allocate_attribute("name", "Default"));
+	root->append_node(defaultMat);
+
+	{
+		xml_node<>* ambient = doc.allocate_node(node_element, "Ambient");
+		ambient->append_attribute(doc.allocate_attribute("red", "1.0"));
+		ambient->append_attribute(doc.allocate_attribute("green", "1.0"));
+		ambient->append_attribute(doc.allocate_attribute("blue", "1.0"));
+		
+		defaultMat->append_node(ambient);
+
+		xml_node<>* diffuse = doc.allocate_node(node_element, "Diffuse");
+		diffuse->append_attribute(doc.allocate_attribute("red", "1.0"));
+		diffuse->append_attribute(doc.allocate_attribute("green", "1.0"));
+		diffuse->append_attribute(doc.allocate_attribute("blue", "1.0"));
+
+		defaultMat->append_node(diffuse);
+
+		xml_node<>* specular = doc.allocate_node(node_element, "Specular");
+		specular->append_attribute(doc.allocate_attribute("red", "1.0"));
+		specular->append_attribute(doc.allocate_attribute("green", "1.0"));
+		specular->append_attribute(doc.allocate_attribute("blue", "1.0"));
+		specular->append_attribute(doc.allocate_attribute("shinyness", "0.5"));
+
+		defaultMat->append_node(specular);
+	}
+
+	newMaterialsListConfig << doc;
+
+	newMaterialsListConfig.close();
 	doc.clear();
 }
 
@@ -311,7 +379,7 @@ std::vector<S_MaterialInfo> C_ConfigLoader::GetAllMaterials() const
 
 	if (!CheckConfigExists(fullPath))
 	{
-		//CreateDefaultTexturesConfig(fullPath);
+		CreateDefaultMaterialsConfig(fullPath);
 	}
 
 	file<> xmlFile(fullPath.c_str());

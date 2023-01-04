@@ -17,6 +17,7 @@ public:
 	void CreateDefaultMainConfig();
 	void CreateDefaultTexturesConfig(std::string const& inConfigFilename) const;
 	void CreateDefaultConfigsListConfig(std::string const& inConfigFilename) const;
+	void CreateDefaultMaterialsConfig(std::string const& inConfigFilename) const;
 
 	void Initialise();
 

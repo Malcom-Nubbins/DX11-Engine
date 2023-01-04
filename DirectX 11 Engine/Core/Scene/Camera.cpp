@@ -20,6 +20,32 @@ Camera::~Camera()
 {
 }
 
+float Camera::GetFoVX() const
+{
+	float halfWidth = 0.5f * GetNearWindowWidth();
+	return 2.0f * atan(halfWidth / m_Near);
+}
+
+float Camera::GetNearWindowWidth() const
+{
+	return m_Aspect * m_NearWindowHeight;
+}
+
+float Camera::GetNearWindowHeight() const
+{
+	return m_NearWindowHeight;
+}
+
+float Camera::GetFarWindowWidth() const
+{
+	return m_Aspect * m_FarWindowHeight;
+}
+
+float Camera::GetFarWindowHeight() const
+{
+	return m_FarWindowHeight;
+}
+
 void Camera::SetPerspective(const bool usePerspective)
 {
 	m_OrthographicMode = !usePerspective;
@@ -39,6 +65,9 @@ void Camera::SetLens()
 	proj = XMMatrixPerspectiveFovLH(m_FovY, m_Aspect, m_Near, m_Far);
 	XMStoreFloat4x4(&m_PerspectiveProj, proj);
 	//XMStoreFloat4x4(&_defaultView, XMMatrixLookAtLH(camRight, camAt, camUp));
+
+	m_NearWindowHeight = 2.0f * m_Near * tanf(0.5f * m_FovY);
+	m_FarWindowHeight = 2.0f * m_Far * tanf(0.5f * m_FovY);
 }
 
 void Camera::LookAt()
@@ -72,6 +101,9 @@ void Camera::SetFOV(float fov)
 
 	auto proj = XMMatrixPerspectiveFovLH(m_FovY, m_Aspect, m_Near, m_Far);
 	XMStoreFloat4x4(&m_PerspectiveProj, proj);
+
+	m_NearWindowHeight = 2.0f * m_Near * tanf(0.5f * m_FovY);
+	m_FarWindowHeight = 2.0f * m_Far * tanf(0.5f * m_FovY);
 }
 
 void Camera::Reset(float fov, float nearZ, float farZ, float aspect)
@@ -128,10 +160,87 @@ void Camera::Yaw(float const angle)
 	XMStoreFloat3(&m_At, XMVector3TransformNormal(XMLoadFloat3(&m_At), yaw));
 }
 
+void Camera::ComputeFrustumFromProjection()
+{
+	static XMVECTOR HomogenousPoints[6] =
+	{
+		{1.0f, 0.0f, 1.0f, 1.0f}, // right
+		{-1.0f, 0.0f, 1.0f, 1.0f}, // left
+		{0.0f, 1.0f, 1.0f, 1.0f}, // top
+		{0.0f, -1.0f, 1.0f, 1.0f}, // bottom
+
+		{0.0f, 0.0f, 0.0f, 1.0f}, // near
+		{0.0f, 0.0f, 1.0f, 1.0f}, // far
+	};
+
+	XMMATRIX Proj = m_OrthographicMode ? XMLoadFloat4x4(&m_OthographicProj) : XMLoadFloat4x4(&m_PerspectiveProj);
+
+	XMVECTOR Determinant;
+	XMMATRIX matInverse = XMMatrixInverse(&Determinant, Proj);
+
+	XMVECTOR Points[6];
+
+	for (u8 idx = 0; idx < 6; ++idx)
+	{
+		Points[idx] = XMVector4Transform(HomogenousPoints[idx], matInverse);
+	}
+
+	CurrentFrustum.Origin = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	CurrentFrustum.Orientation = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	Points[0] = Points[0] * XMVectorReciprocal(XMVectorSplatZ(Points[0]));
+	Points[1] = Points[1] * XMVectorReciprocal(XMVectorSplatZ(Points[1]));
+	Points[2] = Points[2] * XMVectorReciprocal(XMVectorSplatZ(Points[2]));
+	Points[3] = Points[3] * XMVectorReciprocal(XMVectorSplatZ(Points[3]));
+
+	CurrentFrustum.RightSlope = XMVectorGetX(Points[0]);
+	CurrentFrustum.LeftSlope = XMVectorGetX(Points[1]);
+	CurrentFrustum.TopSlope = XMVectorGetY(Points[2]);
+	CurrentFrustum.BottomSlope = XMVectorGetY(Points[3]);
+
+	Points[4] = Points[4] * XMVectorReciprocal(XMVectorSplatW(Points[4]));
+	Points[5] = Points[5] * XMVectorReciprocal(XMVectorSplatW(Points[5]));
+
+	CurrentFrustum.Near = XMVectorGetZ(Points[4]);
+	CurrentFrustum.Far = XMVectorGetZ(Points[5]);
+}
+
+bool Camera::IsPointInFrustum(XMFLOAT3 InPoint)
+{
+	bool IsPointInFrustum = true;
+
+	XMVECTOR LeftVec = XMPlaneDotCoord(XMLoadFloat(&CurrentFrustum.LeftSlope), XMLoadFloat3(&InPoint));
+	XMVECTOR RightVec = XMPlaneDotCoord(XMLoadFloat(&CurrentFrustum.RightSlope), XMLoadFloat3(&InPoint));
+	XMVECTOR TopVec = XMPlaneDotCoord(XMLoadFloat(&CurrentFrustum.TopSlope), XMLoadFloat3(&InPoint));
+	XMVECTOR BottomVec = XMPlaneDotCoord(XMLoadFloat(&CurrentFrustum.BottomSlope), XMLoadFloat3(&InPoint));
+	XMVECTOR NearVec = XMPlaneDotCoord(XMLoadFloat(&CurrentFrustum.Near), XMLoadFloat3(&InPoint));
+	XMVECTOR FarVec = XMPlaneDotCoord(XMLoadFloat(&CurrentFrustum.Far), XMLoadFloat3(&InPoint));
+
+	float FrustumArea[6];
+	XMStoreFloat(&FrustumArea[0], LeftVec);
+	XMStoreFloat(&FrustumArea[1], RightVec);
+	XMStoreFloat(&FrustumArea[2], TopVec);
+	XMStoreFloat(&FrustumArea[3], BottomVec);
+	XMStoreFloat(&FrustumArea[4], NearVec);
+	XMStoreFloat(&FrustumArea[5], FarVec);
+
+	for (u8 idx = 0; idx < 6; ++idx)
+	{
+		if (FrustumArea[idx] < 0.0f)
+		{
+			IsPointInFrustum = false;
+			break;
+		}
+	}
+
+	return IsPointInFrustum;;
+}
+
 void Camera::Update(float deltaTime)
 {
 	UpdateViewMatrix();
 	SetViewProjection();
+	ComputeFrustumFromProjection();
 }
 
 void Camera::UpdateViewMatrix()

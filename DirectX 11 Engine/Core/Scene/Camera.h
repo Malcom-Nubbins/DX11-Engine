@@ -3,6 +3,18 @@
 
 using namespace DirectX;
 
+struct Frustum
+{
+	XMFLOAT3 Origin;
+	XMFLOAT4 Orientation;
+
+	float RightSlope;
+	float LeftSlope;
+	float TopSlope;
+	float BottomSlope;
+	float Near, Far;
+};
+
 class Camera
 {
 private:
@@ -18,6 +30,9 @@ private:
 	float m_Aspect;
 	float m_FovY;
 
+	float m_NearWindowHeight;
+	float m_FarWindowHeight;
+
 	XMFLOAT4X4 m_View;
 	XMFLOAT4X4 m_DefaultView;
 
@@ -25,6 +40,8 @@ private:
 	XMFLOAT4X4 m_OthographicProj;
 
 	XMFLOAT4X4 m_ViewProjection;
+
+	Frustum CurrentFrustum;
 
 	bool m_OrthographicMode;
 public:
@@ -39,6 +56,12 @@ public:
 	XMFLOAT4X4& GetViewProjection() { return m_ViewProjection; }
 	XMFLOAT3 GetPosition() const { return m_Eye; }
 	XMFLOAT3 GetLookDirection()const { return m_At; }
+
+	float GetFoVX() const;
+	float GetNearWindowWidth() const;
+	float GetNearWindowHeight() const;
+	float GetFarWindowWidth() const;
+	float GetFarWindowHeight() const;
 
 	void SetPerspective(bool usePerspective);
 	void SetLens();
@@ -56,9 +79,13 @@ public:
 	void Pitch(float const angle);
 	void Yaw(float const angle);
 
+	bool IsPointInFrustum(XMFLOAT3 InPoint);
+
 	void Update(float deltaTime);
 
 private:
 	void UpdateViewMatrix();
+
+	void ComputeFrustumFromProjection();
 };
 
