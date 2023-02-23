@@ -8,6 +8,8 @@ Player::Player()
 	, m_CurrMovementState(MovementState::None)
 	, m_Sprint(false)
 	, m_LockMouse(true)
+	, m_CurrCamPitch(0.f)
+	, m_CurrCamYaw(0.f)
 {
 }
 

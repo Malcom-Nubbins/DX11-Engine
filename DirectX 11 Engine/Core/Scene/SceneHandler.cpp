@@ -72,7 +72,7 @@ void SceneHandler::FindAllScenes()
 
 		for (xml_node<>* sceneNode = rootNode->first_node("Scene"); sceneNode; sceneNode = sceneNode->next_sibling())
 		{
-			std::string const sceneName(sceneNode->first_attribute("name")->value());
+			std::string sceneName(sceneNode->first_attribute("name")->value());
 
 			//Scene* newScene = new Scene(sceneName.c_str());
 			//newScene->InitialiseScene(doc, *sceneNode);

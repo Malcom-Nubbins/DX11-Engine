@@ -16,7 +16,7 @@ private:
 
 	bool m_LockMouse;
 
-	const float m_LookSpeed = 1.0f;
+	const float m_LookSpeed = 0.3f;
 	const float m_MovementSpeed = 6.0f;
 	bool m_Sprint;
 

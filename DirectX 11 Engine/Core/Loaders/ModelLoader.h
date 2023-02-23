@@ -17,14 +17,14 @@ private:
 
 	struct Tokens
 	{
-		char** tokensList;
-		size_t count;
+		char** tokensList = nullptr;
+		size_t count = 0;
 	};
 
 	struct IntegerTokens
 	{
-		int** tokensList;
-		size_t count;
+		int** tokensList = nullptr;
+		size_t count = 0;
 	};
 
 private:

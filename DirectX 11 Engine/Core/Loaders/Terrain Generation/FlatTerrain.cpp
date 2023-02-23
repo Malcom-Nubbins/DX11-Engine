@@ -176,9 +176,9 @@ void FlatTerrain::GetNormals(UINT faceCount, UINT vertexCount)
 {
 	for (UINT i = 0; i < faceCount; ++i)
 	{
-		UINT i0 = _gridMesh->Indices[i * 3 + 0];
-		UINT i1 = _gridMesh->Indices[i * 3 + 1];
-		UINT i2 = _gridMesh->Indices[i * 3 + 2];
+		UINT i0 = _gridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 0];
+		UINT i1 = _gridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 1];
+		UINT i2 = _gridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 2];
 
 		TempVertex v1, v2, v3;
 		v1.pos = _gridMesh->Vertices[i0].position;

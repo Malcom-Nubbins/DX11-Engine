@@ -41,19 +41,19 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 		if (renderWidth == -1)
 		{
-			std::exception("Invalid render width obtained from config file");
+			std::exception(R"(Invalid render width obtained from config file)");
 			retCode = -1;
 		}
 
 		if (renderHeight == -1)
 		{
-			std::exception("Invalid render height obtained from config file");
+			std::exception(R"(Invalid render height obtained from config file)");
 			retCode = -1;
 		}
 
 		if (vsync == -1)
 		{
-			std::exception("Invalud vsync value obtained from config file");
+			std::exception(R"(Invalud vsync value obtained from config file)");
 		}
 
 		if (retCode != -1)

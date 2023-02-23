@@ -140,7 +140,7 @@ float MathsHandler::Magnitude(XMFLOAT3& const inVec)
 	return sqrtf((inVec.x * inVec.x) + (inVec.y * inVec.y) + (inVec.z * inVec.z));
 }
 
-float MathsHandler::DotProduct(XMFLOAT3& const src, XMFLOAT3& const dst)
+float MathsHandler::DotProduct(const XMFLOAT3& src, const XMFLOAT3& dst)
 {
 	return (src.x * dst.x) + (src.y * dst.y) + (src.z * dst.z);
 }

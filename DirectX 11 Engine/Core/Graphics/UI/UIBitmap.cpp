@@ -8,6 +8,7 @@ UIBitmap::UIBitmap()
 	, m_IsPositionDynamic(false)
 	, m_DynamicPos(0.0f, 0.0f)
 	, m_Order(0)
+	, _screenSize(0.f, 0.f)
 {
 }
 
