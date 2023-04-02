@@ -5,6 +5,7 @@
 #include <string>
 #include "../Globals/stdafx.h"
 #include "../Globals/Structs.h"
+#include "IConfigInterface.h"
 
 class C_ConfigLoader
 {
@@ -12,11 +13,12 @@ public:
 	C_ConfigLoader(std::string const& inFilename);
 	~C_ConfigLoader();
 
+	// Checks if the necessary config directories exist, and makes them if not
+	void CheckForDirectories();
+
 	bool CheckConfigExists(std::string const& inConfigFilename) const;
 
 	void CreateDefaultMainConfig();
-	void CreateDefaultTexturesConfig(std::string const& inConfigFilename) const;
-	void CreateDefaultConfigsListConfig(std::string const& inConfigFilename) const;
 	void CreateDefaultMaterialsConfig(std::string const& inConfigFilename) const;
 
 	void Initialise();
@@ -24,7 +26,6 @@ public:
 	int GetSettingValue(SettingType const settingType, char const* settingName) const;
 	std::string GetSettingStringValue(SettingType const settingType, char const* settingName) const;
 	
-	std::vector<S_TextureInfo> GetAllTextures() const;
 	std::vector<S_MaterialInfo> GetAllMaterials() const;
 
 	S_ConfigInfo GetConfigByName(char const* const inConfigName) const;
@@ -32,20 +33,6 @@ public:
 	void ReloadAllConfigs();
 
 private:
-
-	void InitConfigsList();
-
-	struct S_SettingNameValuePair final
-	{
-		S_SettingNameValuePair(SettingType const inType, char const* inSettingName, int const inSettingValue, std::string const& inWCharVal)
-			: m_Type(inType), m_SettingName(inSettingName), m_SettingValue(inSettingValue), m_SettingValueString(inWCharVal)
-		{}
-
-		SettingType m_Type;
-		std::string m_SettingName;
-		int m_SettingValue;
-		std::string m_SettingValueString;
-	};
 
 	std::string m_ConfigFilename;
 

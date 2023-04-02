@@ -29,8 +29,8 @@ float4 main(VertexOutput input) : SV_TARGET
 		float4 returnCol = float4(0.0f, 0.0f, 0.0f, 1.0f);
 		for (uint i = 0; i < sampleCount; ++i)
 		{
-			returnCol += texToOffset.Load(input.PosH, i);
-		}
+            returnCol += texToOffset.Load(int2(input.PosH.xy), i);
+        }
         
 		return returnCol / sampleCount;
 	}
@@ -46,8 +46,8 @@ float4 main(VertexOutput input) : SV_TARGET
 		float4 returnCol = float4(0.0f, 0.0f, 0.0f, 1.0f);
 		for (uint i = 0; i < sampleCount; ++i)
 		{
-			returnCol += texToOffset.Load(input.PosH, i);
-		}
+            returnCol += texToOffset.Load(int2(input.PosH.xy), i);
+        }
         
         // Texture to overlay with snow
 

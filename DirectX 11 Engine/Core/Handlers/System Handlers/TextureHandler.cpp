@@ -6,11 +6,14 @@
 #include <DDSTextureLoader.h>
 
 TextureHandler::TextureHandler() 
+	: IConfigInterface(TEXTURES_CONFIG)
 {
+	LoadConfig();
 }
 
 TextureHandler::~TextureHandler()
-= default;
+{
+}
 
 void TextureHandler::Cleanup()
 {
@@ -31,13 +34,17 @@ void TextureHandler::LoadAllTextures()
 	ComPtr<ID3D11Device> const& device = ApplicationNew::Get().GetDevice();
 	C_ConfigLoader const* const configLoader = ApplicationNew::Get().GetConfigLoader();
 
-	std::vector<S_TextureInfo> const allTextures = configLoader->GetAllTextures();
-	assert(!allTextures.empty());
+	//assert(!m_TextureInfos.empty());
+
+	if (m_TextureInfos.empty())
+	{
+		return;
+	}
 
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 	std::wstring texturesPath(converter.from_bytes(configLoader->GetSettingStringValue(SettingType::Engine, "TextureDir")));
 
-	for (auto const& texInfo : allTextures)
+	for (auto const& texInfo : m_TextureInfos)
 	{
 		ID3D11ShaderResourceView* tex = nullptr;
 		std::wstring textureFilePath(texturesPath + texInfo.m_TextureFilename);
@@ -81,4 +88,59 @@ ID3D11ShaderResourceView* TextureHandler::GetTextureByName(char const* name) con
 	}
 
 	return nullptr;
+}
+
+void TextureHandler::CreateConfig()
+{
+	using namespace std;
+	using namespace rapidxml;
+
+	ofstream newTexturesListConfig(TEXTURES_CONFIG);
+
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "Textures");
+	doc.append_node(root);
+
+	xml_node<>* defaultTex = doc.allocate_node(node_element, "Texture");
+	defaultTex->append_attribute(doc.allocate_attribute("name", "Default"));
+	defaultTex->value("Default.dds");
+	root->append_node(defaultTex);
+
+	newTexturesListConfig << doc;
+
+	newTexturesListConfig.close();
+	doc.clear();
+}
+
+void TextureHandler::LoadConfig()
+{
+	using namespace rapidxml;
+	using namespace std;
+
+	if (!DoesConfigExist())
+	{
+		CreateConfig();
+	}
+
+	file<> xmlFile(TEXTURES_CONFIG);
+	xml_document<> doc;
+
+	doc.parse<0>(xmlFile.data());
+
+	xml_node<>* rootNode = doc.first_node("Textures");
+
+	for (xml_node<>* textureNode = rootNode->first_node("Texture"); textureNode; textureNode = textureNode->next_sibling())
+	{
+		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+		wstring nodeValue(converter.from_bytes(textureNode->value()));
+
+		S_TextureInfo texInfo(textureNode->first_attribute("name")->value(), nodeValue);
+
+		m_TextureInfos.emplace_back(move(texInfo));
+	}
 }

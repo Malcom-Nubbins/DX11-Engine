@@ -4,7 +4,9 @@
 #include <fstream>
 #include <vector>
 #include <codecvt>
+#include <filesystem>
 
+#include "../Globals/AppValues.h"
 #include "../Core/Loaders/XMLLoader/rapidxml.hpp"
 #include "../Loaders/XMLLoader/rapidxml_ext.hpp"
 #include "../Core/Loaders/XMLLoader/rapidxml_print.hpp"
@@ -17,6 +19,29 @@ C_ConfigLoader::C_ConfigLoader(std::string const& inFilename)
 
 C_ConfigLoader::~C_ConfigLoader()
 {
+}
+
+void C_ConfigLoader::CheckForDirectories()
+{
+	if (!std::filesystem::is_directory(CONFIGS_DIR))
+	{
+		std::filesystem::create_directory(CONFIGS_DIR);
+	}
+
+	if (!std::filesystem::is_directory(RESOURCES_DIR))
+	{
+		std::filesystem::create_directory(RESOURCES_DIR);
+	}
+
+	if (!std::filesystem::is_directory(TEXTURES_DIR))
+	{
+		std::filesystem::create_directory(TEXTURES_DIR);
+	}
+
+	if (!std::filesystem::is_directory(OBJECTS_DIR))
+	{
+		std::filesystem::create_directory(OBJECTS_DIR);
+	}
 }
 
 bool C_ConfigLoader::CheckConfigExists(std::string const& inConfigFilename) const
@@ -128,67 +153,6 @@ void C_ConfigLoader::CreateDefaultMainConfig()
 	doc.clear();
 }
 
-void C_ConfigLoader::CreateDefaultTexturesConfig(std::string const& inConfigFilename) const
-{
-	using namespace std;
-	using namespace rapidxml;
-
-	ofstream newTexturesListConfig(inConfigFilename);
-
-	xml_document<> doc;
-	xml_node<>* decl = doc.allocate_node(node_declaration);
-	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
-	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
-	doc.append_node(decl);
-
-	xml_node<>* root = doc.allocate_node(node_element, "Textures");
-	doc.append_node(root);
-
-	xml_node<>* defaultTex = doc.allocate_node(node_element, "Texture");
-	defaultTex->append_attribute(doc.allocate_attribute("name", "Default"));
-	defaultTex->value("Default.dds");
-	root->append_node(defaultTex);
-
-	newTexturesListConfig << doc;
-
-	newTexturesListConfig.close();
-	doc.clear();
-}
-
-void C_ConfigLoader::CreateDefaultConfigsListConfig(std::string const& inConfigFilename) const
-{
-	using namespace std;
-	using namespace rapidxml;
-
-	ofstream newConfigsList(inConfigFilename);
-
-	xml_document<> doc;
-	xml_node<>* decl = doc.allocate_node(node_declaration);
-	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
-	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
-	doc.append_node(decl);
-
-	xml_node<>* root = doc.allocate_node(node_element, "Configs");
-	doc.append_node(root);
-
-	xml_node<>* uiConfig = doc.allocate_node(node_element, "Config");
-	uiConfig->append_attribute(doc.allocate_attribute("name", "UIConfig"));
-	uiConfig->append_attribute(doc.allocate_attribute("description", "Config file for controlling UI layout"));
-	uiConfig->value("ui_config.xml");
-	root->append_node(uiConfig);
-
-	xml_node<>* scenesConfig = doc.allocate_node(node_element, "Config");
-	scenesConfig->append_attribute(doc.allocate_attribute("name", "ScenesConfig"));
-	scenesConfig->append_attribute(doc.allocate_attribute("description", "Config file containing all game scenes"));
-	scenesConfig->value("scenes_config.xml");
-	root->append_node(scenesConfig);
-
-	newConfigsList << doc;
-
-	newConfigsList.close();
-	doc.clear();
-}
-
 void C_ConfigLoader::CreateDefaultMaterialsConfig(std::string const& inConfigFilename) const
 {
 	using namespace std;
@@ -244,6 +208,8 @@ void C_ConfigLoader::Initialise()
 	using namespace std;
 	using namespace rapidxml;
 
+	CheckForDirectories();
+
 	if (!CheckConfigExists(m_ConfigFilename))
 	{
 		CreateDefaultMainConfig();
@@ -294,8 +260,6 @@ void C_ConfigLoader::Initialise()
 			m_AllSettings.emplace_back(move(videoSetting));
 		}
 	}	
-
-	InitConfigsList();
 }
 
 int C_ConfigLoader::GetSettingValue(SettingType const settingType, char const* settingName) const
@@ -328,43 +292,6 @@ std::string C_ConfigLoader::GetSettingStringValue(SettingType const settingType,
 	}
 
 	return std::string("");
-}
-
-std::vector<S_TextureInfo> C_ConfigLoader::GetAllTextures() const
-{
-	using namespace rapidxml;
-	using namespace std;
-
-	string textureListFilename(GetSettingStringValue(SettingType::Engine, "TexturesListFile"));
-	string filePath(GetSettingStringValue(SettingType::Engine, "TextureDir"));
-
-	string fullPath(filePath + textureListFilename);
-
-	if (!CheckConfigExists(fullPath))
-	{
-		CreateDefaultTexturesConfig(fullPath);
-	}
-
-	file<> xmlFile(fullPath.c_str());
-	xml_document<> doc;
-
-	doc.parse<0>(xmlFile.data());
-
-	xml_node<>* rootNode = doc.first_node("Textures");
-
-	vector<S_TextureInfo> allTextures;
-
-	for (xml_node<>* textureNode = rootNode->first_node("Texture"); textureNode; textureNode = textureNode->next_sibling())
-	{
-		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-		wstring nodeValue(converter.from_bytes(textureNode->value()));
-
-		S_TextureInfo texInfo(textureNode->first_attribute("name")->value(), nodeValue);
-
-		allTextures.emplace_back(move(texInfo));
-	}
-
-	return allTextures;
 }
 
 std::vector<S_MaterialInfo> C_ConfigLoader::GetAllMaterials() const
@@ -442,38 +369,4 @@ S_ConfigInfo C_ConfigLoader::GetConfigByName(char const* const inConfigName) con
 void C_ConfigLoader::ReloadAllConfigs()
 {
 	m_AllConfigs.clear();
-	InitConfigsList();
-}
-
-void C_ConfigLoader::InitConfigsList()
-{
-	using namespace rapidxml;
-	using namespace std;
-
-	string configListFilename(GetSettingStringValue(SettingType::Engine, "ConfigListFile"));
-	string filePath(GetSettingStringValue(SettingType::Engine, "ConfigDir"));
-
-	string fullPath(filePath + configListFilename);
-
-	if (!CheckConfigExists(fullPath))
-	{
-		CreateDefaultConfigsListConfig(fullPath);
-	}
-
-	file<> xmlFile(fullPath.c_str());
-	xml_document<> doc;
-
-	doc.parse<0>(xmlFile.data());
-
-	xml_node<>* rootNode = doc.first_node("Configs");
-
-	for (xml_node<>* configNode = rootNode->first_node("Config"); configNode; configNode = configNode->next_sibling())
-	{
-		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-		wstring nodeValue(converter.from_bytes(configNode->value()));
-
-		S_ConfigInfo configInfo(configNode->first_attribute("name")->value(), nodeValue);
-
-		m_AllConfigs.emplace_back(move(configInfo));
-	}
 }

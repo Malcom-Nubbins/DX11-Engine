@@ -195,6 +195,7 @@
     <ClCompile Include="Core\Handlers\FileReaderWriter.cpp" />
     <ClCompile Include="Core\Scene\SceneHandler.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\GraphicsHandler.cpp" />
+    <ClCompile Include="Core\Loaders\IConfigInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Globals\Bitmask.h" />
@@ -242,6 +243,7 @@
     <ClInclude Include="Core\DX11Engine.h" />
     <ClInclude Include="Core\Handlers\FileReaderWriter.h" />
     <ClInclude Include="Core\Handlers\System Handlers\GraphicsHandler.h" />
+    <ClInclude Include="Core\Loaders\IConfigInterface.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
     <ClInclude Include="Core\Scene\TestingScene.h" />

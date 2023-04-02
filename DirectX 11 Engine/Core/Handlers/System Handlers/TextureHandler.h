@@ -1,8 +1,9 @@
 #pragma once
 #include "D3DClass.h"
+#include "../Core/Loaders/IConfigInterface.h"
 #include <vector>
 
-class TextureHandler
+class TextureHandler : public IConfigInterface
 {
 private:
 	struct S_Texture final
@@ -15,6 +16,16 @@ private:
 		ID3D11ShaderResourceView* m_Texture;
 	};
 
+	struct S_TextureInfo final
+	{
+		S_TextureInfo(char const* inTextureName, std::wstring const& inTexFilename)
+			: m_TextureName(inTextureName)
+			, m_TextureFilename(inTexFilename)
+		{}
+		std::string m_TextureName;
+		std::wstring m_TextureFilename;
+	};
+
 	std::vector<S_Texture> m_Textures;
 
 public:
@@ -24,5 +35,12 @@ public:
 
 	void LoadAllTextures();
 	ID3D11ShaderResourceView* GetTextureByName(char const* name) const;
+
+protected:
+	void CreateConfig() override;
+	void LoadConfig() override;
+
+private:
+	std::vector<S_TextureInfo> m_TextureInfos;
 };
 

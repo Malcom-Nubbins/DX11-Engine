@@ -29,8 +29,15 @@ void HeatHaze::Cleanup() const
 	_renderTargetView->Release();
 	_renderTargetSRV->Release();
 
-	m_SnowTex->Release();
-	m_HeatTex->Release();
+	if (m_SnowTex)
+	{
+		m_SnowTex->Release();
+	}
+	
+	if (m_HeatTex)
+	{
+		m_HeatTex->Release();
+	}
 
 	_heatHazeValues->Release();
 }

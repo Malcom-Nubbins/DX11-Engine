@@ -18,7 +18,10 @@ UIBitmap::~UIBitmap()
 
 void UIBitmap::Cleanup()
 {
-	_texture->Release();
+	if (_texture != nullptr)
+	{
+		_texture->Release();
+	}
 	
 	_uiElement->Cleanup();
 }

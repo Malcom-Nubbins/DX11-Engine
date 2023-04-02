@@ -53,15 +53,15 @@ struct VertexOutput
 VertexOutput main( VertexInput input )
 {
     VertexOutput output = (VertexOutput) 0;
-    output.PosW = mul(float4(input.Pos, 1), World);
+    output.PosW = mul(float4(input.Pos, 1), World).xyz;
     output.PosH = mul(float4(output.PosW, 1), View);
     output.PosH = mul(output.PosH, Projection);
     output.Tex = input.Tex;
 
     output.NormW = normalize(mul(float4(input.Normal, 0.0f), World).xyz);
 
-    output.TangentW = mul(float4(input.Tangent, 0.0f), World);
-    output.BinormalW = mul(float4(input.Binormal, 0.0f), World);
+    output.TangentW = mul(float4(input.Tangent, 0.0f), World).xyz;
+    output.BinormalW = mul(float4(input.Binormal, 0.0f), World).xyz;
 
     output.ShadowProj = mul(float4(input.Pos.xyz, 1.0f), mul(World, ShadowTransform));
     
@@ -72,7 +72,7 @@ VertexOutput main( VertexInput input )
     output.TessFactor = MinTessFactor + tess * (MaxTessFactor - MinTessFactor);
 
     output.BinormalW = cross(output.NormW, output.TangentW);
-    output.BinormalW = mul(float4(output.BinormalW, 0.0f), World);
+    output.BinormalW = mul(float4(output.BinormalW, 0.0f), World).xyz;
 
     float3x3 tangentToWorldSpace;
     tangentToWorldSpace[0] = normalize(output.TangentW);

@@ -266,16 +266,6 @@ struct FullscreenQuadValues
 	XMFLOAT3 padding;
 };
 
-struct S_TextureInfo final
-{
-	S_TextureInfo(char const* inTextureName, std::wstring const& inTexFilename)
-		: m_TextureName(inTextureName)
-		, m_TextureFilename(inTexFilename)
-	{}
-	std::string m_TextureName;
-	std::wstring m_TextureFilename;
-};
-
 struct S_MaterialInfo final
 {
 	S_MaterialInfo(char const* inMaterialName, XMFLOAT4 const inMatAmbient, XMFLOAT4 const inMatDiffuse, XMFLOAT4 const inMatSpecular)

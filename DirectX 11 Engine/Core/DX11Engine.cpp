@@ -49,7 +49,6 @@ bool DX11Engine::LoadContent()
 	m_Player->Initialise();
 
 	m_SceneHandler = new SceneHandler();
-	m_SceneHandler->FindAllScenes();
 
 	/*m_MainScene = new MainScene(*m_Player);
 	m_MainScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());*/

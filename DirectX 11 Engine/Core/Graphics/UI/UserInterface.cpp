@@ -11,14 +11,125 @@
 #include <codecvt>
 
 UserInterface::UserInterface(Camera& camera)
-	: _camera(camera), _inputLayout(nullptr), _vertexShader(nullptr),
-	  _pixelShader(nullptr), _matrixBuffer(nullptr)
+	: IConfigInterface(UI_CONFIG)
+	, _camera(camera)
+	, _inputLayout(nullptr)
+	, _vertexShader(nullptr)
+	, _pixelShader(nullptr)
+	, _matrixBuffer(nullptr)
 {
 	XMStoreFloat4x4(&_worldMatrix, XMMatrixIdentity());
+	LoadConfig();
 }
 
 UserInterface::~UserInterface()
 {
+	
+}
+
+void UserInterface::CreateConfig()
+{
+	using namespace std;
+	using namespace rapidxml;
+
+	ofstream newConfig(GetConfigName());
+	xml_document<> doc;
+	xml_node<>* decl = doc.allocate_node(node_declaration);
+	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
+	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
+	doc.append_node(decl);
+
+	xml_node<>* root = doc.allocate_node(node_element, "UIConfig");
+	doc.append_node(root);
+
+	xml_node<>* defaultUIElement = doc.allocate_node(node_element, "UIElement");
+	defaultUIElement->append_attribute(doc.allocate_attribute("name", "Crosshair"));
+	root->append_node(defaultUIElement);
+
+	// Default UI element details
+	{
+		xml_node<>* texture = doc.allocate_node(node_element, "Texture");
+		texture->value("Crosshair");
+		defaultUIElement->append_node(texture);
+
+		xml_node<>* width = doc.allocate_node(node_element, "Width");
+		width->value("64");
+		defaultUIElement->append_node(width);
+
+		xml_node<>* height = doc.allocate_node(node_element, "Height");
+		height->value("64");
+		defaultUIElement->append_node(height);
+
+		xml_node<>* anchor = doc.allocate_node(node_element, "Anchor");
+		anchor->value("Centre");
+		defaultUIElement->append_node(anchor);
+
+		xml_node<>* origin = doc.allocate_node(node_element, "Origin");
+		origin->value("Centre");
+		defaultUIElement->append_node(origin);
+
+		xml_node<>* offsetX = doc.allocate_node(node_element, "OffsetX");
+		offsetX->value("0.0");
+		defaultUIElement->append_node(offsetX);
+
+		xml_node<>* offsetY = doc.allocate_node(node_element, "OffsetY");
+		offsetY->value("0.0");
+		defaultUIElement->append_node(offsetY);
+
+		xml_node<>* order = doc.allocate_node(node_element, "Order");
+		order->value("0");
+		defaultUIElement->append_node(order);
+	}
+
+	newConfig << doc;
+
+	newConfig.close();
+	doc.clear();
+}
+
+void UserInterface::LoadConfig()
+{
+	using namespace std;
+	using namespace rapidxml;
+	
+	if (!DoesConfigExist())
+	{
+		CreateConfig();
+	}
+
+	file<> xmlFile(UI_CONFIG);
+	xml_document<> doc;
+	doc.parse<0>(xmlFile.data());
+
+	xml_node<>* rootNode = doc.first_node("UIConfig");
+
+	for (xml_node<>* uiElementNode = rootNode->first_node("UIElement"); uiElementNode; uiElementNode = uiElementNode->next_sibling())
+	{
+		std::string const elementName(uiElementNode->first_attribute("name")->value());
+		std::string textureName(uiElementNode->first_node("Texture")->value());
+		float const texWidth = strtof(uiElementNode->first_node("Width")->value(), nullptr);
+		float const texHeight = strtof(uiElementNode->first_node("Height")->value(), nullptr);
+
+		float const offsetX = strtof(uiElementNode->first_node("OffsetX")->value(), nullptr);
+		float const offsetY = strtof(uiElementNode->first_node("OffsetY")->value(), nullptr);
+
+		std::string anchorPointStr(uiElementNode->first_node("Anchor")->value());
+		UIAnchorPoint const anchorPoint(GetAnchorEnumValueFromString(anchorPointStr));
+
+		std::string originPointStr(uiElementNode->first_node("Origin")->value());
+		UIOriginPoint const originPoint(GetOriginEnumValueFromString(originPointStr));
+
+		float const order = strtof(uiElementNode->first_node("Order")->value(), nullptr);
+
+		S_UIElementInfo const elementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName, static_cast<u32>(order));
+
+		AddBitmapToUI(elementInfo);
+	}
+
+	std::sort(_bitmaps.begin(), _bitmaps.end(), [](UIBitmap* bitmapA, UIBitmap* bitmapB)
+		{
+			return bitmapA->GetOrder() > bitmapB->GetOrder();
+		});
 }
 
 void UserInterface::ReloadUI()
@@ -31,7 +142,7 @@ void UserInterface::ReloadUI()
 
 	_bitmaps.clear();
 
-	LoadUIFromConfig();
+	LoadConfig();
 }
 
 void UserInterface::Cleanup()
@@ -84,8 +195,6 @@ void UserInterface::Initialise()
 
 	ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/UIVertexShader.cso", &_vertexShader, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
 	ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/UIPixelShader.cso", &_pixelShader);
-
-	LoadUIFromConfig();
 }
 
 void UserInterface::AddBitmapToUI(S_UIElementInfo const& inElementInfo)
@@ -158,122 +267,4 @@ void UserInterface::Draw()
 
 	RenderClass::EnableZBuffer();
 	RenderClass::DisableAlphaBlending();
-}
-
-void UserInterface::LoadUIFromConfig()
-{
-	using namespace rapidxml;
-	using namespace std;
-	auto configLoader = ApplicationNew::Get().GetConfigLoader();
-	
-	S_ConfigInfo const uiConfig = configLoader->GetConfigByName("UIConfig");
-	if (!uiConfig.m_ConfigFilename.empty())
-	{
-		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-		string configFileName(converter.to_bytes(uiConfig.m_ConfigFilename));
-		string filePath(configLoader->GetSettingStringValue(SettingType::Engine, "ConfigDir"));
-
-		string const fullPath(filePath + configFileName);
-
-		if (!configLoader->CheckConfigExists(fullPath))
-		{
-			CreateDefaultUIConfig(fullPath);
-		}
-
-		file<> xmlFile(fullPath.c_str());
-		xml_document<> doc;
-
-		doc.parse<0>(xmlFile.data());
-
-		xml_node<>* rootNode = doc.first_node("UIConfig");
-
-		for (xml_node<>* uiElementNode = rootNode->first_node("UIElement"); uiElementNode; uiElementNode = uiElementNode->next_sibling())
-		{
-			std::string const elementName(uiElementNode->first_attribute("name")->value());
-			std::string textureName(uiElementNode->first_node("Texture")->value());
-			float const texWidth = strtof(uiElementNode->first_node("Width")->value(), nullptr);
-			float const texHeight = strtof(uiElementNode->first_node("Height")->value(), nullptr);
-
-			float const offsetX = strtof(uiElementNode->first_node("OffsetX")->value(), nullptr);
-			float const offsetY = strtof(uiElementNode->first_node("OffsetY")->value(), nullptr);
-			
-			std::string anchorPointStr(uiElementNode->first_node("Anchor")->value());
-			UIAnchorPoint const anchorPoint(GetAnchorEnumValueFromString(anchorPointStr));
-
-			std::string originPointStr(uiElementNode->first_node("Origin")->value());
-			UIOriginPoint const originPoint(GetOriginEnumValueFromString(originPointStr));
-			
-			float const order = strtof(uiElementNode->first_node("Order")->value(), nullptr);
-
-			S_UIElementInfo const elementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName, static_cast<u32>(order));
-
-			AddBitmapToUI(elementInfo);
-		}
-
-		std::sort(_bitmaps.begin(), _bitmaps.end(), [](UIBitmap* bitmapA, UIBitmap* bitmapB)
-			{
-				return bitmapA->GetOrder() > bitmapB->GetOrder();
-			});
-	}
-}
-
-void UserInterface::CreateDefaultUIConfig(std::string const& inConfigFilename)
-{
-	using namespace std;
-	using namespace rapidxml;
-
-	ofstream newDefaultUIConfig(inConfigFilename);
-
-	xml_document<> doc;
-	xml_node<>* decl = doc.allocate_node(node_declaration);
-	decl->append_attribute(doc.allocate_attribute("version", "1.0"));
-	decl->append_attribute(doc.allocate_attribute("encoding", "UTF-8"));
-	doc.append_node(decl);
-
-	xml_node<>* root = doc.allocate_node(node_element, "UIConfig");
-	doc.append_node(root);
-
-	xml_node<>* defaultUIElement = doc.allocate_node(node_element, "UIElement");
-	defaultUIElement->append_attribute(doc.allocate_attribute("name", "Crosshair"));
-	root->append_node(defaultUIElement);
-
-	// Default UI element details
-	{
-		xml_node<>* texture = doc.allocate_node(node_element, "Texture");
-		texture->value("Crosshair");
-		defaultUIElement->append_node(texture);
-
-		xml_node<>* width = doc.allocate_node(node_element, "Width");
-		width->value("64");
-		defaultUIElement->append_node(width);
-
-		xml_node<>* height = doc.allocate_node(node_element, "Height");
-		height->value("64");
-		defaultUIElement->append_node(height);
-
-		xml_node<>* anchor = doc.allocate_node(node_element, "Anchor");
-		anchor->value("Centre");
-		defaultUIElement->append_node(anchor);
-
-		xml_node<>* origin = doc.allocate_node(node_element, "Origin");
-		origin->value("Centre");
-		defaultUIElement->append_node(origin);
-
-		xml_node<>* offsetX = doc.allocate_node(node_element, "OffsetX");
-		offsetX->value("0.0");
-		defaultUIElement->append_node(offsetX);
-
-		xml_node<>* offsetY = doc.allocate_node(node_element, "OffsetY");
-		offsetY->value("0.0");
-		defaultUIElement->append_node(offsetY);
-
-		xml_node<>* order = doc.allocate_node(node_element, "Order");
-		order->value("0");
-		defaultUIElement->append_node(order);
-	}
-
-	newDefaultUIConfig << doc;
-
-	newDefaultUIConfig.close();
-	doc.clear();
 }

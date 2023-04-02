@@ -132,6 +132,9 @@
     <ClCompile Include="Core\Handlers\System Handlers\GraphicsHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Loaders\IConfigInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Application.h">
@@ -279,6 +282,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_ext.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Loaders\IConfigInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

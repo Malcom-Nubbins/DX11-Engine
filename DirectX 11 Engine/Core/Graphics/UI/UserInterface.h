@@ -2,8 +2,9 @@
 #include "../../Scene/Camera.h"
 #include "UIBitmap.h"
 #include "../../Handlers/SystemHandlers.h"
+#include "../Core/Loaders/IConfigInterface.h"
 
-class UserInterface
+class UserInterface : public IConfigInterface
 {
 private:
 	Camera& _camera;
@@ -18,7 +19,7 @@ private:
 
 public:
 	UserInterface(Camera& camera);
-	~UserInterface();
+	~UserInterface() override;
 
 	void ReloadUI();
 
@@ -35,8 +36,7 @@ public:
 	void Update(double delta);
 	void Draw();
 
-private:
-
-	void LoadUIFromConfig();
-	void CreateDefaultUIConfig(std::string const& inConfigFilename);
+protected:
+	void CreateConfig() override;
+	void LoadConfig() override;
 };

@@ -8,8 +8,12 @@
 #include "../Core/Loaders/XMLLoader/rapidxml_utils.hpp"
 #include <codecvt>
 
-SceneHandler::SceneHandler() : m_CurrentScene(nullptr), m_CurrSceneIndex(0)
+SceneHandler::SceneHandler()
+	: IConfigInterface(SCENES_CONFIG)
+	, m_CurrentScene(nullptr)
+	, m_CurrSceneIndex(0)
 {
+	LoadConfig();
 }
 
 SceneHandler::~SceneHandler()
@@ -24,7 +28,7 @@ void SceneHandler::Cleanup()
 		m_CurrentScene = nullptr;
 	}
 
-	m_Scenes.clear();
+	m_SceneInfos.clear();
 }
 
 void SceneHandler::PreResize()
@@ -43,51 +47,7 @@ void SceneHandler::ResizeViews(float const newWidth, float const newHeight)
 	}
 }
 
-void SceneHandler::FindAllScenes()
-{
-	using namespace rapidxml;
-	using namespace std;
-	auto configLoader = ApplicationNew::Get().GetConfigLoader();
-
-	S_ConfigInfo const scenesConfig = configLoader->GetConfigByName("ScenesConfig");
-	if (!scenesConfig.m_ConfigFilename.empty())
-	{
-		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-		string configFileName(converter.to_bytes(scenesConfig.m_ConfigFilename));
-		string filePath(configLoader->GetSettingStringValue(SettingType::Engine, "ConfigDir"));
-
-		string const fullPath(filePath + configFileName);
-
-		if (!configLoader->CheckConfigExists(fullPath))
-		{
-			CreateDefaultSceneConfig(fullPath);
-		}
-
-		file<> xmlFile(fullPath.c_str());
-		xml_document<> doc;
-
-		doc.parse<0>(xmlFile.data());
-
-		xml_node<>* rootNode = doc.first_node("Scenes");
-
-		for (xml_node<>* sceneNode = rootNode->first_node("Scene"); sceneNode; sceneNode = sceneNode->next_sibling())
-		{
-			std::string sceneName(sceneNode->first_attribute("name")->value());
-
-			//Scene* newScene = new Scene(sceneName.c_str());
-			//newScene->InitialiseScene(doc, *sceneNode);
-
-			m_Scenes.emplace_back(move(sceneName));
-		}
-	}
-
-	if (m_Scenes.size() > 0)
-	{
-		LoadScenesFromName(m_Scenes.front());
-	}
-}
-
-void SceneHandler::LoadScenesFromName(const std::string SceneToLoad)
+void SceneHandler::LoadScenesFromSceneInfo(const SceneInfo& SceneToLoad)
 {	
 	if (m_CurrentScene != nullptr)
 	{
@@ -98,7 +58,7 @@ void SceneHandler::LoadScenesFromName(const std::string SceneToLoad)
 		m_CurrentScene = nullptr;
 	}
 
-	m_CurrentScene = new Scene(SceneToLoad.c_str());
+	m_CurrentScene = new Scene(SceneToLoad);
 	m_CurrentScene->InitialiseScene();
 }
 
@@ -106,12 +66,12 @@ void SceneHandler::GoToNextScene()
 {
 	++m_CurrSceneIndex;
 
-	if (m_CurrSceneIndex > m_Scenes.size() - 1)
+	if (m_CurrSceneIndex > m_SceneInfos.size() - 1)
 	{
 		m_CurrSceneIndex = 0;
 	}
 
-	LoadScenesFromName(m_Scenes[m_CurrSceneIndex]);
+	LoadScenesFromSceneInfo(m_SceneInfos[m_CurrSceneIndex]);
 }
 
 void SceneHandler::GoToPreviousScene()
@@ -120,10 +80,10 @@ void SceneHandler::GoToPreviousScene()
 
 	if (m_CurrSceneIndex < 0)
 	{
-		m_CurrSceneIndex = m_Scenes.size() - 1;
+		m_CurrSceneIndex = m_SceneInfos.size() - 1;
 	}
 
-	LoadScenesFromName(m_Scenes[m_CurrSceneIndex]);
+	LoadScenesFromSceneInfo(m_SceneInfos[m_CurrSceneIndex]);
 }
 
 void SceneHandler::Upate(UpdateEvent& e)
@@ -147,12 +107,12 @@ void SceneHandler::Draw()
 {
 }
 
-void SceneHandler::CreateDefaultSceneConfig(std::string const& inConfigFilename)
+void SceneHandler::CreateConfig()
 {
 	using namespace rapidxml;
 	using namespace std;
 
-	ofstream newDefaultScenesConfig(inConfigFilename);
+	ofstream newDefaultScenesConfig(GetConfigName());
 
 	xml_document<> doc;
 	xml_node<>* decl = doc.allocate_node(node_declaration);
@@ -188,7 +148,7 @@ void SceneHandler::CreateDefaultSceneConfig(std::string const& inConfigFilename)
 			{
 				xml_node<>* transform = doc.allocate_node(node_element, "Transform");
 				defaultSphereObject->append_node(transform);
-				
+
 				// Transform
 				{
 					xml_node<>* Position = doc.allocate_node(node_element, "Position");
@@ -237,4 +197,96 @@ void SceneHandler::CreateDefaultSceneConfig(std::string const& inConfigFilename)
 
 	newDefaultScenesConfig.close();
 	doc.clear();
+}
+
+void SceneHandler::LoadConfig()
+{
+	using namespace rapidxml;
+	using namespace std;
+
+	if (!DoesConfigExist())
+	{
+		CreateConfig();
+	}
+
+	file<> xmlFile(SCENES_CONFIG);
+	xml_document<> doc;
+
+	doc.parse<0>(xmlFile.data());
+
+	xml_node<>* rootNode = doc.first_node("Scenes");
+
+	for (xml_node<>* sceneNode = rootNode->first_node("Scene"); sceneNode; sceneNode = sceneNode->next_sibling())
+	{
+		std::string sceneName(sceneNode->first_attribute("name")->value());
+
+		SceneInfo NewSceneInfo(sceneName);
+		vector<SceneElementInfo> NewElementInfos;
+
+		xml_node<>* elements = sceneNode->first_node("Elements");
+
+		for (xml_node<>* object = elements->first_node("Object"); object; object = object->next_sibling())
+		{
+			std::string objectName(object->first_attribute("name")->value());
+			int const numOfObject = stoi(object->first_attribute("Amount")->value());
+
+			bool const isFlatPlane = stoi(object->first_attribute("IsFlatPlane")->value());
+			bool const isTerrain = stoi(object->first_attribute("IsTerrain")->value());
+			int const generatorWidth = stoi(object->first_attribute("GenWidth")->value());
+			int const generatorHeight = stoi(object->first_attribute("GenHeight")->value());
+			int const generatorSize = stoi(object->first_attribute("GenSize")->value());
+
+			xml_node<>* appearance = object->first_node("Appearance");
+			std::string const materialName(appearance->first_attribute("material")->value());
+			std::string const modelName(appearance->first_attribute("model")->value());
+			std::string const textureName(appearance->first_attribute("texture")->value());
+			std::string const normalMapName(appearance->first_attribute("normalmap")->value());
+			std::string const displacementMapName(appearance->first_attribute("displacementmap")->value());
+			std::string const specularMapName(appearance->first_attribute("specularmap")->value());
+
+			xml_node<>* transform = object->first_node("Transform");
+			xml_node<>* positionNode = transform->first_node("Position");
+			xml_node<>* scaleNode = transform->first_node("Scale");
+			xml_node<>* rotationNode = transform->first_node("Rotation");
+
+			const XMFLOAT3 scale(strtof(scaleNode->first_attribute("x")->value(), nullptr),
+				strtof(scaleNode->first_attribute("y")->value(), nullptr),
+				strtof(scaleNode->first_attribute("z")->value(), nullptr));
+
+			const XMFLOAT3 rotation(strtof(rotationNode->first_attribute("x")->value(), nullptr),
+				strtof(rotationNode->first_attribute("y")->value(), nullptr),
+				strtof(rotationNode->first_attribute("z")->value(), nullptr));
+
+			std::string const xPos(positionNode->first_attribute("x")->value());
+			std::string const yPos(positionNode->first_attribute("y")->value());
+			std::string const zPos(positionNode->first_attribute("z")->value());
+
+			StringHash const randPosStr(GetStringHash("rand"));
+
+			for (u32 idx = 0; idx < numOfObject; ++idx)
+			{
+				float finalXPos = (GetStringHash(xPos) == randPosStr) ? MathsHandler::RandomFloat(-50, 50) : strtof(xPos.c_str(), nullptr);
+				float finalYPos = strtof(yPos.c_str(), nullptr);
+				float finalZPos = (GetStringHash(zPos) == randPosStr) ? MathsHandler::RandomFloat(-50, 50) : strtof(zPos.c_str(), nullptr);
+
+				const XMFLOAT3 position(finalXPos, finalYPos, finalZPos);
+
+				std::string finalObjName = objectName + " %d";
+				finalObjName = FormatCString(finalObjName.c_str(), idx);
+
+				NewElementInfos.emplace_back(finalObjName, numOfObject,
+					isFlatPlane, isTerrain, generatorWidth, generatorHeight, generatorSize,
+					position, scale, rotation,
+					modelName, materialName, textureName, normalMapName, displacementMapName, specularMapName);
+			}
+		}
+
+		NewSceneInfo.ElementInfos = NewElementInfos;
+		m_SceneInfos.push_back(move(NewSceneInfo));
+	}
+
+	if (m_SceneInfos.size() > 0)
+	{
+		LoadScenesFromSceneInfo(m_SceneInfos.front());
+	}
 }
