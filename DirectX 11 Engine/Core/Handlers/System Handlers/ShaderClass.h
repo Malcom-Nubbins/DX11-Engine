@@ -1,7 +1,7 @@
 #pragma once
-#include "D3DClass.h"
 #include "../../Globals/stdafx.h"
 #include "../../Globals/AppValues.h"
+
 class ShaderClass
 {
 private:
@@ -34,7 +34,7 @@ public:
 	static void UnbindTesselationStages();
 
 	HRESULT CreateSamplerStates();
-	static ID3D11SamplerState** GetSamplerState(SAMPLER_TYPE type);
+	static ID3D11SamplerState** GetSamplerState(SamplerType type);
 
 };
 

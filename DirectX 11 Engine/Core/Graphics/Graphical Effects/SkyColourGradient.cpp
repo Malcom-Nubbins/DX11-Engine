@@ -1,15 +1,18 @@
 #include "SkyColourGradient.h"
 #include "../../Loaders/ModelLoader.h"
 #include "../../ApplicationNew.h"
+#include "../Core/Handlers/System Handlers/BufferClass.h"
+#include "../Core/Handlers/System Handlers/ShaderClass.h"
+#include "../Core/Handlers/System Handlers/RenderClass.h"
 
 SkyColourGradient::SkyColourGradient()
-	: _skyDomeElement(nullptr), _matrixBuffer(nullptr)
+	: m_SkyDomeElement(nullptr), m_MatrixBufferPtr(nullptr), m_SkySRV(nullptr)
 {
-	_sceneCentre = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	_colourGradientVS = nullptr;
-	_colourGradientPS = nullptr;
-	_inputLayout = nullptr;
-	_gradientValuesBuffer = nullptr;
+	m_SceneCentre = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_ColourGradientVS = nullptr;
+	m_ColourGradientPS = nullptr;
+	m_InputLayout = nullptr;
+	m_GradientValuesBufferPtr = nullptr;
 }
 
 SkyColourGradient::~SkyColourGradient()
@@ -18,12 +21,12 @@ SkyColourGradient::~SkyColourGradient()
 
 void SkyColourGradient::Cleanup() const
 {
-	_skyDomeElement->Cleanup();
-	_colourGradientVS->Release();
-	_colourGradientPS->Release();
-	_inputLayout->Release();
-	_gradientValuesBuffer->Release();
-	_matrixBuffer->Release();
+	m_SkyDomeElement->Cleanup();
+	m_ColourGradientVS->Release();
+	m_ColourGradientPS->Release();
+	m_InputLayout->Release();
+	m_GradientValuesBufferPtr->Release();
+	m_MatrixBufferPtr->Release();
 }
 
 HRESULT SkyColourGradient::Initialise()
@@ -58,10 +61,10 @@ HRESULT SkyColourGradient::InitialiseShaders()
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ColourGradientVS.cso", &_colourGradientVS, &_inputLayout, layout, ARRAYSIZE(layout));
+	hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ColourGradientVS.cso", &m_ColourGradientVS, &m_InputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
-	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/ColourGradientPS.cso", &_colourGradientPS);
+	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/ColourGradientPS.cso", &m_ColourGradientPS);
 	if (FAILED(hr))
 		return hr;
 
@@ -79,7 +82,7 @@ HRESULT SkyColourGradient::InitialiseBuffers()
 	bd.ByteWidth = sizeof(GradientValuesBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	hr = device->CreateBuffer(&bd, nullptr, &_gradientValuesBuffer);
+	hr = device->CreateBuffer(&bd, nullptr, &m_GradientValuesBufferPtr);
 	if (FAILED(hr))
 		return hr;
 
@@ -88,7 +91,7 @@ HRESULT SkyColourGradient::InitialiseBuffers()
 	bd.ByteWidth = sizeof(MatrixBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	device->CreateBuffer(&bd, nullptr, &_matrixBuffer);
+	device->CreateBuffer(&bd, nullptr, &m_MatrixBufferPtr);
 
 	return S_OK;
 }
@@ -96,9 +99,9 @@ HRESULT SkyColourGradient::InitialiseBuffers()
 void SkyColourGradient::InitialiseSkydomeElement()
 {
 	ObjectMaterial matte;
-	matte.ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	matte.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-	matte.specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	matte.Ambient = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	matte.Diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	matte.Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	auto skyDomeTransform = std::make_shared<Transform>();
 	skyDomeTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -111,20 +114,20 @@ void SkyColourGradient::InitialiseSkydomeElement()
 	auto appearance = std::make_shared<Appearance>(sphere, matte);
 	appearance->SetColourTexture(nullptr);
 
-	_skyDomeElement = new SceneElement(GetStringHash("Sky dome"), *skyDomeTransform, *appearance);
-	_skyDomeElement->SetCastShadows(false);
-	_skyDomeElement->SetAffectedByLight(false);
+	m_SkyDomeElement = new SceneElement(GetStringHash("Sky dome"), *skyDomeTransform, *appearance);
+	m_SkyDomeElement->SetCastShadows(false);
+	m_SkyDomeElement->SetAffectedByLight(false);
 }
 
 void SkyColourGradient::SetAsCurrentShader()
 {
-	ShaderClass::SetShadersAndInputLayout(_colourGradientVS, _colourGradientPS, _inputLayout);
+	ShaderClass::SetShadersAndInputLayout(m_ColourGradientVS, m_ColourGradientPS, m_InputLayout);
 }
 
 void SkyColourGradient::Update(double deltaTime)
 {
-	_skyDomeElement->GetTransform()->SetPosition(_sceneCentre);
-	_skyDomeElement->Update(deltaTime);
+	m_SkyDomeElement->GetTransform()->SetPosition(m_SceneCentre);
+	m_SkyDomeElement->Update(deltaTime);
 }
 
 void SkyColourGradient::Render(Camera& camera, XMFLOAT3&  sunPos)
@@ -132,24 +135,24 @@ void SkyColourGradient::Render(Camera& camera, XMFLOAT3&  sunPos)
 	auto context = ApplicationNew::Get().GetContext();
 
 	RenderClass::DisableZBuffer();
-	RenderClass::SetRasterizerState(NO_CULL);
+	RenderClass::SetRasterizerState(RasterizerType::NO_CULL);
 
-	BufferClass::SetVertexShaderBuffers(&_matrixBuffer);
-	BufferClass::SetPixelShaderBuffers(&_gradientValuesBuffer);
+	BufferClass::SetVertexShaderBuffers(&m_MatrixBufferPtr);
+	BufferClass::SetPixelShaderBuffers(&m_GradientValuesBufferPtr);
 
 	SetAsCurrentShader();
 
 	GradientValuesBuffer colourValues;
-	colourValues.horizonColourDay = XMFLOAT4(0.7f, 0.80f, 0.92f, 1.0f);
-	colourValues.overheadColourDay = XMFLOAT4(0.17f, 0.26f, 0.69f, 1.0f);
+	colourValues.HorizonColourDay = XMFLOAT4(0.7f, 0.80f, 0.92f, 1.0f);
+	colourValues.OverheadColourDay = XMFLOAT4(0.17f, 0.26f, 0.69f, 1.0f);
 
-	colourValues.horizonColourSunrise = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
-	colourValues.overheadColourSunrise = XMFLOAT4(0.29f, 0.38f, 0.58f, 1.0f);
+	colourValues.HorizonColourSunrise = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
+	colourValues.OverheadColourSunrise = XMFLOAT4(0.29f, 0.38f, 0.58f, 1.0f);
 
-	colourValues.horizonColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
-	colourValues.overheadColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	colourValues.HorizonColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	colourValues.OverheadColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
 
-	colourValues.sunPos = sunPos;
+	colourValues.SunPos = sunPos;
 
 	MatrixBuffer matrixBufferValues;
 	
@@ -158,11 +161,11 @@ void SkyColourGradient::Render(Camera& camera, XMFLOAT3&  sunPos)
 	matrixBufferValues.View = XMMatrixTranspose(view);
 	matrixBufferValues.Projection = XMMatrixTranspose(proj);
 
-	XMMATRIX world = XMLoadFloat4x4(&_skyDomeElement->GetTransform()->GetWorld());
+	XMMATRIX world = XMLoadFloat4x4(&m_SkyDomeElement->GetTransform()->GetWorld());
 	matrixBufferValues.World = XMMatrixTranspose(world);
 
-	context->UpdateSubresource(_matrixBuffer, 0, nullptr, &matrixBufferValues, 0, 0);
-	context->UpdateSubresource(_gradientValuesBuffer, 0, nullptr, &colourValues, 0, 0);
+	context->UpdateSubresource(m_MatrixBufferPtr, 0, nullptr, &matrixBufferValues, 0, 0);
+	context->UpdateSubresource(m_GradientValuesBufferPtr, 0, nullptr, &colourValues, 0, 0);
 
-	_skyDomeElement->Draw();
+	m_SkyDomeElement->Draw();
 }

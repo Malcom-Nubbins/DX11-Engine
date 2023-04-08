@@ -26,9 +26,9 @@ public:
 	int GetSettingValue(SettingType const settingType, char const* settingName) const;
 	std::string GetSettingStringValue(SettingType const settingType, char const* settingName) const;
 	
-	std::vector<S_MaterialInfo> GetAllMaterials() const;
+	std::vector<MaterialInfo> GetAllMaterials() const;
 
-	S_ConfigInfo GetConfigByName(char const* const inConfigName) const;
+	ConfigInfo GetConfigByName(char const* const inConfigName) const;
 
 	void ReloadAllConfigs();
 
@@ -36,8 +36,8 @@ private:
 
 	std::string m_ConfigFilename;
 
-	std::vector<S_SettingNameValuePair> m_AllSettings;
+	std::vector<SettingNameValuePair> m_AllSettings;
 
-	std::vector<S_ConfigInfo> m_AllConfigs;
+	std::vector<ConfigInfo> m_AllConfigs;
 };
 

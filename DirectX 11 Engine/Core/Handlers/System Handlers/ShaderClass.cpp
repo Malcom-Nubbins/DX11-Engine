@@ -346,15 +346,15 @@ HRESULT ShaderClass::CreateSamplerStates()
 	return S_OK;
 }
 
-ID3D11SamplerState ** ShaderClass::GetSamplerState(SAMPLER_TYPE type)
+ID3D11SamplerState ** ShaderClass::GetSamplerState(SamplerType type)
 {
 	switch (type)
 	{
-	case LINEAR:
+	case SamplerType::LINEAR:
 		return &m_SSLinear;
-	case ANISOTROPIC:
+	case SamplerType::ANISOTROPIC:
 		return &m_SSAnisotropic;
-	case SHADOW:
+	case SamplerType::SHADOW:
 		return &m_SSShadowSamplerComparison;
 	default:
 		return &m_SSLinear;

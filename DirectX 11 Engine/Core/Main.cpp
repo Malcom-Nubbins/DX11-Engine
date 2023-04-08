@@ -11,7 +11,7 @@ std::map<std::string, UIAnchorPoint> g_AnchorEnumStrings;
 
 void ReportLiveObjects()
 {
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	IDXGIDebug1* dxgiDebug;
 	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
 

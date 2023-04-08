@@ -5,7 +5,7 @@
 #include "../Globals/AppValues.h"
 #include "../ApplicationNew.h"
 
-std::map<std::wstring, NewObjectMesh> ModelLoader::_modelCache;
+std::map<std::wstring, NewObjectMesh> ModelLoader::m_ModelCache;
 
 std::vector<std::string> ModelLoader::Split(const std::string& text, const std::string& delims)
 {
@@ -19,11 +19,11 @@ void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int** indice
 	SimpleVertex& v1 = vertices[*indices[ids[1]]];
 	SimpleVertex& v2 = vertices[*indices[ids[2]]];
 
-	XMVECTOR A = XMLoadFloat3(&v1.pos) - XMLoadFloat3(&v0.pos);
-	XMVECTOR B = XMLoadFloat3(&v2.pos) - XMLoadFloat3(&v0.pos);
+	XMVECTOR A = XMLoadFloat3(&v1.Pos) - XMLoadFloat3(&v0.Pos);
+	XMVECTOR B = XMLoadFloat3(&v2.Pos) - XMLoadFloat3(&v0.Pos);
 
-	XMVECTOR P = XMLoadFloat2(&v1.texCoord) - XMLoadFloat2(&v0.texCoord);
-	XMVECTOR Q = XMLoadFloat2(&v2.texCoord) - XMLoadFloat2(&v0.texCoord);
+	XMVECTOR P = XMLoadFloat2(&v1.TexCoord) - XMLoadFloat2(&v0.TexCoord);
+	XMVECTOR Q = XMLoadFloat2(&v2.TexCoord) - XMLoadFloat2(&v0.TexCoord);
 
 	XMFLOAT2 fP, fQ;
 	XMStoreFloat2(&fP, P); XMStoreFloat2(&fQ, Q);
@@ -74,24 +74,24 @@ void ModelLoader::CalculateTBN(std::vector<SimpleVertex>& vertices, int** indice
 	vOutput[0] = vOutput[0] - NdotT * vOutput[2];
 	vOutput[1] = vOutput[1] - NdotB * vOutput[2] - TdotB * vOutput[0];
 
-	XMStoreFloat3(&v0.normal, vOutput[2]);
-	XMStoreFloat3(&v0.tangent, vOutput[0]);
-	XMStoreFloat3(&v0.binormal, vOutput[1]);
+	XMStoreFloat3(&v0.Normal, vOutput[2]);
+	XMStoreFloat3(&v0.Tangent, vOutput[0]);
+	XMStoreFloat3(&v0.Binormal, vOutput[1]);
 }
 
 bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename, 
 							NewObjectMesh& modelMesh, bool invertFaces)
 {
-	if(_modelCache.find(filename) != _modelCache.end())
+	if(m_ModelCache.find(filename) != m_ModelCache.end())
 	{
-		modelMesh.vertexBuffer = _modelCache[filename].vertexBuffer;
-		modelMesh.numOfSubsets = _modelCache[filename].numOfSubsets;
-		modelMesh.subsets = _modelCache[filename].subsets;
+		modelMesh.VertexBuffer = m_ModelCache[filename].VertexBuffer;
+		modelMesh.NumOfSubsets = m_ModelCache[filename].NumOfSubsets;
+		modelMesh.Subsets = m_ModelCache[filename].Subsets;
 		return true;
 	}
 
 	modelMesh = NewObjectMesh();
-	modelMesh.numOfSubsets = 0;
+	modelMesh.NumOfSubsets = 0;
 
 	/*std::wstring binaryFilename = filename;
 	binaryFilename.append(L"Binary");
@@ -142,7 +142,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 			return true;
 
 		Subset subset = Subset();
-		subset.id = currId;
+		subset.Id = currId;
 
 
 		D3D11_BUFFER_DESC bd;
@@ -157,26 +157,26 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 		ZeroMemory(&initData, sizeof(initData));
 		initData.pSysMem = &indices[0];
 
-		auto hr = device->CreateBuffer(&bd, &initData, &subset.indexBuffer);
+		auto hr = device->CreateBuffer(&bd, &initData, &subset.IndexBuffer);
 		if (FAILED(hr))
 			return false;
 
-		subset.vertexBufferStride = sizeof(SimpleVertex);
-		subset.vertexBufferOffset = 0;
-		subset.indexCount = static_cast<UINT>(indices.size());
+		subset.VertexBufferStride = sizeof(SimpleVertex);
+		subset.VertexBufferOffset = 0;
+		subset.IndexCount = static_cast<UINT>(indices.size());
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING)
+#if defined(_DEBUG)
 		std::wstring const filenameWStr(filename.c_str());
 
 		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
 		
 		std::string const filenameStr(converter.to_bytes(filenameWStr));
 		std::string const indexBufferName = FormatCString("Index Buffer: %s", filenameStr.c_str());
-		subset.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(indexBufferName.length()), indexBufferName.c_str());
+		subset.IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(indexBufferName.length()), indexBufferName.c_str());
 #endif
 
-		modelMesh.subsets.push_back(subset);
-		modelMesh.numOfSubsets++;
+		modelMesh.Subsets.push_back(subset);
+		modelMesh.NumOfSubsets++;
 
 		vertexOffset += static_cast<UINT>(indices.size());
 		indices.clear();
@@ -333,17 +333,17 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 				{
 					SimpleVertex v{};
 
-					v.pos = verts[idPos];
+					v.Pos = verts[idPos];
 					if (idTex >= 0)
 					{
-						v.texCoord = texCoords[idTex];
+						v.TexCoord = texCoords[idTex];
 					}
 					else
 					{
-						v.texCoord = XMFLOAT2(0.0f, 0.0f);
+						v.TexCoord = XMFLOAT2(0.0f, 0.0f);
 					}
 
-					v.normal = normals[idNorm];
+					v.Normal = normals[idNorm];
 
 					vertices.push_back(v);
 					vertexIndex = static_cast<int>(vertices.size()) - 1;
@@ -435,17 +435,17 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 				{
 					SimpleVertex v{};
 
-					v.pos = verts[idPos];
+					v.Pos = verts[idPos];
 					if (idTex >= 0)
 					{
-						v.texCoord = texCoords[idTex];
+						v.TexCoord = texCoords[idTex];
 					}
 					else
 					{
-						v.texCoord = XMFLOAT2(0.0f, 0.0f);
+						v.TexCoord = XMFLOAT2(0.0f, 0.0f);
 					}
 
-					v.normal = normals[idNorm];
+					v.Normal = normals[idNorm];
 
 					vertices.push_back(v);
 					vertexIndex = static_cast<int>(vertices.size()) - 1;
@@ -530,8 +530,7 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 
 		delete[] cstr;
 
-		Tokens tokens;
-		tokens.tokensList = static_cast<char**>(malloc(tokensCount * sizeof(*tokens.tokensList)));
+		Tokens tokens(static_cast<char**>(malloc(tokensCount * sizeof(char**))));
 
 		if(tokens.tokensList)
 		{
@@ -656,27 +655,27 @@ bool ModelLoader::LoadModel(ID3D11Device* device, std::wstring filename,
 	ZeroMemory(&vInitData, sizeof(vInitData));
 	vInitData.pSysMem = &vertices[0];
 
-	auto hr = device->CreateBuffer(&vbd, &vInitData, &modelMesh.vertexBuffer);
+	auto hr = device->CreateBuffer(&vbd, &vInitData, &modelMesh.VertexBuffer);
 	if (FAILED(hr))
 		return false;
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	std::wstring const filenameWStr(filename.c_str());
 	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
 
 	std::string const filenameStr(converter.to_bytes(filenameWStr));
 	std::string const vertexBufferName = FormatCString("Vertex Buffer: %s", filenameStr.c_str());
-	modelMesh.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(vertexBufferName.length()), vertexBufferName.c_str());
+	modelMesh.VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, static_cast<UINT>(vertexBufferName.length()), vertexBufferName.c_str());
 #endif
 
-	_modelCache.insert(std::make_pair(filename, modelMesh));
+	m_ModelCache.insert(std::make_pair(filename, modelMesh));
 
 	return true;
 }
 
 void ModelLoader::UnloadAllModels()
 {
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
 	if (debugPtr)
 	{
@@ -684,7 +683,7 @@ void ModelLoader::UnloadAllModels()
 	}
 #endif
 
-	_modelCache.clear();
+	m_ModelCache.clear();
 
 	/*for (auto const modelCache : _modelCache)
 	{

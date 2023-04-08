@@ -80,7 +80,7 @@ void SceneHandler::GoToPreviousScene()
 
 	if (m_CurrSceneIndex < 0)
 	{
-		m_CurrSceneIndex = m_SceneInfos.size() - 1;
+		m_CurrSceneIndex = static_cast<int>(m_SceneInfos.size()) - 1;
 	}
 
 	LoadScenesFromSceneInfo(m_SceneInfos[m_CurrSceneIndex]);
@@ -261,22 +261,22 @@ void SceneHandler::LoadConfig()
 			std::string const yPos(positionNode->first_attribute("y")->value());
 			std::string const zPos(positionNode->first_attribute("z")->value());
 
-			StringHash const randPosStr(GetStringHash("rand"));
+			TStringHash const randPosStr(GetStringHash("rand"));
 
-			for (u32 idx = 0; idx < numOfObject; ++idx)
+			for (uint32 idx = 0; idx < static_cast<uint32>(numOfObject); ++idx)
 			{
 				float finalXPos = (GetStringHash(xPos) == randPosStr) ? MathsHandler::RandomFloat(-50, 50) : strtof(xPos.c_str(), nullptr);
 				float finalYPos = strtof(yPos.c_str(), nullptr);
 				float finalZPos = (GetStringHash(zPos) == randPosStr) ? MathsHandler::RandomFloat(-50, 50) : strtof(zPos.c_str(), nullptr);
 
-				const XMFLOAT3 position(finalXPos, finalYPos, finalZPos);
+				const XMFLOAT3 Position(finalXPos, finalYPos, finalZPos);
 
 				std::string finalObjName = objectName + " %d";
 				finalObjName = FormatCString(finalObjName.c_str(), idx);
 
 				NewElementInfos.emplace_back(finalObjName, numOfObject,
 					isFlatPlane, isTerrain, generatorWidth, generatorHeight, generatorSize,
-					position, scale, rotation,
+					Position, scale, rotation,
 					modelName, materialName, textureName, normalMapName, displacementMapName, specularMapName);
 			}
 		}

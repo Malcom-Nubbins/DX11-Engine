@@ -1,18 +1,18 @@
 #include "RenderClass.h"
 #include "../../ApplicationNew.h"
 
-ID3D11DepthStencilState* RenderClass::_depthDisabled(nullptr);
-ID3D11DepthStencilState* RenderClass::_depthEnabled(nullptr);
+ID3D11DepthStencilState* RenderClass::m_DepthDisabled(nullptr);
+ID3D11DepthStencilState* RenderClass::m_DepthEnabled(nullptr);
 
-ID3D11RasterizerState* RenderClass::_noCull(nullptr);
-ID3D11RasterizerState* RenderClass::_backCull(nullptr);
-ID3D11RasterizerState* RenderClass::_wireframe(nullptr);
-ID3D11RasterizerState* RenderClass::_shadow(nullptr);
+ID3D11RasterizerState* RenderClass::m_NoCull(nullptr);
+ID3D11RasterizerState* RenderClass::m_BackCull(nullptr);
+ID3D11RasterizerState* RenderClass::m_Wireframe(nullptr);
+ID3D11RasterizerState* RenderClass::m_Shadow(nullptr);
 
-ID3D11BlendState* RenderClass::_alphaBlendState(nullptr);
-ID3D11BlendState* RenderClass::_alphaBlendStateDisabled(nullptr);
+ID3D11BlendState* RenderClass::m_AlphaBlendState(nullptr);
+ID3D11BlendState* RenderClass::m_AlphaBlendStateDisabled(nullptr);
 
-bool RenderClass::_disableRTVClearing(false);
+bool RenderClass::m_DisableRTVClearing(false);
 
 RenderClass::RenderClass()
 {
@@ -25,46 +25,46 @@ RenderClass::~RenderClass()
 
 void RenderClass::Cleanup()
 {
-	_depthDisabled->Release();
-	_depthDisabled = nullptr;
+	m_DepthDisabled->Release();
+	m_DepthDisabled = nullptr;
 
-	_depthEnabled->Release();
-	_depthEnabled = nullptr;
+	m_DepthEnabled->Release();
+	m_DepthEnabled = nullptr;
 
-	if (_noCull)
+	if (m_NoCull)
 	{
-		_noCull->Release();
-		_noCull = nullptr;
+		m_NoCull->Release();
+		m_NoCull = nullptr;
 	}
 
-	if (_backCull)
+	if (m_BackCull)
 	{
-		_backCull->Release();
-		_backCull = nullptr;
+		m_BackCull->Release();
+		m_BackCull = nullptr;
 	}
 
-	if (_wireframe)
+	if (m_Wireframe)
 	{
-		_wireframe->Release();
-		_wireframe = nullptr;
+		m_Wireframe->Release();
+		m_Wireframe = nullptr;
 	}
 
-	if (_shadow)
+	if (m_Shadow)
 	{
-		_shadow->Release();
-		_shadow = nullptr;
+		m_Shadow->Release();
+		m_Shadow = nullptr;
 	}
 
-	if(_alphaBlendState)
+	if(m_AlphaBlendState)
 	{
-		_alphaBlendState->Release();
-		_alphaBlendState = nullptr;
+		m_AlphaBlendState->Release();
+		m_AlphaBlendState = nullptr;
 	}
 
-	if (_alphaBlendStateDisabled)
+	if (m_AlphaBlendStateDisabled)
 	{
-		_alphaBlendStateDisabled->Release();
-		_alphaBlendStateDisabled = nullptr;
+		m_AlphaBlendStateDisabled->Release();
+		m_AlphaBlendStateDisabled = nullptr;
 	}
 }
 
@@ -91,7 +91,7 @@ void RenderClass::Initialise()
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	device->CreateDepthStencilState(&depthStencilDesc, &_depthDisabled);
+	device->CreateDepthStencilState(&depthStencilDesc, &m_DepthDisabled);
 
 
 	ZeroMemory(&depthStencilDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
@@ -112,7 +112,7 @@ void RenderClass::Initialise()
 	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	device->CreateDepthStencilState(&depthStencilDesc, &_depthEnabled);
+	device->CreateDepthStencilState(&depthStencilDesc, &m_DepthEnabled);
 
 	D3D11_BLEND_DESC blendDesc;
 	ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
@@ -125,11 +125,11 @@ void RenderClass::Initialise()
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = 0x0f;
 
-	device->CreateBlendState(&blendDesc, &_alphaBlendState);
+	device->CreateBlendState(&blendDesc, &m_AlphaBlendState);
 
 	blendDesc.RenderTarget[0].BlendEnable = false;
 
-	device->CreateBlendState(&blendDesc, &_alphaBlendStateDisabled);
+	device->CreateBlendState(&blendDesc, &m_AlphaBlendStateDisabled);
 
 }
 
@@ -139,12 +139,12 @@ void RenderClass::ResizeViews()
 
 void RenderClass::DisableZBuffer()
 {
-	ApplicationNew::Get().GetContext()->OMSetDepthStencilState(_depthDisabled, 0);
+	ApplicationNew::Get().GetContext()->OMSetDepthStencilState(m_DepthDisabled, 0);
 }
 
 void RenderClass::EnableZBuffer()
 {
-	ApplicationNew::Get().GetContext()->OMSetDepthStencilState(_depthEnabled, 0);
+	ApplicationNew::Get().GetContext()->OMSetDepthStencilState(m_DepthEnabled, 0);
 }
 
 void RenderClass::EnableAlphaBlending()
@@ -155,7 +155,7 @@ void RenderClass::EnableAlphaBlending()
 	blendFactor[2] = 0.0f;
 	blendFactor[3] = 0.0f;
 
-	ApplicationNew::Get().GetContext()->OMSetBlendState(_alphaBlendState, blendFactor, 0xffffffff);
+	ApplicationNew::Get().GetContext()->OMSetBlendState(m_AlphaBlendState, blendFactor, 0xffffffff);
 }
 
 void RenderClass::DisableAlphaBlending()
@@ -166,28 +166,28 @@ void RenderClass::DisableAlphaBlending()
 	blendFactor[2] = 0.0f;
 	blendFactor[3] = 0.0f;
 
-	ApplicationNew::Get().GetContext()->OMSetBlendState(_alphaBlendStateDisabled, blendFactor, 0xffffffff);
+	ApplicationNew::Get().GetContext()->OMSetBlendState(m_AlphaBlendStateDisabled, blendFactor, 0xffffffff);
 }
 
 void RenderClass::EnableRtvClearing()
 {
-	_disableRTVClearing = false;
+	m_DisableRTVClearing = false;
 }
 
 void RenderClass::DisableRtvClearing()
 {
-	_disableRTVClearing = true;
+	m_DisableRTVClearing = true;
 }
 
-void RenderClass::SetRasterizerState(RASTERIZER_TYPE rasterizer)
+void RenderClass::SetRasterizerState(RasterizerType rasterizer)
 {
 	auto device = ApplicationNew::Get().GetDevice();
 	auto context = ApplicationNew::Get().GetContext();
 
 	switch (rasterizer)
 	{
-	case NO_CULL:
-		if (_noCull == nullptr)
+	case RasterizerType::NO_CULL:
+		if (m_NoCull == nullptr)
 		{
 			D3D11_RASTERIZER_DESC rasteriserdesc;
 			ZeroMemory(&rasteriserdesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -196,13 +196,13 @@ void RenderClass::SetRasterizerState(RASTERIZER_TYPE rasterizer)
 			rasteriserdesc.MultisampleEnable = true;
 			rasteriserdesc.AntialiasedLineEnable = false;
 			rasteriserdesc.FrontCounterClockwise = false;
-			device->CreateRasterizerState(&rasteriserdesc, &_noCull);
+			device->CreateRasterizerState(&rasteriserdesc, &m_NoCull);
 		}
-		context->RSSetState(_noCull);
+		context->RSSetState(m_NoCull);
 		break;
 
-	case BACK_CULL:
-		if (_backCull == nullptr)
+	case RasterizerType::BACK_CULL:
+		if (m_BackCull == nullptr)
 		{
 			D3D11_RASTERIZER_DESC rasteriserdesc;
 			ZeroMemory(&rasteriserdesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -211,25 +211,25 @@ void RenderClass::SetRasterizerState(RASTERIZER_TYPE rasterizer)
 			rasteriserdesc.MultisampleEnable = true;
 			rasteriserdesc.AntialiasedLineEnable = true;
 			rasteriserdesc.FrontCounterClockwise = false;
-			device->CreateRasterizerState(&rasteriserdesc, &_backCull);
+			device->CreateRasterizerState(&rasteriserdesc, &m_BackCull);
 		}
-		context->RSSetState(_backCull);
+		context->RSSetState(m_BackCull);
 		break;
 
-	case WIREFRAME:
-		if (_wireframe == nullptr)
+	case RasterizerType::WIREFRAME:
+		if (m_Wireframe == nullptr)
 		{
 			D3D11_RASTERIZER_DESC wfdesc;
 			ZeroMemory(&wfdesc, sizeof(D3D11_RASTERIZER_DESC));
 			wfdesc.FillMode = D3D11_FILL_WIREFRAME;
 			wfdesc.CullMode = D3D11_CULL_NONE;
-			device->CreateRasterizerState(&wfdesc, &_wireframe);
+			device->CreateRasterizerState(&wfdesc, &m_Wireframe);
 		}
-		context->RSSetState(_wireframe);
+		context->RSSetState(m_Wireframe);
 		break;
 
-	case SHADOWDEPTH:
-		if (_shadow == nullptr)
+	case RasterizerType::SHADOWDEPTH:
+		if (m_Shadow == nullptr)
 		{
 			D3D11_RASTERIZER_DESC ddesc;
 			ZeroMemory(&ddesc, sizeof(D3D11_RASTERIZER_DESC));
@@ -240,9 +240,9 @@ void RenderClass::SetRasterizerState(RASTERIZER_TYPE rasterizer)
 			ddesc.DepthBias = 5000;
 			ddesc.DepthBiasClamp = 0.0f;
 			ddesc.SlopeScaledDepthBias = 4.0f;
-			device->CreateRasterizerState(&ddesc, &_shadow);
+			device->CreateRasterizerState(&ddesc, &m_Shadow);
 		}
-		context->RSSetState(_shadow);
+		context->RSSetState(m_Shadow);
 		break;
 
 	default:
@@ -269,7 +269,7 @@ void RenderClass::SetRenderTargetAndDepthStencil(ID3D11RenderTargetView * render
 	else if (depthStencilView == nullptr && renderTarget != nullptr)
 		context->OMSetRenderTargets(1, &renderTarget, nullptr);
 
-	if (renderTarget != nullptr && _disableRTVClearing == false)
+	if (renderTarget != nullptr && m_DisableRTVClearing == false)
 		context->ClearRenderTargetView(renderTarget, clearColour);
 
 	if (depthStencilView != nullptr)

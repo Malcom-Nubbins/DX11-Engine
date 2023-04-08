@@ -1,12 +1,12 @@
 #include "FlatTerrain.h"
 #include "../../ApplicationNew.h"
 
-FlatTerrain::FlatTerrain() : _terrainGO(nullptr)
+FlatTerrain::FlatTerrain() : m_TerrainGO(nullptr)
 {
-	_gridVertices = std::vector<SimpleVertex>();
-	_vertexBuffer = nullptr;
-	_indexBuffer = nullptr;
-	_gridMesh = nullptr;
+	m_GridVertices = std::vector<SimpleVertex>();
+	m_VertexBuffer = nullptr;
+	m_IndexBuffer = nullptr;
+	m_GridMesh = nullptr;
 }
 
 
@@ -16,26 +16,26 @@ FlatTerrain::~FlatTerrain()
 
 void FlatTerrain::Cleanup()
 {
-	if (_vertexBuffer) _vertexBuffer->Release();
-	if (_indexBuffer) _indexBuffer->Release();
+	if (m_VertexBuffer) m_VertexBuffer->Release();
+	if (m_IndexBuffer) m_IndexBuffer->Release();
 	
-	delete _gridMesh;
-	_gridMesh = nullptr;
+	delete m_GridMesh;
+	m_GridMesh = nullptr;
 
-	if (_terrainGO != nullptr)
+	if (m_TerrainGO != nullptr)
 	{
-		_terrainGO->Cleanup();
-		delete _terrainGO;
-		_terrainGO = nullptr;
+		m_TerrainGO->Cleanup();
+		delete m_TerrainGO;
+		m_TerrainGO = nullptr;
 	}	
 }
 
 void FlatTerrain::SetTerrainValues(float terrainWidth, float terrainDepth, UINT sizeOfTerrain)
 {
-	_info.gridWidth = terrainWidth;
-	_info.gridDepth = terrainDepth;
-	_info.heightMapWidth = sizeOfTerrain;
-	_info.heightMapHeight = sizeOfTerrain;
+	m_Info.GridWidth = terrainWidth;
+	m_Info.GridDepth = terrainDepth;
+	m_Info.HeightMapWidth = sizeOfTerrain;
+	m_Info.HeightMapHeight = sizeOfTerrain;
 }
 
 void FlatTerrain::RegenerateTerrain()
@@ -45,61 +45,61 @@ void FlatTerrain::RegenerateTerrain()
 
 void FlatTerrain::GenerateTerrain()
 {
-	_info.cellSpacing = _info.gridWidth / _info.heightMapHeight;
+	m_Info.CellSpacing = m_Info.GridWidth / m_Info.HeightMapHeight;
 
-	UINT vertexCount = _info.heightMapWidth * _info.heightMapHeight;
-	UINT faceCount = (_info.heightMapWidth - 1)*(_info.heightMapHeight - 1) * 2;
+	UINT vertexCount = m_Info.HeightMapWidth * m_Info.HeightMapHeight;
+	UINT faceCount = (m_Info.HeightMapWidth - 1)*(m_Info.HeightMapHeight - 1) * 2;
 
-	float halfWidth = 0.5f * _info.gridWidth;
-	float halfDepth = 0.5f * _info.gridDepth;
+	float halfWidth = 0.5f * m_Info.GridWidth;
+	float halfDepth = 0.5f * m_Info.GridDepth;
 
-	float dx = _info.gridWidth / (_info.heightMapWidth - 1);
-	float dz = _info.gridDepth / (_info.heightMapHeight - 1);
+	float dx = m_Info.GridWidth / (m_Info.HeightMapWidth - 1);
+	float dz = m_Info.GridDepth / (m_Info.HeightMapHeight - 1);
 
-	float du = 10.0f / (_info.heightMapWidth - 1);
-	float dv = 10.0f / (_info.heightMapHeight - 1);
+	float du = 10.0f / (m_Info.HeightMapWidth - 1);
+	float dv = 10.0f / (m_Info.HeightMapHeight - 1);
 
-	_gridMesh = new GridMeshData();
-	_gridMesh->Vertices.resize(vertexCount);
+	m_GridMesh = new GridMeshData();
+	m_GridMesh->Vertices.resize(vertexCount);
 
-	for (UINT i = 0; i < _info.heightMapWidth; ++i)
+	for (UINT i = 0; i < m_Info.HeightMapWidth; ++i)
 	{
 		float z = halfDepth - i * dz;
 
-		for (UINT j = 0; j < _info.heightMapHeight; ++j)
+		for (UINT j = 0; j < m_Info.HeightMapHeight; ++j)
 		{
 			float x = -halfWidth + j * dx;
 
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].position = XMFLOAT3(x, 0.0f, z);
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].texCoord.x = j * du;
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].texCoord.y = i * dv;
+			m_GridMesh->Vertices[i*m_Info.HeightMapHeight + j].Position = XMFLOAT3(x, 0.0f, z);
+			m_GridMesh->Vertices[i*m_Info.HeightMapHeight + j].Normal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+			m_GridMesh->Vertices[i*m_Info.HeightMapHeight + j].TexCoord.x = j * du;
+			m_GridMesh->Vertices[i*m_Info.HeightMapHeight + j].TexCoord.y = i * dv;
 
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].tangent = XMFLOAT3(0.0f, 0.0f, 0.0f);
-			_gridMesh->Vertices[i*_info.heightMapHeight + j].binormal = XMFLOAT3(0.0f, 0.0f, 0.0f);
+			m_GridMesh->Vertices[i*m_Info.HeightMapHeight + j].Tangent = XMFLOAT3(0.0f, 0.0f, 0.0f);
+			m_GridMesh->Vertices[i*m_Info.HeightMapHeight + j].Binormal = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		}
 	}
 
 
 
-	for (UINT i = 0; i < _gridMesh->Vertices.size(); ++i)
+	for (UINT i = 0; i < m_GridMesh->Vertices.size(); ++i)
 	{
-		_heights.push_back(_gridMesh->Vertices[i].position.y);
+		m_Heights.push_back(m_GridMesh->Vertices[i].Position.y);
 	}
 
-	_gridMesh->Indices.resize(faceCount * 3);
+	m_GridMesh->Indices.resize(faceCount * 3);
 
 	UINT k = 0;
-	for (UINT i = 0; i < _info.heightMapWidth - 1; ++i)
+	for (UINT i = 0; i < m_Info.HeightMapWidth - 1; ++i)
 	{
-		for (UINT j = 0; j < _info.heightMapHeight - 1; ++j)
+		for (UINT j = 0; j < m_Info.HeightMapHeight - 1; ++j)
 		{
-			_gridMesh->Indices[k] = i * _info.heightMapHeight + j;
-			_gridMesh->Indices[k + 1] = i * _info.heightMapHeight + j + 1;
-			_gridMesh->Indices[k + 2] = (i + 1)*_info.heightMapHeight + j;
-			_gridMesh->Indices[k + 3] = (i + 1)*_info.heightMapHeight + j;
-			_gridMesh->Indices[k + 4] = i * _info.heightMapHeight + j + 1;
-			_gridMesh->Indices[k + 5] = (i + 1)*_info.heightMapHeight + j + 1;
+			m_GridMesh->Indices[k] = i * m_Info.HeightMapHeight + j;
+			m_GridMesh->Indices[k + 1] = i * m_Info.HeightMapHeight + j + 1;
+			m_GridMesh->Indices[k + 2] = (i + 1)*m_Info.HeightMapHeight + j;
+			m_GridMesh->Indices[k + 3] = (i + 1)*m_Info.HeightMapHeight + j;
+			m_GridMesh->Indices[k + 4] = i * m_Info.HeightMapHeight + j + 1;
+			m_GridMesh->Indices[k + 5] = (i + 1)*m_Info.HeightMapHeight + j + 1;
 			k += 6;
 		}
 	}
@@ -112,61 +112,61 @@ HRESULT FlatTerrain::CreateBuffers()
 {
 	HRESULT hr;
 	// Vertex Buffer
-	_gridVertices.resize(_gridMesh->Vertices.size());
+	m_GridVertices.resize(m_GridMesh->Vertices.size());
 	UINT k = 0;
 
-	for (size_t i = 0; i < _gridMesh->Vertices.size(); i++, k++)
+	for (size_t i = 0; i < m_GridMesh->Vertices.size(); i++, k++)
 	{
-		_gridVertices[k].pos = _gridMesh->Vertices[i].position;
-		_gridVertices[k].normal = _gridMesh->Vertices[i].normal;
-		_gridVertices[k].texCoord = _gridMesh->Vertices[i].texCoord;
-		_gridVertices[k].tangent = _gridMesh->Vertices[i].tangent;
-		_gridVertices[k].binormal = _gridMesh->Vertices[i].binormal;
+		m_GridVertices[k].Pos = m_GridMesh->Vertices[i].Position;
+		m_GridVertices[k].Normal = m_GridMesh->Vertices[i].Normal;
+		m_GridVertices[k].TexCoord = m_GridMesh->Vertices[i].TexCoord;
+		m_GridVertices[k].Tangent = m_GridMesh->Vertices[i].Tangent;
+		m_GridVertices[k].Binormal = m_GridMesh->Vertices[i].Binormal;
 	}
 
 	D3D11_BUFFER_DESC vbd;
 	ZeroMemory(&vbd, sizeof(vbd));
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = sizeof(SimpleVertex) * static_cast<UINT>(_gridMesh->Vertices.size());
+	vbd.ByteWidth = sizeof(SimpleVertex) * static_cast<UINT>(m_GridMesh->Vertices.size());
 	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vbd.CPUAccessFlags = 0;
 	vbd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA InitGridData;
 	ZeroMemory(&InitGridData, sizeof(InitGridData));
-	InitGridData.pSysMem = &_gridVertices[0];
+	InitGridData.pSysMem = &m_GridVertices[0];
 
-	hr = ApplicationNew::Get().GetDevice()->CreateBuffer(&vbd, &InitGridData, &_vertexBuffer);
+	hr = ApplicationNew::Get().GetDevice()->CreateBuffer(&vbd, &InitGridData, &m_VertexBuffer);
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 	
 	// Index Buffer
-	_gridIndices.insert(_gridIndices.end(), _gridMesh->Indices.begin(), _gridMesh->Indices.end());
+	m_GridIndices.insert(m_GridIndices.end(), m_GridMesh->Indices.begin(), m_GridMesh->Indices.end());
 
 	D3D11_BUFFER_DESC ibd;
 	ZeroMemory(&ibd, sizeof(ibd));
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = sizeof(LONG) * static_cast<UINT>(_gridMesh->Indices.size());
+	ibd.ByteWidth = sizeof(LONG) * static_cast<UINT>(m_GridMesh->Indices.size());
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
 
 	D3D11_SUBRESOURCE_DATA InitGridIndexData;
 	ZeroMemory(&InitGridIndexData, sizeof(InitGridIndexData));
-	InitGridIndexData.pSysMem = &_gridIndices[0];
+	InitGridIndexData.pSysMem = &m_GridIndices[0];
 
-	hr = ApplicationNew::Get().GetDevice()->CreateBuffer(&ibd, &InitGridIndexData, &_indexBuffer);
+	hr = ApplicationNew::Get().GetDevice()->CreateBuffer(&ibd, &InitGridIndexData, &m_IndexBuffer);
 	if (FAILED(hr))
 		return hr;
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	char const flatTerrainVBName[] = "FlatTerrainVB";
-	_vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(flatTerrainVBName) - 1, flatTerrainVBName);
+	m_VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(flatTerrainVBName) - 1, flatTerrainVBName);
 
 	char const flatTerrainIBName[] = "FlatTerrainIB";
-	_indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(flatTerrainIBName) - 1, flatTerrainIBName);
+	m_IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(flatTerrainIBName) - 1, flatTerrainIBName);
 #endif
 
 	return S_OK;
@@ -176,89 +176,89 @@ void FlatTerrain::GetNormals(UINT faceCount, UINT vertexCount)
 {
 	for (UINT i = 0; i < faceCount; ++i)
 	{
-		UINT i0 = _gridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 0];
-		UINT i1 = _gridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 1];
-		UINT i2 = _gridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 2];
+		UINT i0 = m_GridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 0];
+		UINT i1 = m_GridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 1];
+		UINT i2 = m_GridMesh->Indices[static_cast<std::vector<UINT, std::allocator<UINT>>::size_type>(i) * 3 + 2];
 
 		TempVertex v1, v2, v3;
-		v1.pos = _gridMesh->Vertices[i0].position;
-		v2.pos = _gridMesh->Vertices[i1].position;
-		v3.pos = _gridMesh->Vertices[i2].position;
+		v1.Pos = m_GridMesh->Vertices[i0].Position;
+		v2.Pos = m_GridMesh->Vertices[i1].Position;
+		v3.Pos = m_GridMesh->Vertices[i2].Position;
 
-		XMFLOAT3 e0Float = MathsHandler::Subtract(v2.pos, v1.pos);
-		XMFLOAT3 e1Float = MathsHandler::Subtract(v3.pos, v1.pos);
+		XMFLOAT3 e0Float = MathsHandler::Subtract(v2.Pos, v1.Pos);
+		XMFLOAT3 e1Float = MathsHandler::Subtract(v3.Pos, v1.Pos);
 		XMVECTOR e0 = XMLoadFloat3(&e0Float);
 		XMVECTOR e1 = XMLoadFloat3(&e1Float);
 		XMVECTOR normal = XMVector3Cross(e0, e1);
 		XMFLOAT3 normalFloat;
 		XMStoreFloat3(&normalFloat, normal);
 
-		_gridMesh->Vertices[i0].normal = MathsHandler::Add(_gridMesh->Vertices[i0].normal, normalFloat);
-		_gridMesh->Vertices[i1].normal = MathsHandler::Add(_gridMesh->Vertices[i1].normal, normalFloat);
-		_gridMesh->Vertices[i2].normal = MathsHandler::Add(_gridMesh->Vertices[i2].normal, normalFloat);
+		m_GridMesh->Vertices[i0].Normal = MathsHandler::Add(m_GridMesh->Vertices[i0].Normal, normalFloat);
+		m_GridMesh->Vertices[i1].Normal = MathsHandler::Add(m_GridMesh->Vertices[i1].Normal, normalFloat);
+		m_GridMesh->Vertices[i2].Normal = MathsHandler::Add(m_GridMesh->Vertices[i2].Normal, normalFloat);
 
-		v1.pos = _gridMesh->Vertices[i0].position;
-		v1.normal = _gridMesh->Vertices[i0].normal;
-		v1.tex = _gridMesh->Vertices[i0].texCoord;
+		v1.Pos = m_GridMesh->Vertices[i0].Position;
+		v1.Normal = m_GridMesh->Vertices[i0].Normal;
+		v1.TexCoord = m_GridMesh->Vertices[i0].TexCoord;
 
-		v2.pos = _gridMesh->Vertices[i1].position;
-		v2.normal = _gridMesh->Vertices[i1].normal;
-		v2.tex = _gridMesh->Vertices[i1].texCoord;
+		v2.Pos = m_GridMesh->Vertices[i1].Position;
+		v2.Normal = m_GridMesh->Vertices[i1].Normal;
+		v2.TexCoord = m_GridMesh->Vertices[i1].TexCoord;
 
-		v3.pos = _gridMesh->Vertices[i2].position;
-		v3.normal = _gridMesh->Vertices[i2].normal;
-		v3.tex = _gridMesh->Vertices[i2].texCoord;
+		v3.Pos = m_GridMesh->Vertices[i2].Position;
+		v3.Normal = m_GridMesh->Vertices[i2].Normal;
+		v3.TexCoord = m_GridMesh->Vertices[i2].TexCoord;
 
-		_gridMesh->Vertices[i0].tangent = MathsHandler::CalculateTangent(v1, v2, v3);
-		_gridMesh->Vertices[i1].tangent = MathsHandler::CalculateTangent(v1, v2, v3);
-		_gridMesh->Vertices[i2].tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		m_GridMesh->Vertices[i0].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		m_GridMesh->Vertices[i1].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
+		m_GridMesh->Vertices[i2].Tangent = MathsHandler::CalculateTangent(v1, v2, v3);
 
-		_gridMesh->Vertices[i0].binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
-		_gridMesh->Vertices[i1].binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
-		_gridMesh->Vertices[i2].binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		m_GridMesh->Vertices[i0].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		m_GridMesh->Vertices[i1].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
+		m_GridMesh->Vertices[i2].Binormal = MathsHandler::CalculateBinormal(v1, v2, v3);
 
 	}
 
 	for (UINT i = 0; i < vertexCount; ++i)
 	{
-		XMVECTOR normal = XMLoadFloat3(&_gridMesh->Vertices[i].normal);
+		XMVECTOR normal = XMLoadFloat3(&m_GridMesh->Vertices[i].Normal);
 		XMVector3Normalize(normal);
-		XMStoreFloat3(&_gridMesh->Vertices[i].normal, normal);
+		XMStoreFloat3(&m_GridMesh->Vertices[i].Normal, normal);
 	}
 }
 
 void FlatTerrain::Update(float deltaTime)
 {
-	_terrainGO->Update(deltaTime);
+	m_TerrainGO->Update(deltaTime);
 }
 
 void FlatTerrain::DepthNormalDraw(MatrixBuffer mb, ID3D11Buffer * constBuffer)
 {
-	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
+	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&m_TerrainGO->GetTransform()->GetWorld()));
 	ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-	_terrainGO->Draw();
+	m_TerrainGO->Draw();
 }
 
 void FlatTerrain::ShadowDraw(ShadowDepthMatrixBuffer mb, ID3D11Buffer * constBuffer)
 {
-	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&_terrainGO->GetTransform()->GetWorld()));
+	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&m_TerrainGO->GetTransform()->GetWorld()));
 	ApplicationNew::Get().GetContext()->UpdateSubresource(constBuffer, 0, nullptr, &mb, 0, 0);
-	_terrainGO->Draw();
+	m_TerrainGO->Draw();
 }
 
 void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * matrixBuffer, ID3D11Buffer* objValuesBuffer, ID3D11ShaderResourceView * texArray[])
 {
 	auto context = ApplicationNew::Get().GetContext();
 
-	auto* transform = _terrainGO->GetTransform();
-	auto* appearance = _terrainGO->GetAppearance();
+	auto* transform = m_TerrainGO->GetTransform();
+	auto* appearance = m_TerrainGO->GetAppearance();
 
 	auto material = appearance->GetObjectMaterial();
 
 	// Copy material to shader
-	cb.surface.ambient = material.ambient;
-	cb.surface.diffuse = material.diffuse;
-	cb.surface.specular = material.specular;
+	cb.Surface.Ambient = material.Ambient;
+	cb.Surface.Diffuse = material.Diffuse;
+	cb.Surface.Specular = material.Specular;
 
 	// Set world matrix
 	mb.World = XMMatrixTranspose(XMLoadFloat4x4(&transform->GetWorld()));
@@ -269,50 +269,50 @@ void FlatTerrain::Draw(MatrixBuffer mb, ObjectValuesBuffer cb, ID3D11Buffer * ma
 	{
 		texture = appearance->GetColourTex();
 		context->PSSetShaderResources(0, 1, &texture);
-		cb.useColourTex = 1.0f;
+		cb.UseColourTex = 1.0f;
 	}
 	else
 	{
-		cb.useColourTex = 0.0f;
+		cb.UseColourTex = 0.0f;
 	}
 
 	if (appearance->HasNormalMap())
 	{
-		cb.useBumpMap = 1.0f;
+		cb.UseBumpMap = 1.0f;
 		texture = appearance->GetNormalMap();
 		context->PSSetShaderResources(2, 1, &texture);
 	}
 	else
 	{
-		cb.useBumpMap = 0.0f;
+		cb.UseBumpMap = 0.0f;
 	}
 
-	if (_terrainGO->IsAffectedByLight())
+	if (m_TerrainGO->IsAffectedByLight())
 	{
-		cb.affectedByLight = 1.0f;
+		cb.AffectedByLight = 1.0f;
 	}
 	else
 	{
-		cb.affectedByLight = 0.0f;
+		cb.AffectedByLight = 0.0f;
 	}
 
 	// Update constant buffer
 	context->UpdateSubresource(matrixBuffer, 0, nullptr, &mb, 0, 0);
 	context->UpdateSubresource(objValuesBuffer, 0, nullptr, &cb, 0, 0);
-	_terrainGO->Draw();
+	m_TerrainGO->Draw();
 }
 
 float FlatTerrain::GetWidth()
 {
-	return _info.gridWidth * _terrainGO->GetTransform()->GetScale().x;
+	return m_Info.GridWidth * m_TerrainGO->GetTransform()->GetScale().x;
 }
 
 float FlatTerrain::GetDepth()
 {
-	return _info.gridDepth * _terrainGO->GetTransform()->GetScale().z;
+	return m_Info.GridDepth * m_TerrainGO->GetTransform()->GetScale().z;
 }
 
 float FlatTerrain::GetHeight(float camX, float camZ)
 {
-	return _terrainGO->GetTransform()->GetPosition().y;
+	return m_TerrainGO->GetTransform()->GetPosition().y;
 }

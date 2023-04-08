@@ -1,20 +1,19 @@
 #pragma once
-#include <windows.h>
-#include <windowsx.h>
-#include <sstream>
+#include <algorithm>
 #include <assert.h>
 #include <d3d11_1.h>
 #include <d3dcompiler.h>
-#include <directxmath.h>
 #include <directxcolors.h>
+#include <directxmath.h>
+#include <dxgi1_6.h>
+#include <map>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <stdexcept>
-#include <map>
-
-#include <dxgi1_6.h>
-
 #include <wrl.h>
+#include <windows.h>
+#include <windowsx.h>
 
 using namespace Microsoft::WRL;
 
@@ -28,18 +27,16 @@ using namespace Microsoft::WRL;
 
 #pragma warning(disable : 4996)
 
-#include <algorithm>
+typedef ComPtr<ID3D11Buffer> TVertexBufferPtr;
+typedef ComPtr<ID3D11Buffer> TIndexBufferPtr;
 
-typedef ComPtr<ID3D11Buffer> VertexBuffer;
-typedef ComPtr<ID3D11Buffer> IndexBuffer;
+typedef unsigned __int64 uint64;
+typedef unsigned __int32 uint32;
+typedef unsigned char uint8;
 
-typedef unsigned __int64 u64;
-typedef unsigned __int32 u32;
-typedef unsigned char u8;
+typedef size_t TStringHash;
 
-typedef size_t StringHash;
-
-enum SAMPLER_TYPE
+enum class SamplerType
 {
 	LINEAR,
 	ANISOTROPIC,
@@ -50,7 +47,7 @@ enum SAMPLER_TYPE
 	BLURPOINT*/
 };
 
-enum RASTERIZER_TYPE
+enum class RasterizerType
 {
 	NO_CULL,
 	BACK_CULL,
@@ -58,18 +55,7 @@ enum RASTERIZER_TYPE
 	SHADOWDEPTH
 };
 
-enum SYSTEM_HANDLER
-{
-	D3D,
-	SHADER,
-	RENDER,
-	BUFFER,
-	WINDOW,
-	INP,
-	TEXTURE
-};
-
-enum class MovementState : u8
+enum class MovementState : uint8
 {
 	None = 0x00,
 	Forward = 0x01,
@@ -153,25 +139,24 @@ inline UIAnchorPoint GetAnchorEnumValueFromString(std::string& inString)
 
 inline constexpr MovementState operator~(MovementState a) 
 {
-	return static_cast<MovementState>(~static_cast<u8>(a));
+	return static_cast<MovementState>(~static_cast<uint8>(a));
 }
 
 inline constexpr MovementState operator|(MovementState lhs, MovementState const& rhs)
 {
-	return static_cast<MovementState>(static_cast<u8>(lhs) | static_cast<u8>(rhs));
+	return static_cast<MovementState>(static_cast<uint8>(lhs) | static_cast<uint8>(rhs));
 }
 
 inline constexpr MovementState operator&(MovementState lhs, MovementState const& rhs)
 {
-	return static_cast<MovementState>(static_cast<u8>(lhs) & static_cast<u8>(rhs));
+	return static_cast<MovementState>(static_cast<uint8>(lhs) & static_cast<uint8>(rhs));
 }
 
 inline constexpr MovementState& operator|=(MovementState& lhs, MovementState rhs)
 {
-	lhs = static_cast<MovementState>(static_cast<u8>(lhs) | static_cast<u8>(rhs));
+	lhs = static_cast<MovementState>(static_cast<uint8>(lhs) | static_cast<uint8>(rhs));
 	return lhs;
 }
-
 
 
 inline void ThrowIfFailed(HRESULT const hr)
@@ -224,7 +209,7 @@ std::string FormatCString(char const* const format, Args ... args)
 	return std::string(buff.get(), buff.get() + size - 1);
 }
 
-inline StringHash GetStringHash(std::string const str)
+inline TStringHash GetStringHash(std::string const str)
 {
 	std::hash<std::string> hasher;
 	return hasher(str);

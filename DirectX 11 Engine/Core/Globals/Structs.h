@@ -6,11 +6,11 @@ using namespace DirectX;
 
 struct SimpleVertex
 {
-	XMFLOAT3 pos;
-	XMFLOAT3 normal;
-	XMFLOAT2 texCoord;
-	XMFLOAT3 tangent;
-	XMFLOAT3 binormal;
+	XMFLOAT3 Pos;
+	XMFLOAT3 Normal;
+	XMFLOAT2 TexCoord;
+	XMFLOAT3 Tangent;
+	XMFLOAT3 Binormal;
 
 	bool operator<(const SimpleVertex other) const
 	{
@@ -20,158 +20,158 @@ struct SimpleVertex
 
 struct TerrainVertex
 {
-	XMFLOAT3 position;
-	XMFLOAT3 normal;
-	XMFLOAT2 texCoord;
-	XMFLOAT3 tangent;
-	XMFLOAT3 binormal;
+	XMFLOAT3 Position;
+	XMFLOAT3 Normal;
+	XMFLOAT2 TexCoord;
+	XMFLOAT3 Tangent;
+	XMFLOAT3 Binormal;
 
-	TerrainVertex() : binormal(), normal(), position(), tangent(), texCoord() {}
-	TerrainVertex(const XMFLOAT3& pos, const XMFLOAT3& norm, const XMFLOAT3& tangent, const XMFLOAT3& binormal, const XMFLOAT2& tex) : position(pos), normal(norm), texCoord(tex), tangent(tangent), binormal(binormal) {}
+	TerrainVertex() : Binormal(), Normal(), Position(), Tangent(), TexCoord() {}
+	TerrainVertex(const XMFLOAT3& pos, const XMFLOAT3& norm, const XMFLOAT3& tangent, const XMFLOAT3& binormal, const XMFLOAT2& tex) : Position(pos), Normal(norm), TexCoord(tex), Tangent(tangent), Binormal(binormal) {}
 	TerrainVertex(const float px, const float py, const float pz,
 	              const float nx, const float ny, const float nz,
 	              const float tangx, const float tangy, const float tangz,
 				const float binx, const float biny, const float binz,
-	              const float texu, const float texv) : position(px, py, pz), normal(nx, ny, nz), texCoord(texu, texv), tangent(tangx, tangy, tangz), binormal(binx, biny, binz) {}
+	              const float texu, const float texv) : Position(px, py, pz), Normal(nx, ny, nz), TexCoord(texu, texv), Tangent(tangx, tangy, tangz), Binormal(binx, biny, binz) {}
 };
 
 struct Subset
 {
-	Subset() : vertexBuffer(nullptr), indexBuffer(nullptr), vertexBufferStride(0), vertexBufferOffset(0), id(-1),
-	           indexCount(0)
+	Subset() : VertexBuffer(nullptr), IndexBuffer(nullptr), VertexBufferStride(0), VertexBufferOffset(0), Id(-1),
+	           IndexCount(0)
 	{
 	}
 
-	VertexBuffer vertexBuffer;
-	IndexBuffer indexBuffer;
+	TVertexBufferPtr VertexBuffer;
+	TIndexBufferPtr IndexBuffer;
 
-	UINT vertexBufferStride;
-	UINT vertexBufferOffset;
-	UINT id;
+	UINT VertexBufferStride;
+	UINT VertexBufferOffset;
+	UINT Id;
 
-	UINT indexCount;
+	UINT IndexCount;
 };
 
 struct TempVertex
 {
-	XMFLOAT3 pos;
-	XMFLOAT3 normal;
-	XMFLOAT2 tex;
+	XMFLOAT3 Pos;
+	XMFLOAT3 Normal;
+	XMFLOAT2 TexCoord;
 };
 
 struct SimpleQuad
 {
-	XMFLOAT3 pos;
-	XMFLOAT2 texCoord;
+	XMFLOAT3 Pos;
+	XMFLOAT2 TexCoord;
 };
 
 struct NewObjectMesh
 {
 	NewObjectMesh() 
-		: vertexBuffer(nullptr)
-		, numOfSubsets(0) 
+		: VertexBuffer(nullptr)
+		, NumOfSubsets(0) 
 	{}
 
 	void IncreaseRefs()
 	{
-		if (vertexBuffer)
+		if (VertexBuffer)
 		{
-			vertexBuffer->AddRef();
+			VertexBuffer->AddRef();
 		}
 
-		for (auto const subset : subsets)
+		for (const Subset& subset : Subsets)
 		{
-			if (subset.vertexBuffer)
+			if (subset.VertexBuffer)
 			{
-				subset.vertexBuffer->AddRef();
+				subset.VertexBuffer->AddRef();
 			}
 
-			if (subset.indexBuffer)
+			if (subset.IndexBuffer)
 			{
-				subset.indexBuffer->AddRef();
+				subset.IndexBuffer->AddRef();
 			}
 		}
 	}
 
-	VertexBuffer vertexBuffer;
-	UINT numOfSubsets;
-	std::vector<Subset> subsets;
+	TVertexBufferPtr VertexBuffer;
+	UINT NumOfSubsets;
+	std::vector<Subset> Subsets;
 };
 
 struct ObjectMesh
 {
-	ObjectMesh() : vertexBuffer(nullptr)
-		, indexBuffer(nullptr)
+	ObjectMesh() : VertexBuffer(nullptr)
+		, IndexBuffer(nullptr)
 		, vertexBufferStride(0)
-		, vertexBufferOffset(0)
+		, VertexBufferOffset(0)
 	{}
 
-	VertexBuffer vertexBuffer;
-	IndexBuffer indexBuffer;
+	TVertexBufferPtr VertexBuffer;
+	TIndexBufferPtr IndexBuffer;
 
 	UINT vertexBufferStride;
-	UINT vertexBufferOffset;
-	size_t numberOfIndices = 0;
+	UINT VertexBufferOffset;
+	size_t NumberOfIndices = 0;
 };
 
 struct SurfaceMaterial
 {
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
-	XMFLOAT4 specular;
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Specular;
 };
 
 struct DirectionalLight
 {
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
-	XMFLOAT4 specular;
-	XMFLOAT3 lightDirection;
-	float padding;
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Specular;
+	XMFLOAT3 LightDirection;
+	float Padding;
 };
 
 struct PointLight
 {
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
-	XMFLOAT4 specular;
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Specular;
 
-	XMFLOAT3 position;
-	float range;
+	XMFLOAT3 Position;
+	float Range;
 
-	XMFLOAT3 attenuation;
-	float padding;
+	XMFLOAT3 Attenuation;
+	float Padding;
 };
 
 struct SpotLight
 {
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
-	XMFLOAT4 specular;
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Specular;
 
-	XMFLOAT3 position;
-	float range;
+	XMFLOAT3 Position;
+	float Range;
 
-	XMFLOAT3 direction;
-	float spot;
+	XMFLOAT3 Direction;
+	float Spot;
 
-	XMFLOAT3 attenuation;
-	float padding;
+	XMFLOAT3 Attenuation;
+	float Padding;
 };
 
 struct ObjectMaterial
 {
 	ObjectMaterial(XMFLOAT4 const inAmb, XMFLOAT4 const inDiff, XMFLOAT4 const inSpec)
-		: diffuse(inDiff), ambient(inAmb), specular(inSpec)
+		: Diffuse(inDiff), Ambient(inAmb), Specular(inSpec)
 	{}
 
 	ObjectMaterial()
-		: diffuse(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)), ambient(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)), specular(XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f))
+		: Diffuse(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)), Ambient(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)), Specular(XMFLOAT4(1.0f, 1.0f, 1.0f, 0.5f))
 	{}
 
-	XMFLOAT4 diffuse;
-	XMFLOAT4 ambient;
-	XMFLOAT4 specular;
+	XMFLOAT4 Diffuse;
+	XMFLOAT4 Ambient;
+	XMFLOAT4 Specular;
 };
 
 struct MatrixBuffer
@@ -208,43 +208,43 @@ struct CamLightBuffer
 
 struct ObjectValuesBuffer
 {
-	SurfaceMaterial surface;
-	DirectionalLight dirLight;
-	PointLight pointLight[96];
-	SpotLight spotLight;
+	SurfaceMaterial Surface;
+	DirectionalLight DirLight;
+	PointLight PointLight[96];
+	SpotLight SpotLight;
 
-	float useColourTex;
-	float useBumpMap;
-	float usePointLights;
-	float numOfLights;
+	float UseColourTex;
+	float UseBumpMap;
+	float UsePointLights;
+	float NumOfLights;
 
 	XMFLOAT3 EyePos;
-	float affectedByLight;
+	float AffectedByLight;
 
-	float useSpecularMap;
-	XMFLOAT3 padding;
+	float UseSpecularMap;
+	XMFLOAT3 Padding;
 };
 
 struct GradientValuesBuffer
 {
-	XMFLOAT4 horizonColourSunrise;
-	XMFLOAT4 overheadColourSunrise;
+	XMFLOAT4 HorizonColourSunrise;
+	XMFLOAT4 OverheadColourSunrise;
 
-	XMFLOAT4 horizonColourDay;
-	XMFLOAT4 overheadColourDay;
+	XMFLOAT4 HorizonColourDay;
+	XMFLOAT4 OverheadColourDay;
 
-	XMFLOAT4 horizonColourNight;
-	XMFLOAT4 overheadColourNight;
+	XMFLOAT4 HorizonColourNight;
+	XMFLOAT4 OverheadColourNight;
 
-	XMFLOAT3 sunPos;
-	float pad;
+	XMFLOAT3 SunPos;
+	float Pad;
 };
 
 struct FogValuesBuffer
 {
 	float FogStart;
 	float FogRange;
-	float sunHeight;
+	float SunHeight;
 	float UseFog;
 
 	XMFLOAT4 FogColourDay;
@@ -254,62 +254,62 @@ struct FogValuesBuffer
 
 struct HeatHazeValues
 {
-	float time;
-	float heatwave;
-	float blizzard;
-	unsigned int sampleCount;;
+	float Time;
+	float Heatwave;
+	float Blizzard;
+	unsigned int SampleCount;
 };
 
 struct FullscreenQuadValues
 {
-	unsigned int sampleCount;
-	XMFLOAT3 padding;
+	unsigned int SampleCount;
+	XMFLOAT3 Padding;
 };
 
-struct S_MaterialInfo final
+struct MaterialInfo final
 {
-	S_MaterialInfo(char const* inMaterialName, XMFLOAT4 const inMatAmbient, XMFLOAT4 const inMatDiffuse, XMFLOAT4 const inMatSpecular)
-		: m_MaterialName(inMaterialName), m_MaterialAmbient(inMatAmbient), m_MaterialDiffuse(inMatDiffuse), m_MaterialSpecular(inMatSpecular)
+	MaterialInfo(char const* inMaterialName, XMFLOAT4 const inMatAmbient, XMFLOAT4 const inMatDiffuse, XMFLOAT4 const inMatSpecular)
+		: MaterialName(inMaterialName), MaterialAmbient(inMatAmbient), MaterialDiffuse(inMatDiffuse), MaterialSpecular(inMatSpecular)
 	{}
 
-	std::string m_MaterialName;
-	XMFLOAT4 m_MaterialAmbient;
-	XMFLOAT4 m_MaterialDiffuse;
-	XMFLOAT4 m_MaterialSpecular;
+	std::string MaterialName;
+	XMFLOAT4 MaterialAmbient;
+	XMFLOAT4 MaterialDiffuse;
+	XMFLOAT4 MaterialSpecular;
 };
 
-struct S_ConfigInfo final 
+struct ConfigInfo final 
 {
-	S_ConfigInfo() : m_ConfigName(""), m_ConfigFilename(L"")
+	ConfigInfo() : ConfigName(""), ConfigFilename(L"")
 	{}
 
-	S_ConfigInfo(char const* inConfigName, std::wstring const& inConfigFilename)
-		: m_ConfigName(inConfigName), m_ConfigFilename(inConfigFilename)
+	ConfigInfo(char const* inConfigName, std::wstring const& inConfigFilename)
+		: ConfigName(inConfigName), ConfigFilename(inConfigFilename)
 	{}
 
-	std::string m_ConfigName;
-	std::wstring m_ConfigFilename;
+	std::string ConfigName;
+	std::wstring ConfigFilename;
 };
 
-struct S_UIElementInfo final
+struct UIElementInfo final
 {
-	S_UIElementInfo(std::string const& inName,
+	UIElementInfo(std::string const& inName,
 		XMFLOAT2 const& inSize, XMFLOAT2 const& offset, UIAnchorPoint const inAnchor, UIOriginPoint const inOrigin,
-		std::string const& inTexName, u32 order)
-		: m_ElementName(inName)
-		, m_Size(inSize)
-		, m_Offset(offset)
-		, m_AnchorPoint(inAnchor)
-		, m_OriginPoint(inOrigin)
-		, m_TextureName(inTexName)
-		, m_Order(order)
+		std::string const& inTexName, uint32 order)
+		: ElementName(inName)
+		, Size(inSize)
+		, Offset(offset)
+		, AnchorPoint(inAnchor)
+		, OriginPoint(inOrigin)
+		, TextureName(inTexName)
+		, Order(order)
 	{}
 
-	XMFLOAT2 m_Size;
-	XMFLOAT2 m_Offset;
-	UIAnchorPoint m_AnchorPoint;
-	UIOriginPoint m_OriginPoint;
-	std::string m_TextureName;
-	std::string m_ElementName;
-	u32 m_Order;
+	XMFLOAT2 Size;
+	XMFLOAT2 Offset;
+	UIAnchorPoint AnchorPoint;
+	UIOriginPoint OriginPoint;
+	std::string TextureName;
+	std::string ElementName;
+	uint32 Order;
 };

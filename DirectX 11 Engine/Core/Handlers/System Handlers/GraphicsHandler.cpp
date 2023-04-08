@@ -14,24 +14,26 @@
 #include <vector>
 #include <codecvt>
 
+using namespace DirectX;
+
 GraphicsHandler::GraphicsHandler() 
-	: _basicLight(nullptr)
-	, _shadows(nullptr)
-	, _skyGradient(nullptr)
-	, _renderToQuad(nullptr)
-	, _heatHaze(nullptr)
-	, _sceneLight()
-	, _sceneFog()
-	, _spotLight()
+	: m_BasicLight(nullptr)
+	, m_Shadows(nullptr)
+	, m_SkyGradient(nullptr)
+	, m_RenderToQuad(nullptr)
+	, m_HeatHaze(nullptr)
+	, m_SceneLight()
+	, m_SceneFog()
+	, m_SpotLight()
 {
-	_lightRotationAmount = XMConvertToRadians(00.0f);
+	m_LightRotationAmount = XMConvertToRadians(00.0f);
 
-	_fullRotationAmount = XMConvertToRadians(360.0f);
-	_currentTime = XMConvertToRadians(90.0f);
-	_currentDay = 1;
-	_currentSeason = 0;
+	m_FullRotationAmount = XMConvertToRadians(360.0f);
+	m_CurrentTime = XMConvertToRadians(90.0f);
+	m_CurrentDay = 1;
+	m_CurrentSeason = 0;
 
-	_seasonsSunHeightOffset = std::vector<int>
+	m_SeasonsSunHeightOffset =
 	{
 		{0},
 		{2},
@@ -39,7 +41,7 @@ GraphicsHandler::GraphicsHandler()
 		{-2}
 	};
 
-	_seasonNames = std::map<int, std::string>
+	m_SeasonNames =
 	{
 		{0, "Spring"},
 		{1, "Summer"},
@@ -54,255 +56,256 @@ GraphicsHandler::~GraphicsHandler()
 
 void GraphicsHandler::PreResizeViews()
 {
-	_basicLight->PreResize();
-	_heatHaze->PreResize();
-	_shadows->PreResizeViews();
-	_renderToQuad->PreResize();
+	m_BasicLight->PreResize();
+	m_HeatHaze->PreResize();
+	m_Shadows->PreResizeViews();
+	m_RenderToQuad->PreResize();
 }
 
 void GraphicsHandler::ResizeViews(float const windowWidth, float const windowHeight)
 {
-	_basicLight->Resize(windowWidth, windowHeight);
-	_heatHaze->Resize(windowWidth, windowHeight);
+	m_BasicLight->Resize(windowWidth, windowHeight);
+	m_HeatHaze->Resize(windowWidth, windowHeight);
 
 	int const shadowQuality = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "Shadows");
 
-	_shadows->OnResize(static_cast<float>(shadowQuality), static_cast<float>(shadowQuality));
-	_renderToQuad->OnResize(windowWidth, windowHeight);
+	m_Shadows->OnResize(static_cast<float>(shadowQuality), static_cast<float>(shadowQuality));
+	m_RenderToQuad->OnResize(windowWidth, windowHeight);
 }
 
 void GraphicsHandler::Init(float const windowWidth, float const windowHeight)
 {
-	_basicLight = new BasicLight();
-	_basicLight->Initialise(windowWidth, windowHeight);
+	m_BasicLight = new BasicLight();
+	m_BasicLight->Initialise(windowWidth, windowHeight);
 
 	int const shadowQuality = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "Shadows");
 
-	_shadows = new Shadows();
-	_shadows->Initialise(static_cast<float>(shadowQuality), static_cast<float>(shadowQuality));
+	m_Shadows = new Shadows();
+	m_Shadows->Initialise(static_cast<float>(shadowQuality), static_cast<float>(shadowQuality));
 
-	_skyGradient = new SkyColourGradient();
-	_skyGradient->Initialise();
+	m_SkyGradient = new SkyColourGradient();
+	m_SkyGradient->Initialise();
 
-	_renderToQuad = new RenderToFullscreenQuad();
-	_renderToQuad->Initialise(windowWidth, windowHeight);
+	m_RenderToQuad = new RenderToFullscreenQuad();
+	m_RenderToQuad->Initialise(windowWidth, windowHeight);
 
-	_heatHaze = new HeatHaze();
-	_heatHaze->Initialise(windowWidth, windowHeight);
+	m_HeatHaze = new HeatHaze();
+	m_HeatHaze->Initialise(windowWidth, windowHeight);
 
-	_sceneLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_sceneLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_sceneLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_sceneLight.lightDirection = XMFLOAT3(5.0f, 5.0f, 0.0f);
+	m_SceneLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_SceneLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_SceneLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_SceneLight.LightDirection = XMFLOAT3(5.0f, 5.0f, 0.0f);
 
-	_preOffsetLightDir = _sceneLight.lightDirection;
+	m_PreOffsetLightDir = m_SceneLight.LightDirection;
 
-	_sceneFog.FogStart = 5.0f;
-	_sceneFog.FogRange = 50.0f;
-	_sceneFog.FogColourDay = XMFLOAT4(0.7f, 0.80f, 0.92f, 1.0f);
-	_sceneFog.FogColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
-	_sceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
-	_sceneFog.UseFog = 1.0f;
+	m_SceneFog.FogStart = 5.0f;
+	m_SceneFog.FogRange = 50.0f;
+	m_SceneFog.FogColourDay = XMFLOAT4(0.7f, 0.80f, 0.92f, 1.0f);
+	m_SceneFog.FogColourNight = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	m_SceneFog.FogColourSunriseSunset = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
+	m_SceneFog.UseFog = 1.0f;
 
-	_spotLight.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_spotLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_spotLight.specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	_spotLight.attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
-	_spotLight.spot = 20.0f;
-	_spotLight.range = 1000.0f;
+	m_SpotLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_SpotLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_SpotLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_SpotLight.Attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
+	m_SpotLight.Spot = 20.0f;
+	m_SpotLight.Range = 1000.0f;
 
 	LoadMaterialsConfig();
 }
 
 void GraphicsHandler::Cleanup()
 {
-	_heatHaze->Cleanup();
-	delete _heatHaze;
-	_heatHaze = nullptr;
+	m_HeatHaze->Cleanup();
+	delete m_HeatHaze;
+	m_HeatHaze = nullptr;
 
-	_skyGradient->Cleanup();
-	delete _skyGradient;
-	_skyGradient = nullptr;
+	m_SkyGradient->Cleanup();
+	delete m_SkyGradient;
+	m_SkyGradient = nullptr;
 
-	_shadows->Cleanup();
-	delete _shadows;
-	_shadows = nullptr;
+	m_Shadows->Cleanup();
+	delete m_Shadows;
+	m_Shadows = nullptr;
 
-	_basicLight->Cleanup();
-	delete _basicLight;
-	_basicLight = nullptr;
+	m_BasicLight->Cleanup();
+	delete m_BasicLight;
+	m_BasicLight = nullptr;
 
-	_renderToQuad->Cleanup();
-	delete _renderToQuad;
-	_renderToQuad = nullptr;
+	m_RenderToQuad->Cleanup();
+	delete m_RenderToQuad;
+	m_RenderToQuad = nullptr;
 }
 
 void GraphicsHandler::Update(UpdateEvent& e)
 {
-	XMFLOAT3 lightDir = _preOffsetLightDir;
+	XMFLOAT3 lightDir = m_PreOffsetLightDir;
 
 	// Rotate the light at a 45 degree angle
 	XMFLOAT3 rotationAxis = XMFLOAT3(0.0f, -0.5f, 0.5f);
 	XMVECTOR axis = XMLoadFloat3(&rotationAxis);
-	XMVECTOR rotationQuaternion = XMQuaternionRotationAxis(axis, _lightRotationAmount * static_cast<float>(e.ElapsedTime));
+	XMVECTOR rotationQuaternion = XMQuaternionRotationAxis(axis, m_LightRotationAmount * static_cast<float>(e.ElapsedTime));
 
 	XMVECTOR rotatedLight = XMVector3Rotate(XMLoadFloat3(&lightDir), rotationQuaternion);
 	XMStoreFloat3(&lightDir, rotatedLight);
-	_preOffsetLightDir = lightDir;
+	m_PreOffsetLightDir = lightDir;
 
-	_currentTime += _lightRotationAmount * static_cast<float>(e.ElapsedTime);
-	if (_currentTime >= _fullRotationAmount)
+	m_CurrentTime += m_LightRotationAmount * static_cast<float>(e.ElapsedTime);
+	if (m_CurrentTime >= m_FullRotationAmount)
 	{
 		// Day has passed
-		_currentDay++;
-		if (_currentDay > 16)
-			_currentDay = 1;
+		m_CurrentDay++;
+		if (m_CurrentDay > 16)
+			m_CurrentDay = 1;
 
-		_currentTime = 0.0f;
+		m_CurrentTime = 0.0f;
 
-		if (_currentDay % 4 == 0)
+		if (m_CurrentDay % 4 == 0)
 		{
 			// Season has passed
-			_currentSeason++;
-			if (_currentSeason > 3)
-				_currentSeason = 0;
+			m_CurrentSeason++;
+			if (m_CurrentSeason > 3)
+				m_CurrentSeason = 0;
 		}
 	}
-	else if (_currentTime < 0.0f)
+	else if (m_CurrentTime < 0.0f)
 	{
-		_currentDay--;
-		if (_currentDay < 1)
-			_currentDay = 16;
-		_currentTime = _fullRotationAmount;
+		m_CurrentDay--;
+		if (m_CurrentDay < 1)
+			m_CurrentDay = 16;
+		m_CurrentTime = m_FullRotationAmount;
 
-		if (_currentDay % 4 == 0)
+		if (m_CurrentDay % 4 == 0)
 		{
 			// Season has passed
-			_currentSeason--;
-			if (_currentSeason < 0)
-				_currentSeason = 3;
+			m_CurrentSeason--;
+			if (m_CurrentSeason < 0)
+				m_CurrentSeason = 3;
 		}
 	}
 
 	// Raise or lower the height of the sun
-	lightDir.y += _seasonsSunHeightOffset[_currentSeason];
+	lightDir.y += m_SeasonsSunHeightOffset[m_CurrentSeason];
 
-	if (_seasonNames.find(_currentSeason)->second == "Spring" || _seasonNames.find(_currentSeason)->second == "Autumn")
+	std::string CurrentSeasonString(m_SeasonNames.find(m_CurrentSeason)->second);
+	if (CurrentSeasonString == "Spring" || CurrentSeasonString == "Autumn")
 	{
-		_sceneFog.FogStart = 13.0f;
-		_sceneFog.FogRange = 150.0f;
+		m_SceneFog.FogStart = 13.0f;
+		m_SceneFog.FogRange = 150.0f;
 	}
-	else if (_seasonNames.find(_currentSeason)->second == "Summer")
+	else if (CurrentSeasonString == "Summer")
 	{
-		_sceneFog.FogStart = 24.0f;
-		_sceneFog.FogRange = 240.0f;
+		m_SceneFog.FogStart = 24.0f;
+		m_SceneFog.FogRange = 240.0f;
 	}
-	else if (_seasonNames.find(_currentSeason)->second == "Winter")
+	else if (CurrentSeasonString == "Winter")
 	{
-		_sceneFog.FogStart = 7.0f;
-		_sceneFog.FogRange = 80.0f;
+		m_SceneFog.FogStart = 7.0f;
+		m_SceneFog.FogRange = 80.0f;
 	}
 
 	if (InputHandler::IsKeyDown(Keys::OemPeriod))
 	{
-		_lightRotationAmount += (0.5f * static_cast<float>(e.ElapsedTime));
+		m_LightRotationAmount += (0.5f * static_cast<float>(e.ElapsedTime));
 
-		if (_lightRotationAmount > 2.0f)
-			_lightRotationAmount = 2.0f;
+		if (m_LightRotationAmount > 2.0f)
+			m_LightRotationAmount = 2.0f;
 	}
 
 	if (InputHandler::IsKeyDown(Keys::OemComma))
 	{
-		_lightRotationAmount -= (0.5f * static_cast<float>(e.ElapsedTime));
+		m_LightRotationAmount -= (0.5f * static_cast<float>(e.ElapsedTime));
 
-		if (_lightRotationAmount < -2.0f)
-			_lightRotationAmount = -2.0f;
+		if (m_LightRotationAmount < -2.0f)
+			m_LightRotationAmount = -2.0f;
 	}
 
 	if (InputHandler::IsKeyDown(Keys::D1))
 	{
 		// Switch to Spring
-		_currentSeason = 0;
-		_currentDay = 1;
+		m_CurrentSeason = 0;
+		m_CurrentDay = 1;
 
 	}
 	if (InputHandler::IsKeyDown(Keys::D2))
 	{
 		// Switch to Summer
-		_currentSeason = 1;
-		_currentDay = 5;
+		m_CurrentSeason = 1;
+		m_CurrentDay = 5;
 	}
 	if (InputHandler::IsKeyDown(Keys::D3))
 	{
 		// Switch to Autumn
-		_currentSeason = 2;
-		_currentDay = 9;
+		m_CurrentSeason = 2;
+		m_CurrentDay = 9;
 	}
 	if (InputHandler::IsKeyDown(Keys::D4))
 	{
 		// Switch to Winter
-		_currentSeason = 3;
-		_currentDay = 13;
+		m_CurrentSeason = 3;
+		m_CurrentDay = 13;
 	}
 
 	if (InputHandler::IsKeyDown(Keys::T))
 	{
-		_lightRotationAmount = 0.0f;
+		m_LightRotationAmount = 0.0f;
 	}
 
-	_sceneLight.lightDirection = lightDir;
-	_shadows->UpdateLightDirection(_sceneLight.lightDirection);
+	m_SceneLight.LightDirection = lightDir;
+	m_Shadows->UpdateLightDirection(m_SceneLight.LightDirection);
 
 	Scene* currScene = DX11Engine::Get().GetSceneHandler()->GetCurrentScene();
 	Player const* currPlayer = DX11Engine::Get().GetPlayer();
 
-	_shadows->SetSceneCentre(currPlayer->GetPlayerPosition());
-	_shadows->BuildShadowTransform();
+	m_Shadows->SetSceneCentre(currPlayer->GetPlayerPosition());
+	m_Shadows->BuildShadowTransform();
 
-	_skyGradient->SetSceneCentre(currPlayer->GetPlayerPosition());
-	_skyGradient->Update(e.ElapsedTime);
+	m_SkyGradient->SetSceneCentre(currPlayer->GetPlayerPosition());
+	m_SkyGradient->Update(e.ElapsedTime);
 
-	_basicLight->CalculateLightColour(_sceneLight, _shadows->GetLightPosition().y, _sceneFog);
+	m_BasicLight->CalculateLightColour(m_SceneLight, m_Shadows->GetLightPosition().y, m_SceneFog);
 
-	_heatHaze->Update(static_cast<float>(e.TotalTime / 2.0));
+	m_HeatHaze->Update(static_cast<float>(e.TotalTime / 2.0));
 
 	if (InputHandler::IsKeyDown(Keys::LeftControl) && InputHandler::IsKeyUp(Keys::R))
 	{
-		_basicLight->SetWireframeMode(!_basicLight->GetWireframeState());
+		m_BasicLight->SetWireframeMode(!m_BasicLight->GetWireframeState());
 	}
 
-	_spotLight.position = currPlayer->GetPlayerPosition();
-	_spotLight.direction = currPlayer->GetPlayerLookDirection();
+	m_SpotLight.Position = currPlayer->GetPlayerPosition();
+	m_SpotLight.Direction = currPlayer->GetPlayerLookDirection();
 }
 
 void GraphicsHandler::Draw()
 {
-	Scene* currScene = DX11Engine::Get().GetSceneHandler()->GetCurrentScene();
-	Player const* currPlayer = DX11Engine::Get().GetPlayer();
+	const Scene* currScene = DX11Engine::Get().GetSceneHandler()->GetCurrentScene();
+	const Player* currPlayer = DX11Engine::Get().GetPlayer();
 
-	XMFLOAT3 sunPos = _shadows->GetLightPosition();
-	_sceneFog.sunHeight = sunPos.y;
+	XMFLOAT3 sunPos = m_Shadows->GetLightPosition();
+	m_SceneFog.SunHeight = sunPos.y;
 
-	_basicLight->SetAsCurrentRenderTarget();
-	_basicLight->SetAsCurrentViewport();
+	m_BasicLight->SetAsCurrentRenderTarget();
+	m_BasicLight->SetAsCurrentViewport();
 	RenderClass::DisableRtvClearing();
 
-	_skyGradient->Render(currPlayer->GetCamera(), sunPos);
+	m_SkyGradient->Render(currPlayer->GetCamera(), sunPos);
 	RenderClass::EnableZBuffer();
-	_shadows->Render(currScene->GetAllSceneElements());
+	m_Shadows->Render(currScene->GetAllSceneElements());
 
-	_basicLight->Render(currPlayer->GetCamera(), _sceneLight, _pointLights, _spotLight, _sceneFog, currScene->GetAllSceneElements(), *_shadows);
+	m_BasicLight->Render(currPlayer->GetCamera(), m_SceneLight, m_PointLights, m_SpotLight, m_SceneFog, currScene->GetAllSceneElements(), *m_Shadows);
 
-	_renderToQuad->SetAsCurrentVertexShader();
+	m_RenderToQuad->SetAsCurrentVertexShader();
 
-	if (_seasonNames.find(_currentSeason)->second == "Summer" || _seasonNames.find(_currentSeason)->second == "Winter")
+	if (m_SeasonNames.find(m_CurrentSeason)->second == "Summer" || m_SeasonNames.find(m_CurrentSeason)->second == "Winter")
 	{
-		_heatHaze->Render(_basicLight->GetRenderTargetSRV(), _seasonNames.find(_currentSeason)->second);
-		_renderToQuad->Render(_heatHaze->GetTexture());
+		m_HeatHaze->Render(m_BasicLight->GetRenderTargetSRV(), m_SeasonNames.find(m_CurrentSeason)->second);
+		m_RenderToQuad->Render(m_HeatHaze->GetTexture());
 	}
 	else
 	{
-		_renderToQuad->Render(_basicLight->GetRenderTargetSRV());
+		m_RenderToQuad->Render(m_BasicLight->GetRenderTargetSRV());
 	}
 }
 
@@ -310,14 +313,14 @@ ObjectMaterial GraphicsHandler::GetMaterialByName(char const* name) const
 {
 	std::string matName(name);
 
-	auto const it = std::find_if(m_AllMaterials.cbegin(), m_AllMaterials.cend(), [matName](S_Material const& material)
+	auto const it = std::find_if(m_AllMaterials.cbegin(), m_AllMaterials.cend(), [matName](Material const& material)
 		{
-			return material.m_MaterialName == matName;
+			return material.MaterialName == matName;
 		});
 
 	if (it != m_AllMaterials.cend())
 	{
-		return (*it).m_Material;
+		return (*it).ObjMaterial;
 	}
 
 	return ObjectMaterial();
@@ -326,12 +329,12 @@ ObjectMaterial GraphicsHandler::GetMaterialByName(char const* name) const
 void GraphicsHandler::LoadMaterialsConfig()
 {
 	auto configLoader = ApplicationNew::Get().GetConfigLoader();
-	std::vector<S_MaterialInfo> const allMaterials = configLoader->GetAllMaterials();
+	std::vector<MaterialInfo> const allMaterials = configLoader->GetAllMaterials();
 	assert(!allMaterials.empty());
 
-	for (auto const& matInfo : allMaterials)
+	for (const MaterialInfo& matInfo : allMaterials)
 	{
-		S_Material material(matInfo.m_MaterialName.c_str(), ObjectMaterial(matInfo.m_MaterialAmbient, matInfo.m_MaterialDiffuse, matInfo.m_MaterialSpecular));
+		Material material(matInfo.MaterialName.c_str(), ObjectMaterial(matInfo.MaterialAmbient, matInfo.MaterialDiffuse, matInfo.MaterialSpecular));
 		
 		m_AllMaterials.emplace_back(std::move(material));
 	}

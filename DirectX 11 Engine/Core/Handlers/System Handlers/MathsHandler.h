@@ -26,7 +26,7 @@ public:
 	static XMFLOAT3 CalculateTangent(TempVertex v1, TempVertex v2, TempVertex v3);
 	static XMFLOAT3 CalculateBinormal(TempVertex v1, TempVertex v2, TempVertex v3);
 
-	static float Magnitude(XMFLOAT3& const inVec);
+	static float Magnitude(const XMFLOAT3& inVec);
 
 	static float DotProduct(const XMFLOAT3& src, const XMFLOAT3& dst);
 

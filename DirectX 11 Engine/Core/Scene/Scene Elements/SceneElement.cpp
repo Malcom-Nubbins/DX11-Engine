@@ -1,7 +1,10 @@
 #include "SceneElement.h"
 
-SceneElement::SceneElement(StringHash elementName, Transform const& transform, Appearance const& appearance)
-	: _transform(std::make_unique<Transform>(transform)), _appearance(std::make_unique<Appearance>(appearance)), _name(elementName), _castShadows(false), _affectedByLight(false)
+SceneElement::SceneElement(TStringHash elementName, Transform const& transform, Appearance const& appearance)
+	: m_TransformPtr(std::make_unique<Transform>(transform))
+	, m_AppearancePtr(std::make_unique<Appearance>(appearance))
+	, m_Name(elementName)
+	, m_bCastShadows(false), m_bAffectedByLight(false)
 {
 }
 
@@ -11,36 +14,36 @@ SceneElement::~SceneElement()
 
 void SceneElement::Cleanup()
 {
-	if (_transform != nullptr)
+	if (m_TransformPtr != nullptr)
 	{
-		Transform* transformPtr = _transform.release();
+		Transform* transformPtr = m_TransformPtr.release();
 		delete transformPtr;
-		_transform = nullptr;
+		m_TransformPtr = nullptr;
 	}
 	
-	if (_appearance != nullptr)
+	if (m_AppearancePtr != nullptr)
 	{
-		_appearance->Cleanup();
+		m_AppearancePtr->Cleanup();
 
-		Appearance* appearancePtr = _appearance.release();
+		Appearance* appearancePtr = m_AppearancePtr.release();
 		delete appearancePtr;
-		_appearance = nullptr;
+		m_AppearancePtr = nullptr;
 	}
 }
 
 void SceneElement::AddChild(SceneElement * child)
 {
-	_children.push_back(child);
-	child->GetTransform()->SetParent(_transform.get());
+	m_Children.push_back(child);
+	child->GetTransform()->SetParent(m_TransformPtr.get());
 }
 
 void SceneElement::Update(double deltaTime)
 {
-	_transform->Update(deltaTime);
+	m_TransformPtr->Update(deltaTime);
 
-	if (!_children.empty())
+	if (!m_Children.empty())
 	{
-		for (SceneElement* child : _children)
+		for (SceneElement* child : m_Children)
 		{	
 			child->Update(deltaTime);
 		}
@@ -49,10 +52,10 @@ void SceneElement::Update(double deltaTime)
 
 void SceneElement::Draw()
 {
-	if(_name == GetStringHash("Aircraft"))
+	if(m_Name == GetStringHash("Aircraft"))
 	{
 		auto temp = 1;
 	}
 
-	_appearance->Draw();
+	m_AppearancePtr->Draw();
 }

@@ -41,9 +41,9 @@ private:
 
 	XMFLOAT4X4 m_ViewProjection;
 
-	Frustum CurrentFrustum;
+	Frustum m_CurrentFrustum;
 
-	bool m_OrthographicMode;
+	bool m_bOrthographicMode;
 public:
 	Camera(XMFLOAT3 eye, XMFLOAT3 right, XMFLOAT3 up, XMFLOAT3 at, 
 		float nearZ, float farZ, float aspect, float fov, bool orthographic = false);
@@ -66,7 +66,7 @@ public:
 	void SetPerspective(bool usePerspective);
 	void SetLens();
 	void LookAt();
-	void SetPosition(XMFLOAT3 position);
+	void SetPosition(XMFLOAT3 Position);
 
 	void SetViewProjection();
 

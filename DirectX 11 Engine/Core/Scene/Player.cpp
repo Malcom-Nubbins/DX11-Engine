@@ -4,10 +4,10 @@
 
 Player::Player() 
 	: m_Camera(nullptr)
-	, _windowClass(nullptr)
+	, m_WindowClass(nullptr)
 	, m_CurrMovementState(MovementState::None)
-	, m_Sprint(false)
-	, m_LockMouse(true)
+	, m_bSprint(false)
+	, m_bLockMouse(true)
 	, m_CurrCamPitch(0.f)
 	, m_CurrCamYaw(0.f)
 {
@@ -54,7 +54,7 @@ void Player::OnMouseButtonDown(MouseButtonEvent& e)
 	if (e.MiddleMouseButton)
 	{
 		ShowCursor(false);
-		m_LockMouse = true;
+		m_bLockMouse = true;
 	}
 }
 
@@ -68,7 +68,7 @@ void Player::OnMouseButtonUp(MouseButtonEvent& e)
 
 void Player::UpdatePlayerLookDirection(MouseMotionEvent& e)
 {
-	if (m_LockMouse)
+	if (m_bLockMouse)
 	{
 		auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
 		POINT screenCentre = window->GetScreenCentre();
@@ -103,7 +103,7 @@ void Player::OnPlayerMovementKeyPressed(KeyEvent& e)
 		m_CurrMovementState = m_CurrMovementState | MovementState::Backward;
 	}
 
-	m_Sprint = e.Shift;
+	m_bSprint = e.Shift;
 }
 
 void Player::OnPlayerMovementKeyReleased(KeyEvent& e)
@@ -141,7 +141,7 @@ void Player::OnPlayerMovementKeyReleased(KeyEvent& e)
 		}
 	}
 
-	m_Sprint = e.Shift;
+	m_bSprint = e.Shift;
 }
 
 void Player::SetPlayerPosition(XMFLOAT3 pos) const
@@ -157,13 +157,13 @@ void Player::Update(double delta)
 	bool shouldMoveForward = ((MovementState::Forward & m_CurrMovementState) == MovementState::Forward);
 	bool shouldMoveBackward = ((MovementState::Backward & m_CurrMovementState) == MovementState::Backward);
 
-	double moveSpeed = m_Sprint ? (m_MovementSpeed * 2.5f) : m_MovementSpeed;
+	double moveSpeed = m_bSprint ? (m_MovementSpeed * 2.5f) : m_MovementSpeed;
 	moveSpeed *= delta;
 
 	if (InputHandler::IsKeyDown(Keys::M))
 	{
 		ShowCursor(true);
-		m_LockMouse = false;
+		m_bLockMouse = false;
 	}
 
 	if (shouldMoveLeft)

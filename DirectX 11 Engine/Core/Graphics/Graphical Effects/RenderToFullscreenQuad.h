@@ -1,21 +1,20 @@
 #pragma once
 
 #include "../../Globals/Structs.h"
-#include "../../Handlers/SystemHandlers.h"
 
 class RenderToFullscreenQuad
 {
 private:
-	ID3D11VertexShader* _quadVS;
-	ID3D11PixelShader* _quadPS;
+	ID3D11VertexShader* m_QuadVS;
+	ID3D11PixelShader* m_QuadPS;
 
 	ID3D11RenderTargetView* m_MSAARTV;
 	ID3D11Texture2D* m_MSAARenderTargetTex2D;
 
-	ID3D11InputLayout* _inputLayout;
-	ID3D11Buffer* m_ValuesBuffer;
+	ID3D11InputLayout* m_InputLayout;
+	ID3D11Buffer* m_ValuesBufferPtr;
 
-	ObjectMesh		_quad;
+	ObjectMesh		m_Quad;
 
 	UINT m_MSAACount;
 

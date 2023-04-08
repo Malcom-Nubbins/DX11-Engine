@@ -1,25 +1,31 @@
 #include "BasicLight.h"
 #include "../../ApplicationNew.h"
 #include "../../Loaders/ConfigLoader.h"
+#include "../Core/Handlers/System Handlers/BufferClass.h"
+#include "../Core/Handlers/System Handlers/ShaderClass.h"
+#include "../Core/Handlers/System Handlers/RenderClass.h"
 
 BasicLight::BasicLight()
-	: _tesselationHS(nullptr), _tesselationDS(nullptr), _viewport(),
-	  _tesselationBuffer(nullptr), _camLightBuffer(nullptr), _matrixBuffer(nullptr), _objectValueBuffer(nullptr)
+	: m_TesselationHS(nullptr)
+	, m_TesselationDS(nullptr)
+	, m_TesselationVS(nullptr)
+	, m_Viewport()
+	, m_TesselationBufferPtr(nullptr)
+	, m_CamLightBufferPtr(nullptr)
+	, m_MatrixBufferPtr(nullptr)
+	, m_ObjectValueBufferPtr(nullptr)
+	, m_LightVS(nullptr)
+	, m_LightPS(nullptr)
+	, m_SimpleVertexInputLayout(nullptr)
+	, m_RenderTargetTex2D(nullptr)
+	, m_RenderTargetView(nullptr)
+	, m_RenderTargetShaderResourceView(nullptr)
+	, m_DepthStencilBuffer(nullptr)
+	, m_DepthStencilView(nullptr)
+	, m_FogValuesBufferPtr(nullptr)
+	, m_bRenderWireframe(false)
+	, m_MSAACount(0)
 {
-	_lightVS = nullptr;
-	_lightPS = nullptr;
-	_simpleVertexInputLayout = nullptr;
-
-	m_RenderTargetTex2D = nullptr;
-	m_RenderTargetView = nullptr;
-	m_RenderTargetShaderResourceView = nullptr;
-
-	_depthStencilBuffer = nullptr;
-	_depthStencilView = nullptr;
-
-	_fogValuesBuffer = nullptr;
-
-	_renderWireframe = false;
 }
 
 BasicLight::~BasicLight()
@@ -28,26 +34,26 @@ BasicLight::~BasicLight()
 
 void BasicLight::Cleanup() const
 {
-	_lightVS->Release();
+	m_LightVS->Release();
 	m_TesselationVS->Release();
-	_tesselationHS->Release();
-	_tesselationDS->Release();
-	_lightPS->Release();
-	_simpleVertexInputLayout->Release();
+	m_TesselationHS->Release();
+	m_TesselationDS->Release();
+	m_LightPS->Release();
+	m_SimpleVertexInputLayout->Release();
 
 	m_RenderTargetTex2D->Release();
 	m_RenderTargetView->Release();
 	m_RenderTargetShaderResourceView->Release();
 
-	_depthStencilBuffer->Release();
-	_depthStencilView->Release();
+	m_DepthStencilBuffer->Release();
+	m_DepthStencilView->Release();
 
-	_fogValuesBuffer->Release();
-	_tesselationBuffer->Release();
-	_camLightBuffer->Release();
+	m_FogValuesBufferPtr->Release();
+	m_TesselationBufferPtr->Release();
+	m_CamLightBufferPtr->Release();
 
-	_matrixBuffer->Release();
-	_objectValueBuffer->Release();
+	m_MatrixBufferPtr->Release();
+	m_ObjectValueBufferPtr->Release();
 }
 
 void BasicLight::PreResize()
@@ -70,16 +76,16 @@ void BasicLight::PreResize()
 		m_RenderTargetShaderResourceView = nullptr;
 	}
 
-	if (_depthStencilBuffer != nullptr)
+	if (m_DepthStencilBuffer != nullptr)
 	{
-		_depthStencilBuffer->Release();
-		_depthStencilBuffer = nullptr;
+		m_DepthStencilBuffer->Release();
+		m_DepthStencilBuffer = nullptr;
 	}
 
-	if (_depthStencilView != nullptr)
+	if (m_DepthStencilView != nullptr)
 	{
-		_depthStencilView->Release();
-		_depthStencilView = nullptr;
+		m_DepthStencilView->Release();
+		m_DepthStencilView = nullptr;
 	}
 }
 
@@ -122,45 +128,45 @@ HRESULT BasicLight::Initialise(float windowWidth, float windowHeight)
 	bd.ByteWidth = sizeof(MatrixBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	device->CreateBuffer(&bd, nullptr, &_matrixBuffer);
+	device->CreateBuffer(&bd, nullptr, &m_MatrixBufferPtr);
 
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof(ObjectValuesBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	device->CreateBuffer(&bd, nullptr, &_objectValueBuffer);
+	device->CreateBuffer(&bd, nullptr, &m_ObjectValueBufferPtr);
 
 	InitialiseViewport(windowWidth, windowHeight);
 
-	_lightColourDayDiffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
-	_lightColourDayAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	_lightColourDaySpecular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	m_LightColourDayDiffuse = XMFLOAT4(0.6f, 0.6f, 0.6f, 1.0f);
+	m_LightColourDayAmbient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_LightColourDaySpecular = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
 
-	_lightColourSunsetDiffuse = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
-	_lightColourSunsetAmbient = XMFLOAT4(0.19f, 0.09f, 0.07f, 1.0f);
-	_lightColourSunsetSpecular = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
+	m_LightColourSunsetDiffuse = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
+	m_LightColourSunsetAmbient = XMFLOAT4(0.19f, 0.09f, 0.07f, 1.0f);
+	m_LightColourSunsetSpecular = XMFLOAT4(0.89f, 0.59f, 0.27f, 1.0f);
 
-	_lightColourNightDiffuse = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
-	_lightColourNightAmbient = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
-	_lightColourNightSpecular = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	m_LightColourNightDiffuse = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	m_LightColourNightAmbient = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
+	m_LightColourNightSpecular = XMFLOAT4(0.01f, 0.02f, 0.04f, 1.0f);
 
 	return S_OK;
 }
 
 void BasicLight::SetAsCurrentShader()
 {
-	ShaderClass::SetShadersAndInputLayout(_lightVS, _lightPS, _simpleVertexInputLayout);
+	ShaderClass::SetShadersAndInputLayout(m_LightVS, m_LightPS, m_SimpleVertexInputLayout);
 }
 
 void BasicLight::SetAsCurrentRenderTarget()
 {
-	RenderClass::SetRenderTargetAndDepthStencil(m_RenderTargetView, _depthStencilView);
+	RenderClass::SetRenderTargetAndDepthStencil(m_RenderTargetView, m_DepthStencilView);
 }
 
 void BasicLight::SetAsCurrentViewport()
 {
-	RenderClass::SetViewport(_viewport);
+	RenderClass::SetViewport(m_Viewport);
 }
 
 HRESULT BasicLight::InitialiseShaders()
@@ -176,25 +182,25 @@ HRESULT BasicLight::InitialiseShaders()
 		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/LightVS.cso", &_lightVS, &_simpleVertexInputLayout, layout, ARRAYSIZE(layout));
+	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/LightVS.cso", &m_LightVS, &m_SimpleVertexInputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
 
-	hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/TesselationVS.cso", &m_TesselationVS, &_simpleVertexInputLayout, layout, ARRAYSIZE(layout));
+	hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/TesselationVS.cso", &m_TesselationVS, &m_SimpleVertexInputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 	{
 		return hr;
 	}
 
-	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/LightPS.cso", &_lightPS);
+	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/LightPS.cso", &m_LightPS);
 	if (FAILED(hr))
 		return hr;
 
-	hr = ShaderClass::CreateHullShader((WCHAR*)L"Core/Shaders/TesselationHS.cso", &_tesselationHS);
+	hr = ShaderClass::CreateHullShader((WCHAR*)L"Core/Shaders/TesselationHS.cso", &m_TesselationHS);
 	if (FAILED(hr))
 		return hr;
 
-	hr = ShaderClass::CreateDomainShader((WCHAR*)L"Core/Shaders/TesselationDS.cso", &_tesselationDS);
+	hr = ShaderClass::CreateDomainShader((WCHAR*)L"Core/Shaders/TesselationDS.cso", &m_TesselationDS);
 	if (FAILED(hr))
 		return hr;
 
@@ -204,21 +210,21 @@ HRESULT BasicLight::InitialiseShaders()
 	bd.ByteWidth = sizeof(FogValuesBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	device->CreateBuffer(&bd, nullptr, &_fogValuesBuffer);
+	device->CreateBuffer(&bd, nullptr, &m_FogValuesBufferPtr);
 
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof(TesselationBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	device->CreateBuffer(&bd, nullptr, &_tesselationBuffer);
+	device->CreateBuffer(&bd, nullptr, &m_TesselationBufferPtr);
 
 	ZeroMemory(&bd, sizeof(bd));
 	bd.Usage = D3D11_USAGE_DEFAULT;
 	bd.ByteWidth = sizeof(CamLightBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	device->CreateBuffer(&bd, nullptr, &_camLightBuffer);
+	device->CreateBuffer(&bd, nullptr, &m_CamLightBufferPtr);
 
 	return S_OK;
 }
@@ -262,7 +268,7 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 		return hr;
 	}
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	char const rtvNamee[] = "BasicLightRTV";
 	m_RenderTargetView->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(rtvNamee) - 1, rtvNamee);
 #endif
@@ -291,11 +297,11 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 	depthBufferDesc.CPUAccessFlags = 0;
 	depthBufferDesc.MiscFlags = 0;
 
-	hr = device->CreateTexture2D(&depthBufferDesc, nullptr, &_depthStencilBuffer);
+	hr = device->CreateTexture2D(&depthBufferDesc, nullptr, &m_DepthStencilBuffer);
 	if (FAILED(hr))
 		return hr;
 
-	hr = device->CreateDepthStencilView(_depthStencilBuffer, nullptr, &_depthStencilView);
+	hr = device->CreateDepthStencilView(m_DepthStencilBuffer, nullptr, &m_DepthStencilView);
 	if (FAILED(hr))
 		return hr;
 
@@ -304,33 +310,33 @@ HRESULT BasicLight::InitialiseRenderTargetAndDepthStencilViews(float windowWidth
 
 void BasicLight::InitialiseViewport(float windowWidth, float windowHeight)
 {
-	_viewport.Width = static_cast<FLOAT>(windowWidth);
-	_viewport.Height = static_cast<FLOAT>(windowHeight);
-	_viewport.MinDepth = 0.0f;
-	_viewport.MaxDepth = 1.0f;
-	_viewport.TopLeftX = 0;
-	_viewport.TopLeftY = 0;
+	m_Viewport.Width = static_cast<FLOAT>(windowWidth);
+	m_Viewport.Height = static_cast<FLOAT>(windowHeight);
+	m_Viewport.MinDepth = 0.0f;
+	m_Viewport.MaxDepth = 1.0f;
+	m_Viewport.TopLeftX = 0;
+	m_Viewport.TopLeftY = 0;
 }
 
 void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHeight, FogValuesBuffer& sceneFog)
 {
-	XMVECTOR diffuseDay = XMLoadFloat4(&_lightColourDayDiffuse);
-	XMVECTOR ambientDay = XMLoadFloat4(&_lightColourDayAmbient);
-	XMVECTOR specularDay = XMLoadFloat4(&_lightColourDaySpecular);
+	XMVECTOR diffuseDay = XMLoadFloat4(&m_LightColourDayDiffuse);
+	XMVECTOR ambientDay = XMLoadFloat4(&m_LightColourDayAmbient);
+	XMVECTOR specularDay = XMLoadFloat4(&m_LightColourDaySpecular);
 
-	XMVECTOR diffuseSunset = XMLoadFloat4(&_lightColourSunsetDiffuse);
-	XMVECTOR ambientSunset = XMLoadFloat4(&_lightColourSunsetAmbient);
-	XMVECTOR specularSunset = XMLoadFloat4(&_lightColourSunsetSpecular);
+	XMVECTOR diffuseSunset = XMLoadFloat4(&m_LightColourSunsetDiffuse);
+	XMVECTOR ambientSunset = XMLoadFloat4(&m_LightColourSunsetAmbient);
+	XMVECTOR specularSunset = XMLoadFloat4(&m_LightColourSunsetSpecular);
 
-	XMVECTOR diffuseNight = XMLoadFloat4(&_lightColourNightDiffuse);
-	XMVECTOR ambientNight = XMLoadFloat4(&_lightColourNightAmbient);
-	XMVECTOR specularNight = XMLoadFloat4(&_lightColourNightSpecular);
+	XMVECTOR diffuseNight = XMLoadFloat4(&m_LightColourNightDiffuse);
+	XMVECTOR ambientNight = XMLoadFloat4(&m_LightColourNightAmbient);
+	XMVECTOR specularNight = XMLoadFloat4(&m_LightColourNightSpecular);
 
 	if (sunHeight >= 20.0f)
 	{
-		XMStoreFloat4(&sceneLight.diffuse, diffuseDay);
-		XMStoreFloat4(&sceneLight.ambient, ambientDay);
-		XMStoreFloat4(&sceneLight.specular, specularDay);
+		XMStoreFloat4(&sceneLight.Diffuse, diffuseDay);
+		XMStoreFloat4(&sceneLight.Ambient, ambientDay);
+		XMStoreFloat4(&sceneLight.Specular, specularDay);
 	}
 	else if (sunHeight <= 20.0f && sunHeight > 0.0f)
 	{
@@ -338,9 +344,9 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 		XMVECTOR blendedLightAmbient = XMVectorLerp(ambientSunset, ambientDay, sunHeight / 20.0f);
 		XMVECTOR blendedLightSpecular = XMVectorLerp(specularSunset, specularDay, sunHeight / 20.0f);
 		
-		XMStoreFloat4(&sceneLight.diffuse, blendedLightDiffuse);
-		XMStoreFloat4(&sceneLight.ambient, blendedLightAmbient);
-		XMStoreFloat4(&sceneLight.specular, blendedLightSpecular);
+		XMStoreFloat4(&sceneLight.Diffuse, blendedLightDiffuse);
+		XMStoreFloat4(&sceneLight.Ambient, blendedLightAmbient);
+		XMStoreFloat4(&sceneLight.Specular, blendedLightSpecular);
 	}
 	else if(sunHeight <= 0.0f && sunHeight > -10.0f)
 	{
@@ -348,15 +354,15 @@ void BasicLight::CalculateLightColour(DirectionalLight& sceneLight, float sunHei
 		XMVECTOR blendedLightAmbient = XMVectorLerp(ambientSunset, ambientNight, -sunHeight / 10.0f);
 		XMVECTOR blendedLightSpecular = XMVectorLerp(specularSunset, specularNight, -sunHeight / 10.0f);
 		
-		XMStoreFloat4(&sceneLight.diffuse, blendedLightDiffuse);
-		XMStoreFloat4(&sceneLight.ambient, blendedLightAmbient);
-		XMStoreFloat4(&sceneLight.specular, blendedLightSpecular);
+		XMStoreFloat4(&sceneLight.Diffuse, blendedLightDiffuse);
+		XMStoreFloat4(&sceneLight.Ambient, blendedLightAmbient);
+		XMStoreFloat4(&sceneLight.Specular, blendedLightSpecular);
 	}
 	else
 	{
-		XMStoreFloat4(&sceneLight.diffuse, diffuseNight);
-		XMStoreFloat4(&sceneLight.ambient, ambientNight);
-		XMStoreFloat4(&sceneLight.specular, specularNight);
+		XMStoreFloat4(&sceneLight.Diffuse, diffuseNight);
+		XMStoreFloat4(&sceneLight.Ambient, ambientNight);
+		XMStoreFloat4(&sceneLight.Specular, specularNight);
 	}
 }
 
@@ -366,15 +372,15 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 	auto context = ApplicationNew::Get().GetContext();
 	RenderClass::EnableZBuffer();
 
-	BufferClass::SetVertexShaderBuffers(&_matrixBuffer, 0);
+	BufferClass::SetVertexShaderBuffers(&m_MatrixBufferPtr, 0);
 
-	BufferClass::SetPixelShaderBuffers(&_objectValueBuffer, 0);
-	BufferClass::SetPixelShaderBuffers(&_fogValuesBuffer, 1);
+	BufferClass::SetPixelShaderBuffers(&m_ObjectValueBufferPtr, 0);
+	BufferClass::SetPixelShaderBuffers(&m_FogValuesBufferPtr, 1);
 
-	if (_renderWireframe)
-		RenderClass::SetRasterizerState(WIREFRAME);
+	if (m_bRenderWireframe)
+		RenderClass::SetRasterizerState(RasterizerType::WIREFRAME);
 	else
-		RenderClass::SetRasterizerState(BACK_CULL);
+		RenderClass::SetRasterizerState(RasterizerType::BACK_CULL);
 
 	MatrixBuffer matBuffer;
 	ObjectValuesBuffer objValBuffer;
@@ -390,8 +396,8 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 	matBuffer.Projection = XMMatrixTranspose(proj);
 	matBuffer.ShadowTransform = shadowTransform;
 
-	objValBuffer.dirLight = sceneLight;
-	objValBuffer.spotLight = spotLight;
+	objValBuffer.DirLight = sceneLight;
+	objValBuffer.SpotLight = spotLight;
 	objValBuffer.EyePos = camera.GetPosition();
 
 	tessValues.MaxTessDistance = 1.0f;
@@ -400,32 +406,32 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 	tessValues.MinTessFactor = 1.0f;
 
 	camLightValues.EyePos = XMFLOAT4(camera.GetPosition().x, camera.GetPosition().y, camera.GetPosition().z, 1.0f);
-	camLightValues.LightVector = XMFLOAT4(sceneLight.lightDirection.x, sceneLight.lightDirection.y, sceneLight.lightDirection.z, 1.0f);
+	camLightValues.LightVector = XMFLOAT4(sceneLight.LightDirection.x, sceneLight.LightDirection.y, sceneLight.LightDirection.z, 1.0f);
 
 	if (!pointLights.empty())
-		objValBuffer.usePointLights = 0.0f;
+		objValBuffer.UsePointLights = 0.0f;
 	else
-		objValBuffer.usePointLights = 0.0f;
+		objValBuffer.UsePointLights = 0.0f;
 
-	objValBuffer.numOfLights = static_cast<float>(pointLights.size());
+	objValBuffer.NumOfLights = static_cast<float>(pointLights.size());
 
 	if (pointLights.size() < 96)
 	{
 		for (int i = 0; i < pointLights.size(); ++i)
 		{
-			objValBuffer.pointLight[i] = pointLights.at(i);
+			objValBuffer.PointLight[i] = pointLights.at(i);
 		}
 	}
 	else
 	{
 		for (int i = 0; i < 96; ++i)
 		{
-			objValBuffer.pointLight[i] = pointLights.at(i);
+			objValBuffer.PointLight[i] = pointLights.at(i);
 		}
 	}
 
-	context->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(ANISOTROPIC));
-	context->PSSetSamplers(1, 1, ShaderClass::GetSamplerState(SHADOW));
+	context->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(SamplerType::ANISOTROPIC));
+	context->PSSetSamplers(1, 1, ShaderClass::GetSamplerState(SamplerType::SHADOW));
 
 	SetAsCurrentRenderTarget();
 	SetAsCurrentShader();
@@ -440,9 +446,9 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 		Transform* transform = element->GetTransform();
 
 		ObjectMaterial mat = appearance->GetObjectMaterial();
-		objValBuffer.surface.ambient = mat.ambient;
-		objValBuffer.surface.diffuse = mat.diffuse;
-		objValBuffer.surface.specular = mat.specular;
+		objValBuffer.Surface.Ambient = mat.Ambient;
+		objValBuffer.Surface.Diffuse = mat.Diffuse;
+		objValBuffer.Surface.Specular = mat.Specular;
 
 		matBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&transform->GetWorld()));
 		ID3D11ShaderResourceView* tex;
@@ -450,41 +456,41 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 		{
 			tex = appearance->GetColourTex();
 			context->PSSetShaderResources(0, 1, &tex);
-			objValBuffer.useColourTex = 1.0f;
+			objValBuffer.UseColourTex = 1.0f;
 		}
 		else
 		{
-			objValBuffer.useColourTex = 0.0f;
+			objValBuffer.UseColourTex = 0.0f;
 		}
 
 		if (appearance->HasNormalMap())
 		{
-			objValBuffer.useBumpMap = 1.0f;
+			objValBuffer.UseBumpMap = 1.0f;
 			tex = appearance->GetNormalMap();
 			context->PSSetShaderResources(2, 1, &tex);
 		}
 		else
 		{
-			objValBuffer.useBumpMap = 0.0f;
+			objValBuffer.UseBumpMap = 0.0f;
 		}
 
 		if (appearance->HasDisplacementMap())
 		{
-			ShaderClass::SetShadersAndInputLayout(m_TesselationVS, _lightPS, _simpleVertexInputLayout);
+			ShaderClass::SetShadersAndInputLayout(m_TesselationVS, m_LightPS, m_SimpleVertexInputLayout);
 
 			context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
 
 			ID3D11ShaderResourceView* displacementMap = appearance->GetDisplacementMap();
-			ShaderClass::SetHullAndDomainShaders(_tesselationHS, _tesselationDS);
+			ShaderClass::SetHullAndDomainShaders(m_TesselationHS, m_TesselationDS);
 			context->DSSetShaderResources(0, 1, &displacementMap);
-			context->DSSetSamplers(0, 1, ShaderClass::GetSamplerState(LINEAR));
+			context->DSSetSamplers(0, 1, ShaderClass::GetSamplerState(SamplerType::LINEAR));
 
-			BufferClass::SetVertexShaderBuffers(&_tesselationBuffer, 1);
-			BufferClass::SetVertexShaderBuffers(&_camLightBuffer, 2);
+			BufferClass::SetVertexShaderBuffers(&m_TesselationBufferPtr, 1);
+			BufferClass::SetVertexShaderBuffers(&m_CamLightBufferPtr, 2);
 
-			BufferClass::SetDomainShaderBuffers(&_matrixBuffer, 0);
-			BufferClass::SetDomainShaderBuffers(&_tesselationBuffer, 1);
-			BufferClass::SetDomainShaderBuffers(&_camLightBuffer, 2);
+			BufferClass::SetDomainShaderBuffers(&m_MatrixBufferPtr, 0);
+			BufferClass::SetDomainShaderBuffers(&m_TesselationBufferPtr, 1);
+			BufferClass::SetDomainShaderBuffers(&m_CamLightBufferPtr, 2);
 		}
 		else
 		{
@@ -494,35 +500,35 @@ void BasicLight::Render(Camera& camera, const DirectionalLight& sceneLight, cons
 
 		if (appearance->HasSpecularMap())
 		{
-			objValBuffer.useSpecularMap = 1.0f;
+			objValBuffer.UseSpecularMap = 1.0f;
 			tex = appearance->GetSpecularMap();
 			context->PSSetShaderResources(3, 1, &tex);
 		}
 		else
 		{
-			objValBuffer.useSpecularMap = 0.0f;
+			objValBuffer.UseSpecularMap = 0.0f;
 		}
 
 		if (element->IsAffectedByLight())
 		{
-			objValBuffer.affectedByLight = 1.0f;
+			objValBuffer.AffectedByLight = 1.0f;
 		}
 		else
 		{
-			objValBuffer.affectedByLight = 0.0f;
+			objValBuffer.AffectedByLight = 0.0f;
 		}
 
-		context->UpdateSubresource(_matrixBuffer, 0, nullptr, &matBuffer, 0, 0);
-		context->UpdateSubresource(_objectValueBuffer, 0, nullptr, &objValBuffer, 0, 0);
-		context->UpdateSubresource(_tesselationBuffer, 0, nullptr, &tessValues, 0, 0);
-		context->UpdateSubresource(_fogValuesBuffer, 0, nullptr, &fogValuesBuffer, 0, 0);
-		context->UpdateSubresource(_camLightBuffer, 0, nullptr, &camLightValues, 0, 0);
+		context->UpdateSubresource(m_MatrixBufferPtr, 0, nullptr, &matBuffer, 0, 0);
+		context->UpdateSubresource(m_ObjectValueBufferPtr, 0, nullptr, &objValBuffer, 0, 0);
+		context->UpdateSubresource(m_TesselationBufferPtr, 0, nullptr, &tessValues, 0, 0);
+		context->UpdateSubresource(m_FogValuesBufferPtr, 0, nullptr, &fogValuesBuffer, 0, 0);
+		context->UpdateSubresource(m_CamLightBufferPtr, 0, nullptr, &camLightValues, 0, 0);
 
 		element->Draw();
 
 		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		ShaderClass::UnbindTesselationStages();
-		ShaderClass::SetShadersAndInputLayout(_lightVS, _lightPS, _simpleVertexInputLayout);
+		ShaderClass::SetShadersAndInputLayout(m_LightVS, m_LightPS, m_SimpleVertexInputLayout);
 	}
 
 	// Clear out the resource slots

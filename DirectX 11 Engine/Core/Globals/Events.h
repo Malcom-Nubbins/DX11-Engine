@@ -4,6 +4,8 @@
 class EventArgs
 {
 public:
+	typedef EventArgs TBase;
+
 	EventArgs() {}
 };
 
@@ -16,11 +18,9 @@ public:
 		Pressed = 1
 	};
 
-	typedef EventArgs base;
-
-	KeyEvent(KeyCode::Key key, unsigned int c, KeyState state, bool ctrl, bool shift, bool alt)
+	KeyEvent(KeyCode::Key key, unsigned int character, KeyState state, bool ctrl, bool shift, bool alt)
 		: Key(key)
-		, Char(c)
+		, Char(character)
 		, State(state)
 		, Ctrl(ctrl)
 		, Shift(shift)
@@ -38,7 +38,6 @@ public:
 class MouseMotionEvent : public EventArgs
 {
 public:
-	typedef EventArgs base;
 
 	MouseMotionEvent(bool leftMouseButton, bool middleMouseButton, bool rightMouseButton, bool ctrl, bool shift, int x, int y)
 		: LeftMouseButton(leftMouseButton)
@@ -81,9 +80,6 @@ public:
 		Pressed = 1
 	};
 
-
-	typedef EventArgs base;
-
 	MouseButtonEvent(MouseButton buttonID, ButtonState state, bool leftMouseButton, bool middleMouseButton, bool rightMouseButton, bool ctrl, bool shift, int x, int y)
 		: Button(buttonID)
 		, State(state)
@@ -111,7 +107,6 @@ public:
 class MouseWheelEvent : EventArgs
 {
 public:
-	typedef EventArgs base;
 
 	MouseWheelEvent(float wheelDelta, bool leftMouseButton, bool middleMouseButton, bool rightMouseButton, bool ctrl, bool shift, int x, int y)
 		: WheelDelta(wheelDelta)
@@ -138,7 +133,7 @@ public:
 class UpdateEvent : public EventArgs
 {
 public:
-	typedef EventArgs base;
+
 	UpdateEvent(double deltaTime, double totalTime)
 		: ElapsedTime(deltaTime)
 		, TotalTime(totalTime)
@@ -151,7 +146,7 @@ public:
 class RenderEvent : public EventArgs
 {
 public:
-	typedef EventArgs base;
+
 	RenderEvent(double deltaTime, double totalTime)
 		: ElapsedTime(deltaTime)
 		, TotalTime(totalTime)

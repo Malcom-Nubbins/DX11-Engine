@@ -8,17 +8,17 @@
 class Player
 {
 private:
-	WindowClass* _windowClass;
+	WindowClass* m_WindowClass;
 
-	Camera * m_Camera;
+	Camera* m_Camera;
 
 	MovementState m_CurrMovementState;
 
-	bool m_LockMouse;
+	bool m_bLockMouse;
 
 	const float m_LookSpeed = 0.3f;
 	const float m_MovementSpeed = 6.0f;
-	bool m_Sprint;
+	bool m_bSprint;
 
 	float m_CurrCamYaw;
 	float m_CurrCamPitch;

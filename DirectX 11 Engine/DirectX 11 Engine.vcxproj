@@ -109,7 +109,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>shlwapi.lib;DirectXTK_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;DirectXTK_Debug.lib;dxgi.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
@@ -148,7 +148,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies>shlwapi.lib;DirectXTK.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;DirectXTK.lib;dxgi.lib;d3d11.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
@@ -162,13 +162,10 @@
     <ClCompile Include="Core\Graphics\UI\UIBitmap.cpp" />
     <ClCompile Include="Core\Graphics\UI\UserInterface.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\InputHandler.cpp" />
-    <ClCompile Include="Core\Handlers\SystemHandlers.cpp" />
     <ClCompile Include="Core\Loaders\Terrain Generation\FlatTerrain.cpp" />
     <ClCompile Include="Core\Scene\Player.cpp" />
     <ClCompile Include="Core\Scene\Scene Elements\Element Components\Appearance.cpp" />
-    <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\BufferClass.cpp" />
-    <ClCompile Include="Core\Handlers\System Handlers\D3DClass.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\MathsHandler.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\RenderClass.cpp" />
     <ClCompile Include="Core\Handlers\System Handlers\ShaderClass.cpp" />
@@ -206,7 +203,6 @@
     <ClInclude Include="Core\Graphics\UI\UIBitmap.h" />
     <ClInclude Include="Core\Graphics\UI\UserInterface.h" />
     <ClInclude Include="Core\Handlers\System Handlers\InputHandler.h" />
-    <ClInclude Include="Core\Handlers\SystemHandlers.h" />
     <ClInclude Include="Core\Loaders\Terrain Generation\FlatTerrain.h" />
     <ClInclude Include="Core\Loaders\XMLLoader\rapidxml.hpp" />
     <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_ext.hpp" />
@@ -215,12 +211,10 @@
     <ClInclude Include="Core\Loaders\XMLLoader\rapidxml_utils.hpp" />
     <ClInclude Include="Core\Scene\Player.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Appearance.h" />
-    <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Globals\AppValues.h" />
     <ClInclude Include="Core\Globals\stdafx.h" />
     <ClInclude Include="Core\Globals\Structs.h" />
     <ClInclude Include="Core\Handlers\System Handlers\BufferClass.h" />
-    <ClInclude Include="Core\Handlers\System Handlers\D3DClass.h" />
     <ClInclude Include="Core\Handlers\System Handlers\MathsHandler.h" />
     <ClInclude Include="Core\Handlers\System Handlers\RenderClass.h" />
     <ClInclude Include="Core\Handlers\System Handlers\ShaderClass.h" />
@@ -244,6 +238,78 @@
     <ClInclude Include="Core\Handlers\FileReaderWriter.h" />
     <ClInclude Include="Core\Handlers\System Handlers\GraphicsHandler.h" />
     <ClInclude Include="Core\Loaders\IConfigInterface.h" />
+    <ClInclude Include="Inc\HLML\bool2.h" />
+    <ClInclude Include="Inc\HLML\bool2x2.h" />
+    <ClInclude Include="Inc\HLML\bool2x3.h" />
+    <ClInclude Include="Inc\HLML\bool2x4.h" />
+    <ClInclude Include="Inc\HLML\bool3.h" />
+    <ClInclude Include="Inc\HLML\bool3x2.h" />
+    <ClInclude Include="Inc\HLML\bool3x3.h" />
+    <ClInclude Include="Inc\HLML\bool3x4.h" />
+    <ClInclude Include="Inc\HLML\bool4.h" />
+    <ClInclude Include="Inc\HLML\bool4x2.h" />
+    <ClInclude Include="Inc\HLML\bool4x3.h" />
+    <ClInclude Include="Inc\HLML\bool4x4.h" />
+    <ClInclude Include="Inc\HLML\double2.h" />
+    <ClInclude Include="Inc\HLML\double2x2.h" />
+    <ClInclude Include="Inc\HLML\double2x3.h" />
+    <ClInclude Include="Inc\HLML\double2x4.h" />
+    <ClInclude Include="Inc\HLML\double3.h" />
+    <ClInclude Include="Inc\HLML\double3x2.h" />
+    <ClInclude Include="Inc\HLML\double3x3.h" />
+    <ClInclude Include="Inc\HLML\double3x4.h" />
+    <ClInclude Include="Inc\HLML\double4.h" />
+    <ClInclude Include="Inc\HLML\double4x2.h" />
+    <ClInclude Include="Inc\HLML\double4x3.h" />
+    <ClInclude Include="Inc\HLML\double4x4.h" />
+    <ClInclude Include="Inc\HLML\float2.h" />
+    <ClInclude Include="Inc\HLML\float2x2.h" />
+    <ClInclude Include="Inc\HLML\float2x3.h" />
+    <ClInclude Include="Inc\HLML\float2x4.h" />
+    <ClInclude Include="Inc\HLML\float3.h" />
+    <ClInclude Include="Inc\HLML\float3x2.h" />
+    <ClInclude Include="Inc\HLML\float3x3.h" />
+    <ClInclude Include="Inc\HLML\float3x4.h" />
+    <ClInclude Include="Inc\HLML\float4.h" />
+    <ClInclude Include="Inc\HLML\float4x2.h" />
+    <ClInclude Include="Inc\HLML\float4x3.h" />
+    <ClInclude Include="Inc\HLML\float4x4.h" />
+    <ClInclude Include="Inc\HLML\hlml.h" />
+    <ClInclude Include="Inc\HLML\hlml_constants.h" />
+    <ClInclude Include="Inc\HLML\hlml_constants_sse.h" />
+    <ClInclude Include="Inc\HLML\hlml_defines.h" />
+    <ClInclude Include="Inc\HLML\hlml_functions_matrix.h" />
+    <ClInclude Include="Inc\HLML\hlml_functions_quaternion.h" />
+    <ClInclude Include="Inc\HLML\hlml_functions_scalar.h" />
+    <ClInclude Include="Inc\HLML\hlml_functions_scalar_sse.h" />
+    <ClInclude Include="Inc\HLML\hlml_functions_vector.h" />
+    <ClInclude Include="Inc\HLML\hlml_functions_vector_sse.h" />
+    <ClInclude Include="Inc\HLML\hlml_types.h" />
+    <ClInclude Include="Inc\HLML\int2.h" />
+    <ClInclude Include="Inc\HLML\int2x2.h" />
+    <ClInclude Include="Inc\HLML\int2x3.h" />
+    <ClInclude Include="Inc\HLML\int2x4.h" />
+    <ClInclude Include="Inc\HLML\int3.h" />
+    <ClInclude Include="Inc\HLML\int3x2.h" />
+    <ClInclude Include="Inc\HLML\int3x3.h" />
+    <ClInclude Include="Inc\HLML\int3x4.h" />
+    <ClInclude Include="Inc\HLML\int4.h" />
+    <ClInclude Include="Inc\HLML\int4x2.h" />
+    <ClInclude Include="Inc\HLML\int4x3.h" />
+    <ClInclude Include="Inc\HLML\int4x4.h" />
+    <ClInclude Include="Inc\HLML\swizzle_templates.h" />
+    <ClInclude Include="Inc\HLML\uint2.h" />
+    <ClInclude Include="Inc\HLML\uint2x2.h" />
+    <ClInclude Include="Inc\HLML\uint2x3.h" />
+    <ClInclude Include="Inc\HLML\uint2x4.h" />
+    <ClInclude Include="Inc\HLML\uint3.h" />
+    <ClInclude Include="Inc\HLML\uint3x2.h" />
+    <ClInclude Include="Inc\HLML\uint3x3.h" />
+    <ClInclude Include="Inc\HLML\uint3x4.h" />
+    <ClInclude Include="Inc\HLML\uint4.h" />
+    <ClInclude Include="Inc\HLML\uint4x2.h" />
+    <ClInclude Include="Inc\HLML\uint4x3.h" />
+    <ClInclude Include="Inc\HLML\uint4x4.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Core\Scene\Scene Elements\Element Components\Transform.h" />
     <ClInclude Include="Core\Scene\TestingScene.h" />
@@ -255,6 +321,66 @@
   <ItemGroup>
     <None Include="Core\Shaders\Common.hlsli" />
     <None Include="FYP - Seasonal Day Night Cycle.aps" />
+    <None Include="Inc\HLML\bool2.inl" />
+    <None Include="Inc\HLML\bool2x2.inl" />
+    <None Include="Inc\HLML\bool2x3.inl" />
+    <None Include="Inc\HLML\bool2x4.inl" />
+    <None Include="Inc\HLML\bool3.inl" />
+    <None Include="Inc\HLML\bool3x2.inl" />
+    <None Include="Inc\HLML\bool3x3.inl" />
+    <None Include="Inc\HLML\bool3x4.inl" />
+    <None Include="Inc\HLML\bool4.inl" />
+    <None Include="Inc\HLML\bool4x2.inl" />
+    <None Include="Inc\HLML\bool4x3.inl" />
+    <None Include="Inc\HLML\bool4x4.inl" />
+    <None Include="Inc\HLML\double2.inl" />
+    <None Include="Inc\HLML\double2x2.inl" />
+    <None Include="Inc\HLML\double2x3.inl" />
+    <None Include="Inc\HLML\double2x4.inl" />
+    <None Include="Inc\HLML\double3.inl" />
+    <None Include="Inc\HLML\double3x2.inl" />
+    <None Include="Inc\HLML\double3x3.inl" />
+    <None Include="Inc\HLML\double3x4.inl" />
+    <None Include="Inc\HLML\double4.inl" />
+    <None Include="Inc\HLML\double4x2.inl" />
+    <None Include="Inc\HLML\double4x3.inl" />
+    <None Include="Inc\HLML\double4x4.inl" />
+    <None Include="Inc\HLML\float2.inl" />
+    <None Include="Inc\HLML\float2x2.inl" />
+    <None Include="Inc\HLML\float2x3.inl" />
+    <None Include="Inc\HLML\float2x4.inl" />
+    <None Include="Inc\HLML\float3.inl" />
+    <None Include="Inc\HLML\float3x2.inl" />
+    <None Include="Inc\HLML\float3x3.inl" />
+    <None Include="Inc\HLML\float3x4.inl" />
+    <None Include="Inc\HLML\float4.inl" />
+    <None Include="Inc\HLML\float4x2.inl" />
+    <None Include="Inc\HLML\float4x3.inl" />
+    <None Include="Inc\HLML\float4x4.inl" />
+    <None Include="Inc\HLML\int2.inl" />
+    <None Include="Inc\HLML\int2x2.inl" />
+    <None Include="Inc\HLML\int2x3.inl" />
+    <None Include="Inc\HLML\int2x4.inl" />
+    <None Include="Inc\HLML\int3.inl" />
+    <None Include="Inc\HLML\int3x2.inl" />
+    <None Include="Inc\HLML\int3x3.inl" />
+    <None Include="Inc\HLML\int3x4.inl" />
+    <None Include="Inc\HLML\int4.inl" />
+    <None Include="Inc\HLML\int4x2.inl" />
+    <None Include="Inc\HLML\int4x3.inl" />
+    <None Include="Inc\HLML\int4x4.inl" />
+    <None Include="Inc\HLML\uint2.inl" />
+    <None Include="Inc\HLML\uint2x2.inl" />
+    <None Include="Inc\HLML\uint2x3.inl" />
+    <None Include="Inc\HLML\uint2x4.inl" />
+    <None Include="Inc\HLML\uint3.inl" />
+    <None Include="Inc\HLML\uint3x2.inl" />
+    <None Include="Inc\HLML\uint3x3.inl" />
+    <None Include="Inc\HLML\uint3x4.inl" />
+    <None Include="Inc\HLML\uint4.inl" />
+    <None Include="Inc\HLML\uint4x2.inl" />
+    <None Include="Inc\HLML\uint4x3.inl" />
+    <None Include="Inc\HLML\uint4x4.inl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Core\Shaders\ColourGradientPS.hlsl">

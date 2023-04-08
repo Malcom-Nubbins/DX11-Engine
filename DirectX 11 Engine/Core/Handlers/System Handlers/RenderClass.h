@@ -1,21 +1,21 @@
 #pragma once
-#include "D3DClass.h"
 #include "../../Globals/stdafx.h"
+
 class RenderClass
 {
 private:
-	static ID3D11DepthStencilState* _depthDisabled;
-	static ID3D11DepthStencilState* _depthEnabled;
+	static ID3D11DepthStencilState* m_DepthDisabled;
+	static ID3D11DepthStencilState* m_DepthEnabled;
 
-	static ID3D11RasterizerState* _noCull;
-	static ID3D11RasterizerState* _backCull;
-	static ID3D11RasterizerState* _wireframe;
-	static ID3D11RasterizerState* _shadow;
+	static ID3D11RasterizerState* m_NoCull;
+	static ID3D11RasterizerState* m_BackCull;
+	static ID3D11RasterizerState* m_Wireframe;
+	static ID3D11RasterizerState* m_Shadow;
 
-	static ID3D11BlendState* _alphaBlendState;
-	static ID3D11BlendState* _alphaBlendStateDisabled;
+	static ID3D11BlendState* m_AlphaBlendState;
+	static ID3D11BlendState* m_AlphaBlendStateDisabled;
 
-	static bool _disableRTVClearing;
+	static bool m_DisableRTVClearing;
 
 public:
 	RenderClass();
@@ -34,7 +34,7 @@ public:
 	static void EnableRtvClearing();
 	static void DisableRtvClearing();
 
-	static void SetRasterizerState(RASTERIZER_TYPE rasterizer);
+	static void SetRasterizerState(RasterizerType rasterizer);
 
 	static void SetViewport(D3D11_VIEWPORT viewport);
 	static void SetRenderTargetAndDepthStencil(ID3D11RenderTargetView* renderTarget, ID3D11DepthStencilView* depthStencilView);

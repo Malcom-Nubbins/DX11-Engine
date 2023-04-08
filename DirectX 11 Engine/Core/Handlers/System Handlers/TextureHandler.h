@@ -1,32 +1,31 @@
 #pragma once
-#include "D3DClass.h"
 #include "../Core/Loaders/IConfigInterface.h"
 #include <vector>
 
 class TextureHandler : public IConfigInterface
 {
 private:
-	struct S_Texture final
+	struct TextureDesc final
 	{
-		S_Texture(char const* inName, ID3D11ShaderResourceView* inTex)
-			: m_Filename(inName), m_Texture(inTex)
+		TextureDesc(char const* inName, ID3D11ShaderResourceView* inTex)
+			: Filename(inName), Texture(inTex)
 		{}
 
-		std::string m_Filename;
-		ID3D11ShaderResourceView* m_Texture;
+		std::string Filename;
+		ID3D11ShaderResourceView* Texture;
 	};
 
-	struct S_TextureInfo final
+	struct TextureInfo final
 	{
-		S_TextureInfo(char const* inTextureName, std::wstring const& inTexFilename)
-			: m_TextureName(inTextureName)
-			, m_TextureFilename(inTexFilename)
+		TextureInfo(char const* inTextureName, std::wstring const& inTexFilename)
+			: TextureName(inTextureName)
+			, TextureFilename(inTexFilename)
 		{}
-		std::string m_TextureName;
-		std::wstring m_TextureFilename;
+		std::string TextureName;
+		std::wstring TextureFilename;
 	};
 
-	std::vector<S_Texture> m_Textures;
+	std::vector<TextureDesc> m_Textures;
 
 public:
 	TextureHandler();
@@ -41,6 +40,6 @@ protected:
 	void LoadConfig() override;
 
 private:
-	std::vector<S_TextureInfo> m_TextureInfos;
+	std::vector<TextureInfo> m_TextureInfos;
 };
 

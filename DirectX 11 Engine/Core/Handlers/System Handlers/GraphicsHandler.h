@@ -3,6 +3,7 @@
 #include "../Core/Graphics/Graphical Effects/SkyColourGradient.h"
 #include "../Core/Graphics/Graphical Effects/RenderToFullscreenQuad.h"
 #include "../Core/Graphics/Graphical Effects/HeatHaze.h"
+#include "../Core/Globals/Events.h"
 
 class GraphicsHandler
 {
@@ -22,44 +23,44 @@ public:
 	ObjectMaterial GetMaterialByName(char const* name) const;
 
 private:
-	struct S_Material final
+	struct Material final
 	{
-		S_Material(char const* inName, ObjectMaterial const material)
-			: m_MaterialName(inName), m_Material(material)
+		Material(char const* inName, ObjectMaterial const material)
+			: MaterialName(inName), ObjMaterial(material)
 		{}
 
-		std::string m_MaterialName;
-		ObjectMaterial m_Material;
+		std::string MaterialName;
+		ObjectMaterial ObjMaterial;
 	};
 
 	void LoadMaterialsConfig();
 
-	DirectionalLight _sceneLight;
-	FogValuesBuffer _sceneFog;
+	DirectionalLight m_SceneLight;
+	FogValuesBuffer m_SceneFog;
 
-	BasicLight* _basicLight;
-	Shadows* _shadows;
-	SkyColourGradient* _skyGradient;
-	RenderToFullscreenQuad* _renderToQuad;
-	HeatHaze* _heatHaze;
+	BasicLight* m_BasicLight;
+	Shadows* m_Shadows;
+	SkyColourGradient* m_SkyGradient;
+	RenderToFullscreenQuad* m_RenderToQuad;
+	HeatHaze* m_HeatHaze;
 
-	float _lightRotationAmount;
-	XMFLOAT3 _preOffsetLightDir;
+	float m_LightRotationAmount;
+	XMFLOAT3 m_PreOffsetLightDir;
 
-	float _fullRotationAmount;
+	float m_FullRotationAmount;
 
-	float _currentTime;
-	int _currentDay;
-	int _currentSeason;
+	float m_CurrentTime;
+	int m_CurrentDay;
+	int m_CurrentSeason;
 
-	std::vector<int> _seasonsSunHeightOffset;
-	std::map<int, std::string> _seasonNames;
+	std::vector<int> m_SeasonsSunHeightOffset;
+	std::map<int, std::string> m_SeasonNames;
 
-	std::vector<PointLight> _pointLights;
+	std::vector<PointLight> m_PointLights;
 
-	std::vector<S_Material> m_AllMaterials;
+	std::vector<Material> m_AllMaterials;
 
 	// Move spotlight to player
-	SpotLight _spotLight;
+	SpotLight m_SpotLight;
 };
 

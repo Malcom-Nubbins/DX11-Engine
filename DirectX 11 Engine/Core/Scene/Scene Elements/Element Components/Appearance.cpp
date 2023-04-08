@@ -3,39 +3,39 @@
 #include "../../../ApplicationNew.h"
 
 Appearance::Appearance(ObjectMesh const& mesh, ObjectMaterial const& material)
-	: _mesh(mesh), _newMesh(), _material(material), _colourTex(nullptr), _normalMap(nullptr), _displacementMap(nullptr), _specularMap(nullptr)
+	: Mesh(mesh), NewMesh(), Material(material), ColourTex(nullptr), NormalMap(nullptr), DisplacementMap(nullptr), SpecularMap(nullptr)
 {
 }
 
-Appearance::Appearance(NewObjectMesh const& mesh, ObjectMaterial const& material): _mesh(), _newMesh(mesh), _material(material), _colourTex(nullptr),
-                                                                     _normalMap(nullptr), _displacementMap(nullptr),
-                                                                     _specularMap(nullptr)
+Appearance::Appearance(NewObjectMesh const& mesh, ObjectMaterial const& material): Mesh(), NewMesh(mesh), Material(material), ColourTex(nullptr),
+                                                                     NormalMap(nullptr), DisplacementMap(nullptr),
+                                                                     SpecularMap(nullptr)
 {
-	//_newMesh.IncreaseRefs();
+	//NewMesh.IncreaseRefs();
 }
 
 Appearance::~Appearance()
 {
-	if (_mesh.numberOfIndices > 0)
+	if (Mesh.NumberOfIndices > 0)
 	{
-		_mesh.vertexBuffer.Reset();
-		_mesh.indexBuffer.Reset();
+		Mesh.VertexBuffer.Reset();
+		Mesh.IndexBuffer.Reset();
 	}
 
-	if (_newMesh.numOfSubsets > 0)
+	if (NewMesh.NumOfSubsets > 0)
 	{
-		_newMesh.vertexBuffer.Reset();
+		NewMesh.VertexBuffer.Reset();
 
-		for (UINT i = 0; i < _newMesh.numOfSubsets; ++i)
+		for (UINT i = 0; i < NewMesh.NumOfSubsets; ++i)
 		{
-			if (_newMesh.subsets[i].vertexBuffer)
+			if (NewMesh.Subsets[i].VertexBuffer)
 			{
-				_newMesh.subsets[i].vertexBuffer.Reset();
+				NewMesh.Subsets[i].VertexBuffer.Reset();
 			}
 
-			if (_newMesh.subsets[i].indexBuffer)
+			if (NewMesh.Subsets[i].IndexBuffer)
 			{
-				_newMesh.subsets[i].indexBuffer.Reset();
+				NewMesh.Subsets[i].IndexBuffer.Reset();
 			}
 		}
 	}
@@ -43,28 +43,28 @@ Appearance::~Appearance()
 
 void Appearance::Cleanup()
 {
-	if (_colourTex)
+	if (ColourTex)
 	{
-		_colourTex->Release();
-		_colourTex = nullptr;
+		ColourTex->Release();
+		ColourTex = nullptr;
 	}
 	
-	if (_normalMap)
+	if (NormalMap)
 	{
-		_normalMap->Release();
-		_normalMap = nullptr;
+		NormalMap->Release();
+		NormalMap = nullptr;
 	}
 	
-	if (_displacementMap)
+	if (DisplacementMap)
 	{
-		_displacementMap->Release();
-		_displacementMap = nullptr;
+		DisplacementMap->Release();
+		DisplacementMap = nullptr;
 	}
 	
-	if (_specularMap)
+	if (SpecularMap)
 	{
-		_specularMap->Release();
-		_specularMap = nullptr;
+		SpecularMap->Release();
+		SpecularMap = nullptr;
 	}
 }
 
@@ -72,19 +72,19 @@ void Appearance::Draw()
 {
 	auto context = ApplicationNew::Get().GetContext();
 
-	if(_mesh.numberOfIndices > 0)
+	if(Mesh.NumberOfIndices > 0)
 	{
-		context->IASetVertexBuffers(0, 1, _mesh.vertexBuffer.GetAddressOf(), &_mesh.vertexBufferStride, &_mesh.vertexBufferOffset);
-		context->IASetIndexBuffer(_mesh.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-		context->DrawIndexed(static_cast<UINT>(_mesh.numberOfIndices), 0, 0);
+		context->IASetVertexBuffers(0, 1, Mesh.VertexBuffer.GetAddressOf(), &Mesh.vertexBufferStride, &Mesh.VertexBufferOffset);
+		context->IASetIndexBuffer(Mesh.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+		context->DrawIndexed(static_cast<UINT>(Mesh.NumberOfIndices), 0, 0);
 	}
 	else
 	{
-		for(UINT i = 0; i < _newMesh.numOfSubsets; ++i)
+		for(UINT i = 0; i < NewMesh.NumOfSubsets; ++i)
 		{
-			context->IASetVertexBuffers(0, 1, _newMesh.vertexBuffer.GetAddressOf(), &_newMesh.subsets[i].vertexBufferStride, &_newMesh.subsets[i].vertexBufferOffset);
-			context->IASetIndexBuffer(_newMesh.subsets[i].indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-			context->DrawIndexed(_newMesh.subsets[i].indexCount, 0, 0);
+			context->IASetVertexBuffers(0, 1, NewMesh.VertexBuffer.GetAddressOf(), &NewMesh.Subsets[i].VertexBufferStride, &NewMesh.Subsets[i].VertexBufferOffset);
+			context->IASetIndexBuffer(NewMesh.Subsets[i].IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+			context->DrawIndexed(NewMesh.Subsets[i].IndexCount, 0, 0);
 		}
 	}
 }

@@ -4,11 +4,11 @@
 #include "../../DX11Engine.h"
 
 UIBitmap::UIBitmap()
-	: m_ShouldDraw(true)
-	, m_IsPositionDynamic(false)
+	: bShouldDraw(true)
+	, bIsPositionDynamic(false)
 	, m_DynamicPos(0.0f, 0.0f)
 	, m_Order(0)
-	, _screenSize(0.f, 0.f)
+	, m_ScreenSize(0.f, 0.f)
 {
 }
 
@@ -18,49 +18,49 @@ UIBitmap::~UIBitmap()
 
 void UIBitmap::Cleanup()
 {
-	if (_texture != nullptr)
+	if (m_Texture != nullptr)
 	{
-		_texture->Release();
+		m_Texture->Release();
 	}
 	
-	_uiElement->Cleanup();
+	m_UIElement->Cleanup();
 }
 
-void UIBitmap::Initialise(XMFLOAT2 const screenSize, S_UIElementInfo const inElementInfo)
+void UIBitmap::Initialise(XMFLOAT2 const screenSize, UIElementInfo const inElementInfo)
 {
 	auto textureHandler = DX11Engine::Get().GetTextureHandler();
 
-	_screenSize = screenSize;
-	_bitmapSize = inElementInfo.m_Size;
-	m_Anchor = inElementInfo.m_AnchorPoint;
-	m_Origin = inElementInfo.m_OriginPoint;
-	m_ElementName = inElementInfo.m_ElementName;
-	m_Offset = inElementInfo.m_Offset;
-	_texture = textureHandler->GetTextureByName(inElementInfo.m_TextureName.c_str());
-	m_Order = inElementInfo.m_Order;
+	m_ScreenSize = screenSize;
+	m_BitmapSize = inElementInfo.Size;
+	m_Anchor = inElementInfo.AnchorPoint;
+	m_Origin = inElementInfo.OriginPoint;
+	m_ElementName = inElementInfo.ElementName;
+	m_BitmapOffset = inElementInfo.Offset;
+	m_Texture = textureHandler->GetTextureByName(inElementInfo.TextureName.c_str());
+	m_Order = inElementInfo.Order;
 
-	BufferClass::CreateQuadDynamic(&_uiQuad.vertexBuffer, &_uiQuad.indexBuffer);
+	BufferClass::CreateQuadDynamic(&m_UIQuad.VertexBuffer, &m_UIQuad.IndexBuffer);
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	char const uiQuadVBName[] = "UI Quad VB";
 	char const uiQuadIBName[] = "UI Quad IB";
 
-	_uiQuad.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadVBName) - 1, uiQuadVBName);
-	_uiQuad.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadIBName) - 1, uiQuadIBName);
+	m_UIQuad.VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadVBName) - 1, uiQuadVBName);
+	m_UIQuad.IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(uiQuadIBName) - 1, uiQuadIBName);
 #endif
 
-	_uiQuad.numberOfIndices = 6;
-	_uiQuad.vertexBufferOffset = 0;
-	_uiQuad.vertexBufferStride = sizeof(SimpleQuad);
+	m_UIQuad.NumberOfIndices = 6;
+	m_UIQuad.VertexBufferOffset = 0;
+	m_UIQuad.vertexBufferStride = sizeof(SimpleQuad);
 
 	auto uiTransform = std::make_shared<Transform>();
 	uiTransform->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	uiTransform->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 	uiTransform->SetRotation(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
-	auto uiAppearance = std::make_shared<Appearance>(_uiQuad, ObjectMaterial{});
+	auto uiAppearance = std::make_shared<Appearance>(m_UIQuad, ObjectMaterial{});
 
-	_uiElement = new SceneElement(GetStringHash(m_ElementName), *uiTransform, *uiAppearance);
+	m_UIElement = new SceneElement(GetStringHash(m_ElementName), *uiTransform, *uiAppearance);
 
 	SetPosition();
 
@@ -74,47 +74,47 @@ void UIBitmap::SetPosition()
 	{
 	case UIAnchorPoint::TopLeft:
 	{
-		m_Position = XMFLOAT2(0.0f, 0.0f);
+		m_BitmapPosition = XMFLOAT2(0.0f, 0.0f);
 	}
 	break;
 	case UIAnchorPoint::TopMiddle:
 	{
-		m_Position = XMFLOAT2(_screenSize.x / 2.0f, 0.0f);
+		m_BitmapPosition = XMFLOAT2(m_ScreenSize.x / 2.0f, 0.0f);
 	}
 	break;
 	case UIAnchorPoint::TopRight:
 	{
-		m_Position = XMFLOAT2(_screenSize.x, 0.0f);
+		m_BitmapPosition = XMFLOAT2(m_ScreenSize.x, 0.0f);
 	}
 	break;
 	case UIAnchorPoint::CentreLeft:
 	{
-		m_Position = XMFLOAT2(0.0f, _screenSize.y / 2.0f);
+		m_BitmapPosition = XMFLOAT2(0.0f, m_ScreenSize.y / 2.0f);
 	}
 	break;
 	case UIAnchorPoint::Centre:
 	{
-		m_Position = XMFLOAT2(_screenSize.x / 2.0f, _screenSize.y / 2.0f);
+		m_BitmapPosition = XMFLOAT2(m_ScreenSize.x / 2.0f, m_ScreenSize.y / 2.0f);
 	}
 	break;
 	case UIAnchorPoint::CentreRight:
 	{
-		m_Position = XMFLOAT2(_screenSize.x, _screenSize.y / 2.0f);
+		m_BitmapPosition = XMFLOAT2(m_ScreenSize.x, m_ScreenSize.y / 2.0f);
 	}
 	break;
 	case UIAnchorPoint::BottomLeft:
 	{
-		m_Position = XMFLOAT2(0.0f, _screenSize.y);
+		m_BitmapPosition = XMFLOAT2(0.0f, m_ScreenSize.y);
 	}
 	break;
 	case UIAnchorPoint::BottomCentre:
 	{
-		m_Position = XMFLOAT2(_screenSize.x / 2.0f, _screenSize.y);
+		m_BitmapPosition = XMFLOAT2(m_ScreenSize.x / 2.0f, m_ScreenSize.y);
 	}
 	break;
 	case UIAnchorPoint::BottomRight:
 	{
-		m_Position = XMFLOAT2(_screenSize.x, _screenSize.y);
+		m_BitmapPosition = XMFLOAT2(m_ScreenSize.x, m_ScreenSize.y);
 	}
 	break;
 	default:
@@ -129,12 +129,12 @@ void UIBitmap::SetDynamicPos(XMFLOAT2 const pos)
 
 void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 {
-	if (newScreenSize.x == _screenSize.x && newScreenSize.y == _screenSize.y)
+	if (newScreenSize.x == m_ScreenSize.x && newScreenSize.y == m_ScreenSize.y)
 	{
 		return;
 	}
 
-	_screenSize = newScreenSize;
+	m_ScreenSize = newScreenSize;
 
 	SetPosition();
 
@@ -145,24 +145,24 @@ void UIBitmap::UpdateScreenSize(XMFLOAT2 newScreenSize)
 
 void UIBitmap::Update(double delta)
 {
-	if (m_IsPositionDynamic)
+	if (bIsPositionDynamic)
 	{
 		XMFLOAT4 const bitmapPos = CalculateFinalPosition();
 		UpdateBuffers(bitmapPos);
 	}
 
-	_uiElement->Update(delta);
+	m_UIElement->Update(delta);
 }
 
 void UIBitmap::Draw()
 {
-	if (m_ShouldDraw)
+	if (bShouldDraw)
 	{
 		auto context = ApplicationNew::Get().GetContext();
 
-		context->PSSetShaderResources(0, 1, &_texture);
+		context->PSSetShaderResources(0, 1, &m_Texture);
 
-		_uiElement->Draw();
+		m_UIElement->Draw();
 	}
 }
 
@@ -180,7 +180,7 @@ void UIBitmap::UpdateBuffers(XMFLOAT4 const& inVertsPos)
 		{ XMFLOAT3(inVertsPos.y, inVertsPos.w, 0.0f),XMFLOAT2(1.0f, 1.0f) }
 	};
 
-	HRESULT hr = context->Map(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT hr = context->Map(m_UIElement->GetAppearance()->GetObjectMesh().VertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr))
 	{
 		return;
@@ -190,21 +190,21 @@ void UIBitmap::UpdateBuffers(XMFLOAT4 const& inVertsPos)
 
 	memcpy(vertsPtr, verts, sizeof(SimpleQuad) * 4);
 
-	context->Unmap(_uiElement->GetAppearance()->GetObjectMesh().vertexBuffer.Get(), 0);
+	context->Unmap(m_UIElement->GetAppearance()->GetObjectMesh().VertexBuffer.Get(), 0);
 }
 
 XMFLOAT4 UIBitmap::CalculateFinalPosition()
 {
-	auto aspectRatio = _screenSize.x / _screenSize.y;
+	auto aspectRatio = m_ScreenSize.x / m_ScreenSize.y;
 
 	float left, right, top, bottom;
 
-	XMFLOAT2 pos = m_IsPositionDynamic ? m_DynamicPos : m_Position;
+	XMFLOAT2 pos = bIsPositionDynamic ? m_DynamicPos : m_BitmapPosition;
 
-	left = ((_screenSize.x / 2.0f) * -1.0f) + pos.x;
-	right = left + _bitmapSize.x;
-	top = (_screenSize.y / 2.0f) - pos.y;
-	bottom = top - _bitmapSize.y;
+	left = ((m_ScreenSize.x / 2.0f) * -1.0f) + pos.x;
+	right = left + m_BitmapSize.x;
+	top = (m_ScreenSize.y / 2.0f) - pos.y;
+	bottom = top - m_BitmapSize.y;
 
 	switch (m_Origin)
 	{
@@ -216,7 +216,7 @@ XMFLOAT4 UIBitmap::CalculateFinalPosition()
 	case UIOriginPoint::TopMiddle:
 	{
 		// Offset element to the left by half the bitmap width
-		float const bitmapHalfWidth = (_bitmapSize.x / 2.f);
+		float const bitmapHalfWidth = (m_BitmapSize.x / 2.f);
 		left -= bitmapHalfWidth;
 		right -= bitmapHalfWidth;
 	}
@@ -224,22 +224,22 @@ XMFLOAT4 UIBitmap::CalculateFinalPosition()
 	case UIOriginPoint::TopRight:
 	{
 		// Offset element to the left by full bitmap width
-		left -= _bitmapSize.x;
-		right -= _bitmapSize.x;
+		left -= m_BitmapSize.x;
+		right -= m_BitmapSize.x;
 	}
 	break;
 	case UIOriginPoint::CentreLeft:
 	{
 		// Offset element up by half bitmap height
-		float const bitmapHalfHeight = (_bitmapSize.y / 2.f);
+		float const bitmapHalfHeight = (m_BitmapSize.y / 2.f);
 		top += bitmapHalfHeight;
 		bottom += bitmapHalfHeight;
 	}
 	break;
 	case UIOriginPoint::Centre:
 	{
-		float const bitmapHalfHeight = (_bitmapSize.y / 2.f);
-		float const bitmapHalfWidth = (_bitmapSize.x / 2.f);
+		float const bitmapHalfHeight = (m_BitmapSize.y / 2.f);
+		float const bitmapHalfWidth = (m_BitmapSize.x / 2.f);
 		// Offset element up and to the left by half bitmap width + half bitmap height
 		left -= bitmapHalfWidth;
 		right -= bitmapHalfWidth;
@@ -249,10 +249,10 @@ XMFLOAT4 UIBitmap::CalculateFinalPosition()
 	break;
 	case UIOriginPoint::CentreRight:
 	{
-		float const bitmapHalfHeight = (_bitmapSize.y / 2.f);
+		float const bitmapHalfHeight = (m_BitmapSize.y / 2.f);
 		// Offset element up and to the left by full bitmap width + half bitmap height
-		left -= _bitmapSize.x;
-		right -= _bitmapSize.x;
+		left -= m_BitmapSize.x;
+		right -= m_BitmapSize.x;
 		top += bitmapHalfHeight;
 		bottom += bitmapHalfHeight;
 	}
@@ -260,39 +260,39 @@ XMFLOAT4 UIBitmap::CalculateFinalPosition()
 	case UIOriginPoint::BottomLeft:
 	{
 		// Offset element up by full bitmap height
-		top += _bitmapSize.y;
-		bottom += _bitmapSize.y;
+		top += m_BitmapSize.y;
+		bottom += m_BitmapSize.y;
 	}
 	break;
 	case UIOriginPoint::BottomCentre:
 	{
-		float const bitmapHalfWidth = (_bitmapSize.x / 2.f);
+		float const bitmapHalfWidth = (m_BitmapSize.x / 2.f);
 		// Offset element up and to the left by half bitmap width + full bitmap height
 		left -= bitmapHalfWidth;
 		right -= bitmapHalfWidth;
-		top += _bitmapSize.y;
-		bottom += _bitmapSize.y;
+		top += m_BitmapSize.y;
+		bottom += m_BitmapSize.y;
 	}
 	break;
 	case UIOriginPoint::BottomRight:
 	{
 		// Offset element up and to the left by full bitmap width + full bitmap height
-		left -= _bitmapSize.x;
-		right -= _bitmapSize.x;
-		top += _bitmapSize.y;
-		bottom += _bitmapSize.y;
+		left -= m_BitmapSize.x;
+		right -= m_BitmapSize.x;
+		top += m_BitmapSize.y;
+		bottom += m_BitmapSize.y;
 	}
 	break;
 	default:
 		break;
 	}
 
-	left += m_Offset.x;
-	right += m_Offset.x;
-	top += m_Offset.y;
-	bottom += m_Offset.y;
+	left += m_BitmapOffset.x;
+	right += m_BitmapOffset.x;
+	top += m_BitmapOffset.y;
+	bottom += m_BitmapOffset.y;
 
-	/*if (m_IsPositionDynamic)
+	/*if (bIsPositionDynamic)
 	{
 		left += m_DynamicPos.x;
 		right += m_DynamicPos.x;

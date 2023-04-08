@@ -6,9 +6,9 @@
 #include "../Core/Loaders/XMLLoader/rapidxml_print.hpp"
 #include "../Core/Loaders/XMLLoader/rapidxml_utils.hpp"
 
-struct S_SettingNameValuePair final
+struct SettingNameValuePair final
 {
-	S_SettingNameValuePair(SettingType const inType, char const* inSettingName, int const inSettingValue, std::string const& inWCharVal)
+	SettingNameValuePair(SettingType const inType, char const* inSettingName, int const inSettingValue, std::string const& inWCharVal)
 		: m_Type(inType), m_SettingName(inSettingName), m_SettingValue(inSettingValue), m_SettingValueString(inWCharVal)
 	{}
 

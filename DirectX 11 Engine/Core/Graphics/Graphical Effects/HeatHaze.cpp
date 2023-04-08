@@ -4,16 +4,16 @@
 #include "../Core/Loaders/ConfigLoader.h"
 
 HeatHaze::HeatHaze()
-	: _quad(), _values()
+	: m_HeatHazePS(nullptr)
+	, m_InputLayout(nullptr)
+	, m_RenderTargetTex2D(nullptr)
+	, m_RenderTargetView(nullptr)
+	, m_RenderTargetSRV(nullptr)
+	, m_HeatHazeValuesBufferPtr(nullptr)
+	, m_SnowTex(nullptr)
+	, m_HeatTex(nullptr)
+	, m_HeatHazeValues()
 {
-	_heatHazePS = nullptr;
-	_inputLayout = nullptr;
-
-	_renderTargetTex2D = nullptr;
-	_renderTargetView = nullptr;
-	_renderTargetSRV = nullptr;
-
-	_heatHazeValues = nullptr;
 }
 
 HeatHaze::~HeatHaze()
@@ -22,12 +22,12 @@ HeatHaze::~HeatHaze()
 
 void HeatHaze::Cleanup() const
 {
-	_heatHazePS->Release();
+	m_HeatHazePS->Release();
 	//_inputLayout->Release();
 
-	_renderTargetTex2D->Release();
-	_renderTargetView->Release();
-	_renderTargetSRV->Release();
+	m_RenderTargetTex2D->Release();
+	m_RenderTargetView->Release();
+	m_RenderTargetSRV->Release();
 
 	if (m_SnowTex)
 	{
@@ -39,7 +39,7 @@ void HeatHaze::Cleanup() const
 		m_HeatTex->Release();
 	}
 
-	_heatHazeValues->Release();
+	m_HeatHazeValuesBufferPtr->Release();
 }
 
 HRESULT HeatHaze::Initialise(const float width, const float height)
@@ -67,9 +67,9 @@ HRESULT HeatHaze::Initialise(const float width, const float height)
 	bd.ByteWidth = sizeof(HeatHazeValues);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &_heatHazeValues);
+	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &m_HeatHazeValuesBufferPtr);
 
-	auto texHandler = DX11Engine::Get().GetTextureHandler();
+	const TextureHandler* texHandler = DX11Engine::Get().GetTextureHandler();
 	m_SnowTex = texHandler->GetTextureByName("Snow");
 	m_HeatTex = texHandler->GetTextureByName("DistortionMap");
 
@@ -79,16 +79,16 @@ HRESULT HeatHaze::Initialise(const float width, const float height)
 		msaaCount = 0;
 	}
 
-	_values.sampleCount = static_cast<UINT>(msaaCount);
+	m_HeatHazeValues.SampleCount = static_cast<UINT>(msaaCount);
 
 	return S_OK;
 }
 
 void HeatHaze::PreResize()
 {
-	_renderTargetTex2D->Release();
-	_renderTargetView->Release();
-	_renderTargetSRV->Release();
+	m_RenderTargetTex2D->Release();
+	m_RenderTargetView->Release();
+	m_RenderTargetSRV->Release();
 }
 
 void HeatHaze::Resize(const float width, const float height)
@@ -114,7 +114,7 @@ HRESULT HeatHaze::InitialiseRenderTarget(const float width, const float height)
 	renderTargetTexDesc.CPUAccessFlags = 0;
 	renderTargetTexDesc.MiscFlags = 0;
 
-	hr = device->CreateTexture2D(&renderTargetTexDesc, nullptr, &_renderTargetTex2D);
+	hr = device->CreateTexture2D(&renderTargetTexDesc, nullptr, &m_RenderTargetTex2D);
 	if (FAILED(hr))
 	{
 		return hr;
@@ -125,7 +125,7 @@ HRESULT HeatHaze::InitialiseRenderTarget(const float width, const float height)
 	renderTargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 	renderTargetDesc.Texture2D.MipSlice = 0;
 
-	hr = device->CreateRenderTargetView(_renderTargetTex2D, &renderTargetDesc, &_renderTargetView);
+	hr = device->CreateRenderTargetView(m_RenderTargetTex2D, &renderTargetDesc, &m_RenderTargetView);
 	if (FAILED(hr))
 	{
 		MessageBox(nullptr, L"Failed to create Render Target View (BasicLight)", L"Error", MB_OK);
@@ -138,14 +138,14 @@ HRESULT HeatHaze::InitialiseRenderTarget(const float width, const float height)
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.MipLevels = 1;
 
-	device->CreateShaderResourceView(_renderTargetTex2D, &srvDesc, &_renderTargetSRV);
+	device->CreateShaderResourceView(m_RenderTargetTex2D, &srvDesc, &m_RenderTargetSRV);
 
 	return S_OK;
 }
 
 HRESULT HeatHaze::InitialiseShaders()
 {
-	HRESULT hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/HeatHazePS.cso", &_heatHazePS);
+	HRESULT hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/HeatHazePS.cso", &m_HeatHazePS);
 	if (FAILED(hr))
 		return hr;
 
@@ -154,37 +154,37 @@ HRESULT HeatHaze::InitialiseShaders()
 
 void HeatHaze::BuildQuad()
 {
-	HRESULT hr = BufferClass::CreateQuad(&_quad.vertexBuffer, &_quad.indexBuffer);
+	HRESULT hr = BufferClass::CreateQuad(&m_Quad.VertexBuffer, &m_Quad.IndexBuffer);
 	if (FAILED(hr))
 	{
 		return;
 	}
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	char const vbName[] = "Heat Haze VB";
 	char const ibName[] = "Heat Haze IB";
-	_quad.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(vbName) - 1, vbName);
-	_quad.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(ibName) - 1, ibName);
+	m_Quad.VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(vbName) - 1, vbName);
+	m_Quad.IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(ibName) - 1, ibName);
 #endif
 
-	_quad.numberOfIndices = 6;
-	_quad.vertexBufferOffset = 0;
-	_quad.vertexBufferStride = sizeof(SimpleQuad);
+	m_Quad.NumberOfIndices = 6;
+	m_Quad.VertexBufferOffset = 0;
+	m_Quad.vertexBufferStride = sizeof(SimpleQuad);
 }
 
 void HeatHaze::SetAsCurrentRenderTarget() const
 {
-	RenderClass::SetRenderTargetAndDepthStencil(_renderTargetView, nullptr);
+	RenderClass::SetRenderTargetAndDepthStencil(m_RenderTargetView, nullptr);
 }
 
 void HeatHaze::SetAsCurrentPixelShader() const
 {
-	ShaderClass::SetShadersAndInputLayout(nullptr, _heatHazePS, nullptr);
+	ShaderClass::SetShadersAndInputLayout(nullptr, m_HeatHazePS, nullptr);
 }
 
 void HeatHaze::Update(const float deltaTime)
 {
-	_values.time = deltaTime;
+	m_HeatHazeValues.Time = deltaTime;
 }
 
 void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, std::string season)
@@ -193,31 +193,31 @@ void HeatHaze::Render(ID3D11ShaderResourceView * textureToProcess, std::string s
 
 	if (season == "Winter")
 	{
-		_values.blizzard = 1.0f;
-		_values.heatwave = 0.0f;
+		m_HeatHazeValues.Blizzard = 1.0f;
+		m_HeatHazeValues.Heatwave = 0.0f;
 
 		context->PSSetShaderResources(1, 1, &m_SnowTex);
 	}
 	else if (season == "Summer")
 	{
-		_values.blizzard = 0.0f;
-		_values.heatwave = 1.0f;
+		m_HeatHazeValues.Blizzard = 0.0f;
+		m_HeatHazeValues.Heatwave = 1.0f;
 
 		context->PSSetShaderResources(1, 1, &m_HeatTex);
 	}
 
-	BufferClass::SetPixelShaderBuffers(&_heatHazeValues);
+	BufferClass::SetPixelShaderBuffers(&m_HeatHazeValuesBufferPtr);
 
-	context->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(LINEAR));
+	context->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(SamplerType::LINEAR));
 	SetAsCurrentRenderTarget();
 	SetAsCurrentPixelShader();
 
-	context->IASetVertexBuffers(0, 1, _quad.vertexBuffer.GetAddressOf(), &_quad.vertexBufferStride, &_quad.vertexBufferOffset);
-	context->IASetIndexBuffer(_quad.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	context->IASetVertexBuffers(0, 1, m_Quad.VertexBuffer.GetAddressOf(), &m_Quad.vertexBufferStride, &m_Quad.VertexBufferOffset);
+	context->IASetIndexBuffer(m_Quad.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	context->PSSetShaderResources(0, 1, &textureToProcess);
 
-	context->UpdateSubresource(_heatHazeValues, 0, nullptr, &_values, 0, 0);
+	context->UpdateSubresource(m_HeatHazeValuesBufferPtr, 0, nullptr, &m_HeatHazeValues, 0, 0);
 
-	context->DrawIndexed(static_cast<UINT>(_quad.numberOfIndices), 0, 0);
+	context->DrawIndexed(static_cast<UINT>(m_Quad.NumberOfIndices), 0, 0);
 }

@@ -1,14 +1,23 @@
 #include "Shadows.h"
 #include "../../ApplicationNew.h"
+#include "../Core/Handlers/System Handlers/BufferClass.h"
+#include "../Core/Handlers/System Handlers/ShaderClass.h"
+#include "../Core/Handlers/System Handlers/RenderClass.h"
 
 Shadows::Shadows()
-	: _inputLayout(nullptr), _shadowViewport(), _shadowDepthMatrixBuffer(nullptr)
+	: m_InputLayout(nullptr)
+	, m_ShadowViewport()
+	, m_ShadowDepthMatrixBufferPtr(nullptr)
 {
-	_shadowDepthVS = nullptr;
-	_sceneBoundary.sphereCentre = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	_sceneBoundary.sphereRadius = sqrtf(35.0f * 35.0f + 40.0f * 40.0f);
-	_lightDirection = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	_lightPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMStoreFloat4x4(&m_LightProjectionMatrix, XMMatrixIdentity());
+	XMStoreFloat4x4(&m_LightViewMatrix, XMMatrixIdentity());
+	XMStoreFloat4x4(&m_ShadowTransformMatrix, XMMatrixIdentity());
+
+	m_ShadowDepthVS = nullptr;
+	m_SceneBoundary.SphereCentre = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_SceneBoundary.SphereRadius = sqrtf(35.0f * 35.0f + 40.0f * 40.0f);
+	m_LightDirection = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_LightPosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 }
 
 Shadows::~Shadows()
@@ -17,12 +26,12 @@ Shadows::~Shadows()
 
 void Shadows::Cleanup()
 {
-	_inputLayout->Release();
-	_shadowDepthVS->Release();
-	_ShadowTex->Release();
-	_ShadowDepthStencilView->Release();
-	_ShadowSRV->Release();
-	_shadowDepthMatrixBuffer->Release();
+	m_InputLayout->Release();
+	m_ShadowDepthVS->Release();
+	m_ShadowTex->Release();
+	m_ShadowDepthStencilView->Release();
+	m_ShadowSRV->Release();
+	m_ShadowDepthMatrixBufferPtr->Release();
 }
 
 HRESULT Shadows::Initialise(float windowWidth, float windowHeight)
@@ -48,7 +57,7 @@ HRESULT Shadows::Initialise(float windowWidth, float windowHeight)
 	bd.ByteWidth = sizeof(MatrixBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &_shadowDepthMatrixBuffer);
+	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &m_ShadowDepthMatrixBufferPtr);
 
 	InitialiseViewport(windowWidth, windowHeight);
 
@@ -57,9 +66,9 @@ HRESULT Shadows::Initialise(float windowWidth, float windowHeight)
 
 void Shadows::PreResizeViews()
 {
-	_ShadowTex->Release();
-	_ShadowSRV->Release();
-	_ShadowDepthStencilView->Release();
+	m_ShadowTex->Release();
+	m_ShadowSRV->Release();
+	m_ShadowDepthStencilView->Release();
 }
 
 void Shadows::OnResize(float windowWidth, float windowHeight)
@@ -78,7 +87,7 @@ HRESULT Shadows::InitialiseShaders()
 		{ "BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ShadowDepthVS.cso", &_shadowDepthVS, &_inputLayout, layout, ARRAYSIZE(layout));
+	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/ShadowDepthVS.cso", &m_ShadowDepthVS, &m_InputLayout, layout, ARRAYSIZE(layout));
 	if (FAILED(hr))
 		return hr;
 
@@ -103,7 +112,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	texDesc.CPUAccessFlags = 0;
 	texDesc.MiscFlags = 0;
 
-	hr = device->CreateTexture2D(&texDesc, 0, &_ShadowTex);
+	hr = device->CreateTexture2D(&texDesc, 0, &m_ShadowTex);
 	if (FAILED(hr))
 		return hr;
 
@@ -113,7 +122,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Texture2D.MipSlice = 0;
 
-	hr = device->CreateDepthStencilView(_ShadowTex, &dsvDesc, &_ShadowDepthStencilView);
+	hr = device->CreateDepthStencilView(m_ShadowTex, &dsvDesc, &m_ShadowDepthStencilView);
 	if (FAILED(hr))
 		return hr;
 
@@ -123,7 +132,7 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 	srvDesc.Texture2D.MipLevels = texDesc.MipLevels;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 
-	hr = device->CreateShaderResourceView(_ShadowTex, &srvDesc, &_ShadowSRV);
+	hr = device->CreateShaderResourceView(m_ShadowTex, &srvDesc, &m_ShadowSRV);
 	if (FAILED(hr))
 		return hr;
 	return S_OK;
@@ -131,21 +140,21 @@ HRESULT Shadows::InitialiseDepthStencilView(float windowWidth, float windowHeigh
 
 void Shadows::InitialiseViewport(float windowWidth, float windowHeight)
 {
-	_shadowViewport.Width = static_cast<FLOAT>(windowWidth);
-	_shadowViewport.Height = static_cast<FLOAT>(windowHeight);
-	_shadowViewport.MinDepth = 0.0f;
-	_shadowViewport.MaxDepth = 1.0f;
-	_shadowViewport.TopLeftX = 0;
-	_shadowViewport.TopLeftY = 0;
+	m_ShadowViewport.Width = static_cast<FLOAT>(windowWidth);
+	m_ShadowViewport.Height = static_cast<FLOAT>(windowHeight);
+	m_ShadowViewport.MinDepth = 0.0f;
+	m_ShadowViewport.MaxDepth = 1.0f;
+	m_ShadowViewport.TopLeftX = 0;
+	m_ShadowViewport.TopLeftY = 0;
 }
 
 void Shadows::BuildShadowTransform()
 {
-	const XMVECTOR lightDirVec = XMLoadFloat3(&_lightDirection);
-	const XMVECTOR lightPos = 2.0f * _sceneBoundary.sphereRadius * lightDirVec;
-	XMStoreFloat3(&_lightPosition, lightPos);
+	const XMVECTOR lightDirVec = XMLoadFloat3(&m_LightDirection);
+	const XMVECTOR lightPos = 2.0f * m_SceneBoundary.SphereRadius * lightDirVec;
+	XMStoreFloat3(&m_LightPosition, lightPos);
 
-	const XMVECTOR targetPos = XMLoadFloat3(&_sceneBoundary.sphereCentre);
+	const XMVECTOR targetPos = XMLoadFloat3(&m_SceneBoundary.SphereCentre);
 
 	const XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -154,12 +163,12 @@ void Shadows::BuildShadowTransform()
 	XMFLOAT3 sphereCenterLS;
 	XMStoreFloat3(&sphereCenterLS, XMVector3TransformCoord(targetPos, V));
 
-	const float l = sphereCenterLS.x - _sceneBoundary.sphereRadius;
-	const float b = sphereCenterLS.y - _sceneBoundary.sphereRadius;
-	const float n = sphereCenterLS.z - _sceneBoundary.sphereRadius;
-	const float r = sphereCenterLS.x + _sceneBoundary.sphereRadius;
-	const float t = sphereCenterLS.y + _sceneBoundary.sphereRadius;
-	const float f = sphereCenterLS.z + _sceneBoundary.sphereRadius;
+	const float l = sphereCenterLS.x - m_SceneBoundary.SphereRadius;
+	const float b = sphereCenterLS.y - m_SceneBoundary.SphereRadius;
+	const float n = sphereCenterLS.z - m_SceneBoundary.SphereRadius;
+	const float r = sphereCenterLS.x + m_SceneBoundary.SphereRadius;
+	const float t = sphereCenterLS.y + m_SceneBoundary.SphereRadius;
+	const float f = sphereCenterLS.z + m_SceneBoundary.SphereRadius;
 
 	const XMMATRIX P = XMMatrixPerspectiveOffCenterLH(l, r, b, t, n, f);
 
@@ -172,37 +181,37 @@ void Shadows::BuildShadowTransform()
 
 	const XMMATRIX S = XMMatrixTranspose(XMMatrixMultiply(ViewProj, textureSpace));
 
-	XMStoreFloat4x4(&_lightViewMatrix, V);
-	XMStoreFloat4x4(&_lightProjectionMatrix, P);
-	XMStoreFloat4x4(&_shadowTransformMatrix, S);
+	XMStoreFloat4x4(&m_LightViewMatrix, V);
+	XMStoreFloat4x4(&m_LightProjectionMatrix, P);
+	XMStoreFloat4x4(&m_ShadowTransformMatrix, S);
 }
 
 void Shadows::SetSceneCentre(XMFLOAT3 newCentre)
 {
-	_sceneBoundary.sphereCentre.x = newCentre.x;
-	_sceneBoundary.sphereCentre.z = newCentre.z;
+	m_SceneBoundary.SphereCentre.x = newCentre.x;
+	m_SceneBoundary.SphereCentre.z = newCentre.z;
 }
 
 void Shadows::UpdateLightDirection(XMFLOAT3 lightDirection)
 {
-	_lightDirection = lightDirection;
+	m_LightDirection = lightDirection;
 }
 
 void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 {
 	auto context = ApplicationNew::Get().GetContext();
 
-	RenderClass::SetRasterizerState(SHADOWDEPTH);
+	RenderClass::SetRasterizerState(RasterizerType::SHADOWDEPTH);
 	SetAsCurrentViewport();
 	SetAsCurrentDepthStencil();
 	SetAsCurrentShader();
 	context->PSSetShader(nullptr, nullptr, 0);
-	BufferClass::SetVertexShaderBuffers(&_shadowDepthMatrixBuffer);
+	BufferClass::SetVertexShaderBuffers(&m_ShadowDepthMatrixBufferPtr);
 
 	ShadowDepthMatrixBuffer shadowDepthMatrixBuffer;
 
-	XMMATRIX view = XMLoadFloat4x4(&_lightViewMatrix);
-	XMMATRIX proj = XMLoadFloat4x4(&_lightProjectionMatrix);
+	XMMATRIX view = XMLoadFloat4x4(&m_LightViewMatrix);
+	XMMATRIX proj = XMLoadFloat4x4(&m_LightProjectionMatrix);
 
 	shadowDepthMatrixBuffer.LightView = XMMatrixTranspose(view);
 	shadowDepthMatrixBuffer.LightProjection = XMMatrixTranspose(proj);
@@ -212,25 +221,25 @@ void Shadows::Render(const std::vector<SceneElement*>& sceneElements)
 		if (element->CanCastShadows())
 		{
 			shadowDepthMatrixBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&element->GetTransform()->GetWorld()));
-			context->UpdateSubresource(_shadowDepthMatrixBuffer, 0, nullptr, &shadowDepthMatrixBuffer, 0, 0);
+			context->UpdateSubresource(m_ShadowDepthMatrixBufferPtr, 0, nullptr, &shadowDepthMatrixBuffer, 0, 0);
 			element->Draw();
 		}
 	}
 
-	//terrain.ShadowDraw(shadowDepthMatrixBuffer, _shadowDepthMatrixBuffer);
+	//terrain.ShadowDraw(shadowDepthMatrixBuffer, m_ShadowDepthMatrixBufferPtr);
 }
 
 void Shadows::SetAsCurrentShader()
 {
-	ShaderClass::SetShadersAndInputLayout(_shadowDepthVS, nullptr, _inputLayout);
+	ShaderClass::SetShadersAndInputLayout(m_ShadowDepthVS, nullptr, m_InputLayout);
 }
 
 void Shadows::SetAsCurrentDepthStencil()
 {
-	RenderClass::SetRenderTargetAndDepthStencil(nullptr, _ShadowDepthStencilView);
+	RenderClass::SetRenderTargetAndDepthStencil(nullptr, m_ShadowDepthStencilView);
 }
 
 void Shadows::SetAsCurrentViewport()
 {
-	RenderClass::SetViewport(_shadowViewport);
+	RenderClass::SetViewport(m_ShadowViewport);
 }

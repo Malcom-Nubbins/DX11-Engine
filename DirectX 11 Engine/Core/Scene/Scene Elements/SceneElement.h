@@ -11,18 +11,18 @@ using namespace DirectX;
 class SceneElement
 {
 private:
-	std::unique_ptr<Transform> _transform;
-	std::unique_ptr<Appearance> _appearance;
+	std::unique_ptr<Transform> m_TransformPtr;
+	std::unique_ptr<Appearance> m_AppearancePtr;
 
-	StringHash _name;
+	TStringHash m_Name;
 
-	bool _castShadows;
-	bool _affectedByLight;
+	bool m_bCastShadows;
+	bool m_bAffectedByLight;
 
-	std::vector<SceneElement*> _children;
+	std::vector<SceneElement*> m_Children;
 
 public:
-	SceneElement(StringHash elementName, Transform const& transform, Appearance const& appearance);
+	SceneElement(TStringHash elementName, Transform const& transform, Appearance const& appearance);
 	~SceneElement();
 
 	void Cleanup();
@@ -32,18 +32,18 @@ public:
 
 public:
 	
-	Transform * GetTransform() const { return _transform.get(); }
-	Appearance * GetAppearance() const { return _appearance.get(); }
+	Transform* GetTransform() const { return m_TransformPtr.get(); }
+	Appearance* GetAppearance() const { return m_AppearancePtr.get(); }
 
-	void SetCastShadows(bool castShadows) { _castShadows = castShadows; }
-	bool CanCastShadows() const { return _castShadows; }
+	void SetCastShadows(bool castShadows) { m_bCastShadows = castShadows; }
+	bool CanCastShadows() const { return m_bCastShadows; }
 
-	void SetAffectedByLight(bool affected) { _affectedByLight = affected; }
-	bool IsAffectedByLight() const { return _affectedByLight; }
+	void SetAffectedByLight(bool affected) { m_bAffectedByLight = affected; }
+	bool IsAffectedByLight() const { return m_bAffectedByLight; }
 
-	StringHash GetElementName() const { return _name; }
+	TStringHash GetElementName() const { return m_Name; }
 
 	void AddChild(SceneElement* child);
-	std::vector<SceneElement*> GetChildren() { return _children; }
+	std::vector<SceneElement*> GetChildren() { return m_Children; }
 };
 

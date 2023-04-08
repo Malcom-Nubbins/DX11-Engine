@@ -1,9 +1,9 @@
 #pragma once
-#include "../../Handlers/System Handlers/D3DClass.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
 #include "../../Handlers/System Handlers/MathsHandler.h"
 #include <vector>
 #include <fstream>
+
 class DiamondSquareTerrain
 {
 	struct GridMeshData
@@ -14,33 +14,33 @@ class DiamondSquareTerrain
 
 	struct InitInfo
 	{
-		std::wstring heightMapFileName;
-		UINT heightMapHeight;
-		UINT heightMapWidth;
+		std::wstring HeightMapFileName;
+		UINT HeightMapHeight = 0;
+		UINT HeightMapWidth = 0;
 
-		float gridWidth;
-		float gridDepth;
-		float heightScale;
+		float GridWidth = 0.f;
+		float GridDepth = 0.f;
+		float HeightScale = 0.f;
 
-		float cellSpacing;
+		float CellSpacing = 1.f;
 	};
 
 private:
-	VertexBuffer _vertexBuffer;
-	IndexBuffer _indexBuffer;
+	TVertexBufferPtr m_VertexBuffer;
+	TIndexBufferPtr m_IndexBuffer;
 
-	GridMeshData* _gridMesh;
+	GridMeshData* m_GridMesh;
 
-	std::vector<SimpleVertex> _gridVertices;
-	std::vector<LONG> _gridIndices;
+	std::vector<SimpleVertex> m_GridVertices;
+	std::vector<LONG> m_GridIndices;
 
-	double* _heightMap;
-	std::vector<float> _heights;
-	InitInfo _info;
+	double* m_HeightMap;
+	std::vector<float> m_Heights;
+	InitInfo m_Info;
 
-	bool _finishedBuilding;
+	bool m_bFinishedBuilding;
 
-	static const int _cellsPerPatch = 64;
+	static const int ms_CellsPerPatch = 64;
 
 private:
 
@@ -79,12 +79,12 @@ public:
 	float GetDepth();
 	float GetHeight(float camX, float camZ);
 
-	VertexBuffer GetVertexBuffer() const { return _vertexBuffer; }
-	VertexBuffer GetIndexBuffer() const { return _indexBuffer; }
-	GridMeshData* GetMeshData() const { return _gridMesh; }
+	TVertexBufferPtr GetVertexBuffer() const { return m_VertexBuffer; }
+	TVertexBufferPtr GetIndexBuffer() const { return m_IndexBuffer; }
+	GridMeshData* GetMeshData() const { return m_GridMesh; }
 
-	void SetTerrainFinishedBuilding(bool state) { _finishedBuilding = state; }
-	bool HasTerrainFinishedBuilding() const { return _finishedBuilding; }
+	void SetTerrainFinishedBuilding(bool state) { m_bFinishedBuilding = state; }
+	bool HasTerrainFinishedBuilding() const { return m_bFinishedBuilding; }
 	void UpdateMeshData();
 
 };

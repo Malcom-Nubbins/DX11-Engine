@@ -2,6 +2,8 @@
 
 #include "../../ApplicationNew.h"
 #include "../../Handlers/System Handlers/WindowClass.h"
+#include "../Core/Handlers/System Handlers/ShaderClass.h"
+#include "../Core/Handlers/System Handlers/RenderClass.h"
 #include "../../Loaders/ConfigLoader.h"
 #include "../Core/Loaders/XMLLoader/rapidxml.hpp"
 #include "../Core/Loaders/XMLLoader/rapidxml_ext.hpp"
@@ -10,15 +12,15 @@
 #include <vector>
 #include <codecvt>
 
-UserInterface::UserInterface(Camera& camera)
+UserInterface::UserInterface(Camera* camera)
 	: IConfigInterface(UI_CONFIG)
-	, _camera(camera)
-	, _inputLayout(nullptr)
-	, _vertexShader(nullptr)
-	, _pixelShader(nullptr)
-	, _matrixBuffer(nullptr)
+	, m_CameraPtr(camera)
+	, m_InputLayout(nullptr)
+	, m_UIVertexShader(nullptr)
+	, m_UIPixelShader(nullptr)
+	, m_MatrixBufferPtr(nullptr)
 {
-	XMStoreFloat4x4(&_worldMatrix, XMMatrixIdentity());
+	XMStoreFloat4x4(&m_WorldMatrix, XMMatrixIdentity());
 	LoadConfig();
 }
 
@@ -121,12 +123,12 @@ void UserInterface::LoadConfig()
 
 		float const order = strtof(uiElementNode->first_node("Order")->value(), nullptr);
 
-		S_UIElementInfo const elementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName, static_cast<u32>(order));
+		UIElementInfo const elementInfo(elementName, XMFLOAT2(texWidth, texHeight), XMFLOAT2(offsetX, offsetY), anchorPoint, originPoint, textureName, static_cast<uint32>(order));
 
 		AddBitmapToUI(elementInfo);
 	}
 
-	std::sort(_bitmaps.begin(), _bitmaps.end(), [](UIBitmap* bitmapA, UIBitmap* bitmapB)
+	std::sort(m_Bitmaps.begin(), m_Bitmaps.end(), [](UIBitmap* bitmapA, UIBitmap* bitmapB)
 		{
 			return bitmapA->GetOrder() > bitmapB->GetOrder();
 		});
@@ -134,44 +136,44 @@ void UserInterface::LoadConfig()
 
 void UserInterface::ReloadUI()
 {
-	for (auto uiElement : _bitmaps)
+	for (auto uiElement : m_Bitmaps)
 	{
 		uiElement->Cleanup();
 		delete uiElement;
 	}
 
-	_bitmaps.clear();
+	m_Bitmaps.clear();
 
 	LoadConfig();
 }
 
 void UserInterface::Cleanup()
 {
-	for (auto uiBitmap : _bitmaps)
+	for (auto uiBitmap : m_Bitmaps)
 	{
 		uiBitmap->Cleanup();
 		delete uiBitmap;
 	}
 
-	_bitmaps.clear();
-	_bitmaps.shrink_to_fit();
+	m_Bitmaps.clear();
+	m_Bitmaps.shrink_to_fit();
 
-	if (_inputLayout)
-		_inputLayout->Release();
+	if (m_InputLayout)
+		m_InputLayout->Release();
 
-	if (_vertexShader)
-		_vertexShader->Release();
+	if (m_UIVertexShader)
+		m_UIVertexShader->Release();
 
-	if (_pixelShader)
-		_pixelShader->Release();
+	if (m_UIPixelShader)
+		m_UIPixelShader->Release();
 
-	if (_matrixBuffer)
-		_matrixBuffer->Release();
+	if (m_MatrixBufferPtr)
+		m_MatrixBufferPtr->Release();
 }
 
 void UserInterface::Resize(float width, float height)
 {
-	for (UIBitmap* bitmap : _bitmaps)
+	for (UIBitmap* bitmap : m_Bitmaps)
 	{
 		bitmap->UpdateScreenSize(XMFLOAT2(width, height));
 	}
@@ -185,7 +187,7 @@ void UserInterface::Initialise()
 	bd.ByteWidth = sizeof(MatrixBuffer);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &_matrixBuffer);
+	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &m_MatrixBufferPtr);
 
 	D3D11_INPUT_ELEMENT_DESC quadLayout[] =
 	{
@@ -193,11 +195,11 @@ void UserInterface::Initialise()
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
 	};
 
-	ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/UIVertexShader.cso", &_vertexShader, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
-	ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/UIPixelShader.cso", &_pixelShader);
+	ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/UIVertexShader.cso", &m_UIVertexShader, &m_InputLayout, quadLayout, ARRAYSIZE(quadLayout));
+	ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/UIPixelShader.cso", &m_UIPixelShader);
 }
 
-void UserInterface::AddBitmapToUI(S_UIElementInfo const& inElementInfo)
+void UserInterface::AddBitmapToUI(UIElementInfo const& inElementInfo)
 {
 	auto window = ApplicationNew::Get().GetWindowByName(L"DX11 Engine");
 
@@ -210,17 +212,17 @@ void UserInterface::AddBitmapToUI(S_UIElementInfo const& inElementInfo)
 		bitmap->SetIsDynamicPos(true);
 	}
 
-	_bitmaps.push_back(bitmap);
+	m_Bitmaps.push_back(bitmap);
 }
 
-UIBitmap* UserInterface::GetUIElement(StringHash const elementNameHash) const
+UIBitmap* UserInterface::GetUIElement(TStringHash const elementNameHash) const
 {
-	auto const it = std::find_if(_bitmaps.cbegin(), _bitmaps.cend(), [elementNameHash](UIBitmap const* element)
+	auto const it = std::find_if(m_Bitmaps.cbegin(), m_Bitmaps.cend(), [elementNameHash](UIBitmap const* element)
 		{
 			return element->GetName() == elementNameHash;
 		});
 
-	if (it != _bitmaps.cend())
+	if (it != m_Bitmaps.cend())
 	{
 		return (*it);
 	}
@@ -230,7 +232,7 @@ UIBitmap* UserInterface::GetUIElement(StringHash const elementNameHash) const
 
 void UserInterface::Update(double delta)
 {
-	for(auto bitmap : _bitmaps)
+	for(auto bitmap : m_Bitmaps)
 	{
 		bitmap->Update(delta);
 	}
@@ -246,22 +248,22 @@ void UserInterface::Draw()
 	RenderClass::EnableAlphaBlending();
 
 	app->GetContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	ShaderClass::SetShadersAndInputLayout(_vertexShader, _pixelShader, _inputLayout);
+	ShaderClass::SetShadersAndInputLayout(m_UIVertexShader, m_UIPixelShader, m_InputLayout);
 
-	BufferClass::SetVertexShaderBuffers(&_matrixBuffer, 0);
+	BufferClass::SetVertexShaderBuffers(&m_MatrixBufferPtr, 0);
 	MatrixBuffer matBuffer;
-	XMMATRIX view = XMMatrixTranspose(XMLoadFloat4x4(&_camera.GetDefaultView()));
-	XMMATRIX proj = XMMatrixTranspose(XMLoadFloat4x4(&_camera.GetOthographicProj()));
+	XMMATRIX view = XMMatrixTranspose(XMLoadFloat4x4(&m_CameraPtr->GetDefaultView()));
+	XMMATRIX proj = XMMatrixTranspose(XMLoadFloat4x4(&m_CameraPtr->GetOthographicProj()));
 
 	matBuffer.View = view;
 	matBuffer.Projection = proj;
 
-	app->GetContext()->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(LINEAR));
+	app->GetContext()->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(SamplerType::LINEAR));
 
-	for (auto bitmap : _bitmaps)
+	for (UIBitmap* bitmap : m_Bitmaps)
 	{
 		matBuffer.World = XMMatrixTranspose(XMLoadFloat4x4(&bitmap->GetUIElement()->GetTransform()->GetWorld()));
-		app->GetContext()->UpdateSubresource(_matrixBuffer, 0, nullptr, &matBuffer, 0, 0);
+		app->GetContext()->UpdateSubresource(m_MatrixBufferPtr, 0, nullptr, &matBuffer, 0, 0);
 		bitmap->Draw();
 	}
 

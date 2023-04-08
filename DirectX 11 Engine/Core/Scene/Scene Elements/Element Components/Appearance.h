@@ -4,15 +4,15 @@
 class Appearance
 {
 private:
-	ObjectMesh _mesh;
-	NewObjectMesh _newMesh;
+	ObjectMesh Mesh;
+	NewObjectMesh NewMesh;
 
-	ObjectMaterial _material;
+	ObjectMaterial Material;
 
-	ID3D11ShaderResourceView* _colourTex;
-	ID3D11ShaderResourceView* _normalMap;
-	ID3D11ShaderResourceView* _displacementMap;
-	ID3D11ShaderResourceView* _specularMap;
+	ID3D11ShaderResourceView* ColourTex;
+	ID3D11ShaderResourceView* NormalMap;
+	ID3D11ShaderResourceView* DisplacementMap;
+	ID3D11ShaderResourceView* SpecularMap;
 
 public:
 	Appearance(ObjectMesh const& mesh, ObjectMaterial const& material);
@@ -21,25 +21,25 @@ public:
 
 	void Cleanup();
 
-	void SetColourTexture(ID3D11ShaderResourceView* colourTex) { _colourTex = colourTex; }
-	void SetNormalMap(ID3D11ShaderResourceView* normalMap) { _normalMap = normalMap; }
-	void SetDisplacementMap(ID3D11ShaderResourceView* displacementMap) { _displacementMap = displacementMap; }
-	void SetSpecularMap(ID3D11ShaderResourceView* specularMap) { _specularMap = specularMap; }
+	void SetColourTexture(ID3D11ShaderResourceView* colourTex) { ColourTex = colourTex; }
+	void SetNormalMap(ID3D11ShaderResourceView* normalMap) { NormalMap = normalMap; }
+	void SetDisplacementMap(ID3D11ShaderResourceView* displacementMap) { DisplacementMap = displacementMap; }
+	void SetSpecularMap(ID3D11ShaderResourceView* specularMap) { SpecularMap = specularMap; }
 
-	ID3D11ShaderResourceView * GetColourTex() const { return _colourTex; }
-	ID3D11ShaderResourceView * GetNormalMap() const { return _normalMap; }
-	ID3D11ShaderResourceView * GetDisplacementMap() const { return _displacementMap; }
-	ID3D11ShaderResourceView * GetSpecularMap() const { return _specularMap; }
+	ID3D11ShaderResourceView * GetColourTex() const { return ColourTex; }
+	ID3D11ShaderResourceView * GetNormalMap() const { return NormalMap; }
+	ID3D11ShaderResourceView * GetDisplacementMap() const { return DisplacementMap; }
+	ID3D11ShaderResourceView * GetSpecularMap() const { return SpecularMap; }
 
-	bool HasColourTexture() const { return _colourTex ? true : false; }
-	bool HasNormalMap() const { return _normalMap ? true : false; }
-	bool HasDisplacementMap() const { return _displacementMap ? true : false; }
-	bool HasSpecularMap() const { return _specularMap ? true : false; }
+	bool HasColourTexture() const { return ColourTex ? true : false; }
+	bool HasNormalMap() const { return NormalMap ? true : false; }
+	bool HasDisplacementMap() const { return DisplacementMap ? true : false; }
+	bool HasSpecularMap() const { return SpecularMap ? true : false; }
 
-	void UpdateObjectMesh(ObjectMesh updatedMesh) { _mesh = updatedMesh; }
-	ObjectMesh GetObjectMesh() const { return _mesh; }
+	void UpdateObjectMesh(ObjectMesh updatedMesh) { Mesh = updatedMesh; }
+	ObjectMesh GetObjectMesh() const { return Mesh; }
 
-	ObjectMaterial GetObjectMaterial() const { return _material; }
+	ObjectMaterial GetObjectMaterial() const { return Material; }
 
 	void Draw();
 

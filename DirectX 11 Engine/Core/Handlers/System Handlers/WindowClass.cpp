@@ -120,7 +120,7 @@ void WindowClass::OnResize(UINT width, UINT height)
 
 			ApplicationNew::Get().GetContext()->Flush();
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 			ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
 			if (debugPtr)
 			{
@@ -141,7 +141,7 @@ void WindowClass::OnResize(UINT width, UINT height)
 		ApplicationNew::Get().GetContext()->ClearState();
 		ApplicationNew::Get().GetContext()->Flush();
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 		ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
 		if (debugPtr)
 		{
@@ -223,7 +223,7 @@ void WindowClass::UpdateRenderTargetViews()
 	backBuffer->Release();
 	backBuffer = nullptr;
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	char const backBufferName[] = "BackBuffer";
 	m_BackBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(backBufferName) - 1, backBufferName);
 
@@ -254,7 +254,7 @@ void WindowClass::Cleanup()
 	ApplicationNew::Get().GetContext()->ClearState();
 	ApplicationNew::Get().GetContext()->Flush();
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	ComPtr<ID3D11Debug> const& debugPtr = ApplicationNew::Get().GetDebug();
 	if (debugPtr)
 	{

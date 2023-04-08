@@ -13,12 +13,25 @@
 class ModelLoader
 {
 private:
-	static std::map<std::wstring, NewObjectMesh> _modelCache;
+	static std::map<std::wstring, NewObjectMesh> m_ModelCache;
 
 	struct Tokens
 	{
-		char** tokensList = nullptr;
-		size_t count = 0;
+		Tokens() : tokensList(nullptr), count(0)
+		{}
+
+		Tokens(char** InTokensList)
+			: tokensList(InTokensList)
+			, count(0)
+		{}
+
+		Tokens(char** InTokensList, size_t InCount)
+			: tokensList(InTokensList)
+			, count(InCount)
+		{}
+
+		char** tokensList;
+		size_t count;
 	};
 
 	struct IntegerTokens

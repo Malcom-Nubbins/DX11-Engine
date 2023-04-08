@@ -26,7 +26,7 @@ public:
 
 	ComPtr<ID3D11Device> const& GetDevice() const { return m_Device; }
 	ComPtr<ID3D11DeviceContext> const& GetContext() const { return m_Context; }
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	ComPtr<ID3D11Debug> GetDebug() const { return m_Debug; }
 #endif
 	C_ConfigLoader const* GetConfigLoader() const { return m_ConfigLoader; }

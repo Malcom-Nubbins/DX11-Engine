@@ -41,11 +41,11 @@ void OBJLoader::CreateIndices(
 		}
 		else //if not found, add it to the buffer
 		{
-			outVertices.push_back(vertex.pos);
-			outTexCoords.push_back(vertex.texCoord);
-			outNormals.push_back(vertex.normal);
-			outTangents.push_back(vertex.tangent);
-			outBinormals.push_back(vertex.binormal);
+			outVertices.push_back(vertex.Pos);
+			outTexCoords.push_back(vertex.TexCoord);
+			outNormals.push_back(vertex.Normal);
+			outTangents.push_back(vertex.Tangent);
+			outBinormals.push_back(vertex.Binormal);
 
 			UINT newIndex = static_cast<UINT>(outVertices.size()) - 1;
 			outIndices.push_back(newIndex);
@@ -233,17 +233,17 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 				XMFLOAT3 binormalValues = XMFLOAT3(0.0f, 0.0f, 0.0f);
 				XMFLOAT3 newNormalValues = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
-				vertex1.pos = expandedVertices[i + 0];
-				vertex1.normal = expandedNormals[i + 0];
-				vertex1.tex = expandedTexCoords[i + 0];
+				vertex1.Pos = expandedVertices[i + 0];
+				vertex1.Normal = expandedNormals[i + 0];
+				vertex1.TexCoord = expandedTexCoords[i + 0];
 
-				vertex2.pos = expandedVertices[i + 1];
-				vertex2.normal = expandedNormals[i + 1];
-				vertex2.tex = expandedTexCoords[i + 1];
+				vertex2.Pos = expandedVertices[i + 1];
+				vertex2.Normal = expandedNormals[i + 1];
+				vertex2.TexCoord = expandedTexCoords[i + 1];
 
-				vertex3.pos = expandedVertices[i + 2];
-				vertex3.normal = expandedNormals[i + 2];
-				vertex3.tex = expandedTexCoords[i + 2];
+				vertex3.Pos = expandedVertices[i + 2];
+				vertex3.Normal = expandedNormals[i + 2];
+				vertex3.TexCoord = expandedTexCoords[i + 2];
 
 				CreateTangentsAndBinormals(vertex1, vertex2, vertex3, tangentValues, binormalValues);
 
@@ -273,16 +273,16 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 
 			for (unsigned int i = 0; i < numMeshVertices; ++i)
 			{
-				finalVerts[i].pos = meshVertices[i];
-				finalVerts[i].normal = meshNormals[i];
-				finalVerts[i].texCoord = meshTexCoords[i];
-				finalVerts[i].tangent = finalTangents[i];
-				finalVerts[i].binormal = finalBinormals[i];
+				finalVerts[i].Pos = meshVertices[i];
+				finalVerts[i].Normal = meshNormals[i];
+				finalVerts[i].TexCoord = meshTexCoords[i];
+				finalVerts[i].Tangent = finalTangents[i];
+				finalVerts[i].Binormal = finalBinormals[i];
 			}
 
 			//Put data into vertex and index buffers, then pass the relevant data to the MeshData object.
 			//The rest of the code will hopefully look familiar to you, as it's similar to whats in your InitVertexBuffer and InitIndexBuffer methods
-			VertexBuffer vertexBuffer;
+			TVertexBufferPtr vertexBuffer;
 
 			D3D11_BUFFER_DESC bd;
 			ZeroMemory(&bd, sizeof(bd));
@@ -297,8 +297,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 
 			_pd3dDevice->CreateBuffer(&bd, &InitData, &vertexBuffer);
 
-			meshData.vertexBuffer = vertexBuffer;
-			meshData.vertexBufferOffset = 0;
+			meshData.VertexBuffer = vertexBuffer;
+			meshData.VertexBufferOffset = 0;
 			meshData.vertexBufferStride = sizeof(SimpleVertex);
 
 			auto indicesArray = new UINT[meshIndices.size()];
@@ -334,8 +334,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 				return ObjectMesh();
 			}
 
-			meshData.numberOfIndices = meshIndices.size();
-			meshData.indexBuffer = indexBuffer;
+			meshData.NumberOfIndices = meshIndices.size();
+			meshData.IndexBuffer = indexBuffer;
 
 			//This data has now been sent over to the GPU so we can delete this CPU-side stuff
 			delete[] indicesArray;
@@ -377,8 +377,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 
 		_pd3dDevice->CreateBuffer(&bd, &InitData, &vertexBuffer);
 
-		meshData.vertexBuffer = vertexBuffer;
-		meshData.vertexBufferOffset = 0;
+		meshData.VertexBuffer = vertexBuffer;
+		meshData.VertexBufferOffset = 0;
 		meshData.vertexBufferStride = sizeof(SimpleVertex);
 
 		ID3D11Buffer* indexBuffer;
@@ -393,8 +393,8 @@ ObjectMesh OBJLoader::Load(std::wstring filename, ID3D11Device* _pd3dDevice, boo
 		InitData.pSysMem = indices;
 		_pd3dDevice->CreateBuffer(&bd, &InitData, &indexBuffer);
 
-		meshData.numberOfIndices = numIndices;
-		meshData.indexBuffer = indexBuffer;
+		meshData.NumberOfIndices = numIndices;
+		meshData.IndexBuffer = indexBuffer;
 
 		//This data has now been sent over to the GPU so we can delete this CPU-side stuff
 		delete[] indices;

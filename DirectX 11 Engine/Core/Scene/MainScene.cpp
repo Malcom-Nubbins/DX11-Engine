@@ -224,7 +224,7 @@ MainScene::~MainScene()
 //{	
 //	Scene::Update(e);
 //
-//	//_pointLights.at(0).Position = _camera->GetPosition();
+//	//_pointLights.at(0).Position = CameraPtr->GetPosition();
 //
 //	/*std::wostringstream out;
 //	out.precision(6);

@@ -36,7 +36,7 @@ void Scene::ResizeViews(float windowWidth, float windowHeight)
 
 void Scene::Unload()
 {
-	IsUnloading = true;
+	m_bIsUnloading = true;
 }
 
 void Scene::InitialiseScene()
@@ -68,17 +68,17 @@ void Scene::InitialiseScene()
 		}
 		else
 		{
-			if (ElementInfo.IsFlatPlane)
+			if (ElementInfo.bIsFlatPlane)
 			{
 				FlatTerrain* flatPlane = new FlatTerrain();
 				flatPlane->SetTerrainValues(ElementInfo.TerrainGenWidth, ElementInfo.TerrainGenHeight, ElementInfo.TerrainGenSize);
 				flatPlane->GenerateTerrain();
 
 				ObjectMesh planeMesh;
-				planeMesh.vertexBuffer = flatPlane->GetVertexBuffer();
-				planeMesh.indexBuffer = flatPlane->GetIndexBuffer();
-				planeMesh.numberOfIndices = static_cast<int>(flatPlane->GetMeshData()->Indices.size());
-				planeMesh.vertexBufferOffset = 0;
+				planeMesh.VertexBuffer = flatPlane->GetVertexBuffer();
+				planeMesh.IndexBuffer = flatPlane->GetIndexBuffer();
+				planeMesh.NumberOfIndices = static_cast<int>(flatPlane->GetMeshData()->Indices.size());
+				planeMesh.VertexBufferOffset = 0;
 				planeMesh.vertexBufferStride = sizeof(SimpleVertex);
 
 				objectAppearance = make_shared<Appearance>(planeMesh, Material);
@@ -86,17 +86,17 @@ void Scene::InitialiseScene()
 				flatPlane->Cleanup();
 				flatPlane = nullptr;
 			}
-			else if (ElementInfo.IsTerrain)
+			else if (ElementInfo.bIsTerrain)
 			{
 				DiamondSquareTerrain* terrain = new DiamondSquareTerrain();
 				terrain->SetTerrainValues(ElementInfo.TerrainGenWidth, ElementInfo.TerrainGenHeight, ElementInfo.TerrainGenSize);
 				terrain->GenerateTerrain();
 
 				ObjectMesh terrainMesh;
-				terrainMesh.vertexBuffer = terrain->GetVertexBuffer();
-				terrainMesh.indexBuffer = terrain->GetIndexBuffer();
-				terrainMesh.numberOfIndices = static_cast<int>(terrain->GetMeshData()->Indices.size());
-				terrainMesh.vertexBufferOffset = 0;
+				terrainMesh.VertexBuffer = terrain->GetVertexBuffer();
+				terrainMesh.IndexBuffer = terrain->GetIndexBuffer();
+				terrainMesh.NumberOfIndices = static_cast<int>(terrain->GetMeshData()->Indices.size());
+				terrainMesh.VertexBufferOffset = 0;
 				terrainMesh.vertexBufferStride = sizeof(SimpleVertex);
 
 				objectAppearance = make_shared<Appearance>(terrainMesh, Material);
@@ -139,7 +139,7 @@ void Scene::InitialiseScene()
 
 void Scene::Update(UpdateEvent& e)
 {
-	if (!IsUnloading)
+	if (!m_bIsUnloading)
 	{
 		for (SceneElement* element : m_SceneElements)
 		{

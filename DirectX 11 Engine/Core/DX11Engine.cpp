@@ -5,7 +5,7 @@ static DX11Engine* g_Engine = nullptr;
 
 DX11Engine::DX11Engine(const std::wstring& name, UINT width, UINT height, bool vsync)
 	: super(name, width, height, vsync)
-	, m_ContentLoaded(false)
+	, m_bContentLoaded(false)
 	, m_BufferClass(nullptr)
 	, m_RenderClass(nullptr)
 	, m_SceneHandler(nullptr)
@@ -56,14 +56,14 @@ bool DX11Engine::LoadContent()
 	/*m_TestingScene = new TestingScene(*m_Player);
 	m_TestingScene->InitialiseScene(m_AppWindow->GetWindowWidth(), m_AppWindow->GetWindowHeight());*/
 
-	m_UI = new UserInterface(m_Player->GetCamera());
+	m_UI = new UserInterface(&m_Player->GetCamera());
 	m_UI->Initialise();
 
-	m_ContentLoaded = true;
+	m_bContentLoaded = true;
 
 	ShowCursor(false);
 
-	return m_ContentLoaded;
+	return m_bContentLoaded;
 }
 
 void DX11Engine::UnloadContent()
@@ -114,7 +114,7 @@ DX11Engine& DX11Engine::Get()
 void DX11Engine::OnUpdate(UpdateEvent& e)
 {
 	super::OnUpdate(e);
-	if (m_ContentLoaded)
+	if (m_bContentLoaded)
 	{
 		m_Player->Update(e.ElapsedTime);
 		m_UI->Update(e.ElapsedTime);
@@ -130,7 +130,7 @@ void DX11Engine::OnUpdate(UpdateEvent& e)
 
 void DX11Engine::OnRender(RenderEvent& e)
 {
-	if (m_ContentLoaded)
+	if (m_bContentLoaded)
 	{
 		m_GraphicsHandler->Draw();
 

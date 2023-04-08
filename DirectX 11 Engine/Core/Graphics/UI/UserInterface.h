@@ -1,24 +1,23 @@
 ﻿#pragma once
 #include "../../Scene/Camera.h"
 #include "UIBitmap.h"
-#include "../../Handlers/SystemHandlers.h"
 #include "../Core/Loaders/IConfigInterface.h"
 
 class UserInterface : public IConfigInterface
 {
 private:
-	Camera& _camera;
-	std::vector<UIBitmap*> _bitmaps;
+	Camera* m_CameraPtr;
+	std::vector<UIBitmap*> m_Bitmaps;
 
-	ID3D11InputLayout* _inputLayout;
-	ID3D11VertexShader* _vertexShader;
-	ID3D11PixelShader* _pixelShader;
+	ID3D11InputLayout* m_InputLayout;
+	ID3D11VertexShader* m_UIVertexShader;
+	ID3D11PixelShader* m_UIPixelShader;
 
-	ID3D11Buffer* _matrixBuffer;
-	XMFLOAT4X4 _worldMatrix;
+	ID3D11Buffer* m_MatrixBufferPtr;
+	XMFLOAT4X4 m_WorldMatrix;
 
 public:
-	UserInterface(Camera& camera);
+	UserInterface(Camera* camera);
 	~UserInterface() override;
 
 	void ReloadUI();
@@ -29,9 +28,9 @@ public:
 
 	void Initialise();
 
-	void AddBitmapToUI(S_UIElementInfo const& inElementInfo);
+	void AddBitmapToUI(UIElementInfo const& inElementInfo);
 
-	UIBitmap* GetUIElement(StringHash const elementNameHash) const;
+	UIBitmap* GetUIElement(TStringHash const elementNameHash) const;
 
 	void Update(double delta);
 	void Draw();

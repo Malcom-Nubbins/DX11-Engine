@@ -1,25 +1,24 @@
 #pragma once
 
 #include "../../Globals/Structs.h"
-#include "../../Handlers/SystemHandlers.h"
 
 class HeatHaze
 {
 private:
-	ID3D11PixelShader*	_heatHazePS;
-	ID3D11InputLayout*	_inputLayout;
+	ID3D11PixelShader*	m_HeatHazePS;
+	ID3D11InputLayout*	m_InputLayout;
 
-	ID3D11Texture2D*	_renderTargetTex2D;
-	ID3D11RenderTargetView* _renderTargetView;
-	ID3D11ShaderResourceView* _renderTargetSRV;
+	ID3D11Texture2D*	m_RenderTargetTex2D;
+	ID3D11RenderTargetView* m_RenderTargetView;
+	ID3D11ShaderResourceView* m_RenderTargetSRV;
 
 	ID3D11ShaderResourceView* m_SnowTex;
 	ID3D11ShaderResourceView* m_HeatTex;
 
-	ObjectMesh		_quad;
+	ObjectMesh		m_Quad;
 
-	ID3D11Buffer* _heatHazeValues;
-	HeatHazeValues _values;
+	ID3D11Buffer* m_HeatHazeValuesBufferPtr;
+	HeatHazeValues m_HeatHazeValues;
 
 public:
 	HeatHaze();
@@ -33,7 +32,7 @@ public:
 	void SetAsCurrentRenderTarget() const;
 
 	void SetAsCurrentPixelShader() const;
-	ID3D11ShaderResourceView* GetTexture() const { return _renderTargetSRV; }
+	ID3D11ShaderResourceView* GetTexture() const { return m_RenderTargetSRV; }
 
 	void Update(float deltaTime);
 	void Render(ID3D11ShaderResourceView* textureToProcess, std::string season);

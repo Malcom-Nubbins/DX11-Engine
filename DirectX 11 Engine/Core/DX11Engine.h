@@ -50,21 +50,15 @@ protected:
 	virtual void OnConfigsReloaded() override;
 
 private:
-	bool m_ContentLoaded;
+	bool m_bContentLoaded;
 
 	RenderClass* m_RenderClass;
 	ShaderClass* m_ShaderClass;
 	BufferClass* m_BufferClass;
 	TextureHandler* m_TextureHandler;
 	GraphicsHandler* m_GraphicsHandler;
-
-	/*MainScene* m_MainScene;
-	TestingScene* m_TestingScene;*/
-
 	SceneHandler* m_SceneHandler;
-
 	Player* m_Player;
-
 	UserInterface* m_UI;
 
 	float m_ToggleCooldown;

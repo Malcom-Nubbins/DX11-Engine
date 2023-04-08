@@ -3,48 +3,46 @@
 #include "../../Scene/Camera.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
 #include "Shadows.h"
-#include "../../Handlers/SystemHandlers.h"
-
 
 class BasicLight
 {
 private:
-	ID3D11VertexShader* _lightVS;
-	ID3D11VertexShader* m_TesselationVS;
-	ID3D11HullShader* _tesselationHS;
-	ID3D11DomainShader* _tesselationDS;
-	ID3D11PixelShader*	_lightPS;
-	ID3D11InputLayout*	_simpleVertexInputLayout;
+	ID3D11VertexShader*			m_LightVS;
+	ID3D11VertexShader*			m_TesselationVS;
+	ID3D11HullShader*			m_TesselationHS;
+	ID3D11DomainShader*			m_TesselationDS;
+	ID3D11PixelShader*			m_LightPS;
+	ID3D11InputLayout*			m_SimpleVertexInputLayout;
 
-	ID3D11Texture2D*	m_RenderTargetTex2D;
-	ID3D11RenderTargetView* m_RenderTargetView;
-	ID3D11ShaderResourceView* m_RenderTargetShaderResourceView;
+	ID3D11Texture2D*			m_RenderTargetTex2D;
+	ID3D11RenderTargetView*		m_RenderTargetView;
+	ID3D11ShaderResourceView*	m_RenderTargetShaderResourceView;
 
-	ID3D11Texture2D* _depthStencilBuffer;
-	ID3D11DepthStencilView* _depthStencilView;
-	D3D11_VIEWPORT _viewport;
+	ID3D11Texture2D*			m_DepthStencilBuffer;
+	ID3D11DepthStencilView*		m_DepthStencilView;
+	D3D11_VIEWPORT				m_Viewport;
 
-	ID3D11Buffer*	_fogValuesBuffer;
-	ID3D11Buffer* _tesselationBuffer;
-	ID3D11Buffer* _camLightBuffer;
+	ID3D11Buffer*				m_FogValuesBufferPtr;
+	ID3D11Buffer*				m_TesselationBufferPtr;
+	ID3D11Buffer*				m_CamLightBufferPtr;
 
-	ID3D11Buffer* _matrixBuffer;
-	ID3D11Buffer* _objectValueBuffer;
+	ID3D11Buffer*				m_MatrixBufferPtr;
+	ID3D11Buffer*				m_ObjectValueBufferPtr;
 
-	XMFLOAT4 _lightColourDayDiffuse;
-	XMFLOAT4 _lightColourDayAmbient;
-	XMFLOAT4 _lightColourDaySpecular;
+	XMFLOAT4					m_LightColourDayDiffuse = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	XMFLOAT4					m_LightColourDayAmbient = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	XMFLOAT4					m_LightColourDaySpecular = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
 
-	XMFLOAT4 _lightColourSunsetDiffuse;
-	XMFLOAT4 _lightColourSunsetAmbient;
-	XMFLOAT4 _lightColourSunsetSpecular;
+	XMFLOAT4					m_LightColourSunsetDiffuse = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	XMFLOAT4					m_LightColourSunsetAmbient = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	XMFLOAT4					m_LightColourSunsetSpecular = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
 
-	XMFLOAT4 _lightColourNightDiffuse;
-	XMFLOAT4 _lightColourNightAmbient;
-	XMFLOAT4 _lightColourNightSpecular;
+	XMFLOAT4					m_LightColourNightDiffuse = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	XMFLOAT4					m_LightColourNightAmbient = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
+	XMFLOAT4					m_LightColourNightSpecular = XMFLOAT4(0.f, 0.f, 0.f, 0.f);
 
-	UINT m_MSAACount;
-	bool _renderWireframe;
+	UINT						m_MSAACount;
+	bool						m_bRenderWireframe;
 
 public:
 	BasicLight();
@@ -60,8 +58,8 @@ public:
 	void SetAsCurrentRenderTarget();
 	void SetAsCurrentViewport();
 
-	void SetWireframeMode(bool state) { _renderWireframe = state; }
-	bool GetWireframeState() const { return _renderWireframe; }
+	void SetWireframeMode(bool state) { m_bRenderWireframe = state; }
+	bool GetWireframeState() const { return m_bRenderWireframe; }
 
 	void CalculateLightColour(DirectionalLight& sceneLight, float sunHeight, FogValuesBuffer& sceneFog);
 	ID3D11ShaderResourceView* GetRenderTargetSRV() const { return m_RenderTargetShaderResourceView; }

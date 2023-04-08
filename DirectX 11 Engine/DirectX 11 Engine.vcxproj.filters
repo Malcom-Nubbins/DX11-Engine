@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,13 +78,7 @@
     <ClCompile Include="Core\Graphics\UI\UIBitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Handlers\SystemHandlers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Handlers\System Handlers\BufferClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Core\Handlers\System Handlers\D3DClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Core\Handlers\System Handlers\InputHandler.cpp">
@@ -137,9 +128,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Core\Application.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Timer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -212,13 +200,7 @@
     <ClInclude Include="Core\Graphics\UI\UIBitmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Handlers\SystemHandlers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\Handlers\System Handlers\BufferClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Handlers\System Handlers\D3DClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Core\Handlers\System Handlers\InputHandler.h">
@@ -287,6 +269,222 @@
     <ClInclude Include="Core\Loaders\IConfigInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Inc\HLML\bool2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool2x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool2x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool2x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool3x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool3x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool3x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool4x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool4x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\bool4x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double2x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double2x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double2x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double3x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double3x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double3x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double4x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double4x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\double4x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float2x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float2x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float2x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float3x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float3x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float3x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float4x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float4x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\float4x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_constants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_constants_sse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_functions_matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_functions_quaternion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_functions_scalar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_functions_scalar_sse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_functions_vector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_functions_vector_sse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\hlml_types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int2x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int2x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int2x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int3x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int3x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int3x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int4x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int4x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\int4x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\swizzle_templates.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint2x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint2x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint2x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint3x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint3x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint3x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint4x2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint4x3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inc\HLML\uint4x4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FYP - Seasonal Day Night Cycle.rc">
@@ -296,6 +494,186 @@
   <ItemGroup>
     <None Include="FYP - Seasonal Day Night Cycle.aps" />
     <None Include="Core\Shaders\Common.hlsli" />
+    <None Include="Inc\HLML\bool2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool2x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool2x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool2x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool3x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool3x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool3x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool4x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool4x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\bool4x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double2x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double2x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double2x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double3x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double3x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double3x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double4x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double4x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\double4x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float2x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float2x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float2x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float3x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float3x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float3x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float4x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float4x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\float4x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int2x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int2x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int2x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int3x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int3x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int3x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int4x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int4x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\int4x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint2x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint2x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint2x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint3x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint3x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint3x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint4.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint4x2.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint4x3.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Inc\HLML\uint4x4.inl">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Core\Shaders\ColourGradientPS.hlsl" />

@@ -19,10 +19,10 @@ void TextureHandler::Cleanup()
 {
 	for (auto tex : m_Textures)
 	{
-		if (tex.m_Texture != nullptr)
+		if (tex.Texture != nullptr)
 		{
-			tex.m_Texture->Release();
-			tex.m_Texture = nullptr;
+			tex.Texture->Release();
+			tex.Texture = nullptr;
 		}
 	}
 
@@ -47,12 +47,12 @@ void TextureHandler::LoadAllTextures()
 	for (auto const& texInfo : m_TextureInfos)
 	{
 		ID3D11ShaderResourceView* tex = nullptr;
-		std::wstring textureFilePath(texturesPath + texInfo.m_TextureFilename);
+		std::wstring textureFilePath(texturesPath + texInfo.TextureFilename);
 
 		CreateDDSTextureFromFile(device.Get(), textureFilePath.c_str(), nullptr, &tex);
 		if (tex != nullptr)
 		{
-			S_Texture texture(texInfo.m_TextureName.c_str(), tex);
+			TextureDesc texture(texInfo.TextureName.c_str(), tex);
 			m_Textures.emplace_back(std::move(texture));
 		}
 	}
@@ -62,28 +62,28 @@ ID3D11ShaderResourceView* TextureHandler::GetTextureByName(char const* name) con
 {
 	std::string texName(name);
 
-	auto const it = std::find_if(m_Textures.cbegin(), m_Textures.cend(), [texName](S_Texture const& tex)
+	auto const it = std::find_if(m_Textures.cbegin(), m_Textures.cend(), [texName](TextureDesc const& tex)
 		{
-			return tex.m_Filename == texName;
+			return tex.Filename == texName;
 		});
 
 	if (it != m_Textures.cend())
 	{
-		(*it).m_Texture->AddRef();
-		return (*it).m_Texture;
+		(*it).Texture->AddRef();
+		return (*it).Texture;
 	}
 	else
 	{
 		std::string defaultTexName("Default");
-		auto const defaultIt = std::find_if(m_Textures.cbegin(), m_Textures.cend(), [defaultTexName](S_Texture const& tex)
+		auto const defaultIt = std::find_if(m_Textures.cbegin(), m_Textures.cend(), [defaultTexName](TextureDesc const& tex)
 			{
-				return tex.m_Filename == defaultTexName;
+				return tex.Filename == defaultTexName;
 			});
 
 		if (defaultIt != m_Textures.cend())
 		{
-			(*defaultIt).m_Texture->AddRef();
-			return (*defaultIt).m_Texture;
+			(*defaultIt).Texture->AddRef();
+			return (*defaultIt).Texture;
 		}
 	}
 
@@ -139,7 +139,7 @@ void TextureHandler::LoadConfig()
 		wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 		wstring nodeValue(converter.from_bytes(textureNode->value()));
 
-		S_TextureInfo texInfo(textureNode->first_attribute("name")->value(), nodeValue);
+		TextureInfo texInfo(textureNode->first_attribute("name")->value(), nodeValue);
 
 		m_TextureInfos.emplace_back(move(texInfo));
 	}

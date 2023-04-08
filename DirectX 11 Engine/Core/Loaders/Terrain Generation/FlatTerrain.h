@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "../../Handlers/System Handlers/D3DClass.h"
 #include "../../Globals/Structs.h"
 #include "../../Scene/Scene Elements/SceneElement.h"
 #include "../../Handlers/System Handlers/MathsHandler.h"
@@ -15,31 +14,31 @@ class FlatTerrain
 
 	struct InitInfo
 	{
-		std::wstring heightMapFileName;
-		UINT heightMapHeight;
-		UINT heightMapWidth;
+		std::wstring HeightMapFileName;
+		UINT HeightMapHeight;
+		UINT HeightMapWidth;
 
-		float gridWidth;
-		float gridDepth;
-		float heightScale;
+		float GridWidth;
+		float GridDepth;
+		float HeightScale;
 
-		float cellSpacing;
+		float CellSpacing;
 	};
 private:
-	ID3D11Buffer * _vertexBuffer;
-	ID3D11Buffer* _indexBuffer;
+	TVertexBufferPtr m_VertexBuffer;
+	TIndexBufferPtr m_IndexBuffer;
 
-	GridMeshData* _gridMesh;
+	GridMeshData* m_GridMesh;
 
-	std::vector<SimpleVertex> _gridVertices;
-	std::vector<LONG> _gridIndices;
+	std::vector<SimpleVertex> m_GridVertices;
+	std::vector<LONG> m_GridIndices;
 
-	std::vector<float> _heightMap;
-	std::vector<float> _heights;
-	InitInfo _info;
-	bool _useHeightMap;
+	std::vector<float> m_HeightMap;
+	std::vector<float> m_Heights;
+	InitInfo m_Info;
+	bool m_bUseHeightMap;
 
-	SceneElement* _terrainGO;
+	SceneElement* m_TerrainGO;
 
 private:
 	HRESULT CreateBuffers();
@@ -54,7 +53,7 @@ public:
 
 	void RegenerateTerrain();
 	void GenerateTerrain();
-	void SetGameObject(SceneElement* object) { _terrainGO = object; }
+	void SetGameObject(SceneElement* object) { m_TerrainGO = object; }
 
 	void Update(float deltaTime);
 
@@ -67,8 +66,8 @@ public:
 
 	float GetHeight(float camX, float camZ);
 
-	ID3D11Buffer * GetVertexBuffer() const { return _vertexBuffer; }
-	ID3D11Buffer* GetIndexBuffer() const { return _indexBuffer; }
-	GridMeshData* GetMeshData() const { return _gridMesh; }
+	TVertexBufferPtr GetVertexBuffer() const { return m_VertexBuffer; }
+	TIndexBufferPtr GetIndexBuffer() const { return m_IndexBuffer; }
+	GridMeshData* GetMeshData() const { return m_GridMesh; }
 };
 

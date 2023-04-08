@@ -22,5 +22,3 @@
 #define MATERIALS_CONFIG "Core/Config/materials.xml"
 #define UI_CONFIG "Core/Config/ui.xml"
 #define SCENES_CONFIG "Core/Config/scenes.xml"
-
-#define USE_D3D11_DEBUGGING 1

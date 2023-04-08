@@ -174,27 +174,27 @@ void C_ConfigLoader::CreateDefaultMaterialsConfig(std::string const& inConfigFil
 	root->append_node(defaultMat);
 
 	{
-		xml_node<>* ambient = doc.allocate_node(node_element, "Ambient");
-		ambient->append_attribute(doc.allocate_attribute("red", "1.0"));
-		ambient->append_attribute(doc.allocate_attribute("green", "1.0"));
-		ambient->append_attribute(doc.allocate_attribute("blue", "1.0"));
+		xml_node<>* Ambient = doc.allocate_node(node_element, "Ambient");
+		Ambient->append_attribute(doc.allocate_attribute("red", "1.0"));
+		Ambient->append_attribute(doc.allocate_attribute("green", "1.0"));
+		Ambient->append_attribute(doc.allocate_attribute("blue", "1.0"));
 		
-		defaultMat->append_node(ambient);
+		defaultMat->append_node(Ambient);
 
-		xml_node<>* diffuse = doc.allocate_node(node_element, "Diffuse");
-		diffuse->append_attribute(doc.allocate_attribute("red", "1.0"));
-		diffuse->append_attribute(doc.allocate_attribute("green", "1.0"));
-		diffuse->append_attribute(doc.allocate_attribute("blue", "1.0"));
+		xml_node<>* Diffuse = doc.allocate_node(node_element, "Diffuse");
+		Diffuse->append_attribute(doc.allocate_attribute("red", "1.0"));
+		Diffuse->append_attribute(doc.allocate_attribute("green", "1.0"));
+		Diffuse->append_attribute(doc.allocate_attribute("blue", "1.0"));
 
-		defaultMat->append_node(diffuse);
+		defaultMat->append_node(Diffuse);
 
-		xml_node<>* specular = doc.allocate_node(node_element, "Specular");
-		specular->append_attribute(doc.allocate_attribute("red", "1.0"));
-		specular->append_attribute(doc.allocate_attribute("green", "1.0"));
-		specular->append_attribute(doc.allocate_attribute("blue", "1.0"));
-		specular->append_attribute(doc.allocate_attribute("shinyness", "0.5"));
+		xml_node<>* Specular = doc.allocate_node(node_element, "Specular");
+		Specular->append_attribute(doc.allocate_attribute("red", "1.0"));
+		Specular->append_attribute(doc.allocate_attribute("green", "1.0"));
+		Specular->append_attribute(doc.allocate_attribute("blue", "1.0"));
+		Specular->append_attribute(doc.allocate_attribute("shinyness", "0.5"));
 
-		defaultMat->append_node(specular);
+		defaultMat->append_node(Specular);
 	}
 
 	newMaterialsListConfig << doc;
@@ -228,7 +228,7 @@ void C_ConfigLoader::Initialise()
 		{
 			string nodeValue(engineNode->value());
 
-			S_SettingNameValuePair engineSetting(SettingType::Engine, 
+			SettingNameValuePair engineSetting(SettingType::Engine, 
 				engineNode->first_attribute("name")->value(), 
 				-1, 
 				nodeValue.c_str());
@@ -240,7 +240,7 @@ void C_ConfigLoader::Initialise()
 		{
 			int const nodeValue = stoi(string(graphicsNode->value()));
 
-			S_SettingNameValuePair graphicsSetting(SettingType::Graphics,
+			SettingNameValuePair graphicsSetting(SettingType::Graphics,
 				graphicsNode->first_attribute("name")->value(),
 				nodeValue,
 				"");
@@ -252,7 +252,7 @@ void C_ConfigLoader::Initialise()
 		{
 			int const nodeValue = stoi(string(videoNode->value()));
 
-			S_SettingNameValuePair videoSetting(SettingType::Video,
+			SettingNameValuePair videoSetting(SettingType::Video,
 				videoNode->first_attribute("name")->value(),
 				nodeValue, 
 				"");
@@ -264,7 +264,7 @@ void C_ConfigLoader::Initialise()
 
 int C_ConfigLoader::GetSettingValue(SettingType const settingType, char const* settingName) const
 {
-	auto const it = std::find_if(m_AllSettings.cbegin(), m_AllSettings.cend(), [settingType, settingName](S_SettingNameValuePair const& pair)
+	auto const it = std::find_if(m_AllSettings.cbegin(), m_AllSettings.cend(), [settingType, settingName](SettingNameValuePair const& pair)
 		{
 			std::string settingNameStr(settingName);
 			return (pair.m_Type == settingType) && (settingNameStr == pair.m_SettingName);
@@ -280,7 +280,7 @@ int C_ConfigLoader::GetSettingValue(SettingType const settingType, char const* s
 
 std::string C_ConfigLoader::GetSettingStringValue(SettingType const settingType, char const* settingName) const
 {
-	auto const it = std::find_if(m_AllSettings.cbegin(), m_AllSettings.cend(), [settingType, settingName](S_SettingNameValuePair const& pair)
+	auto const it = std::find_if(m_AllSettings.cbegin(), m_AllSettings.cend(), [settingType, settingName](SettingNameValuePair const& pair)
 		{
 			std::string settingNameStr(settingName);
 			return (pair.m_Type == settingType) && (settingNameStr == pair.m_SettingName);
@@ -294,7 +294,7 @@ std::string C_ConfigLoader::GetSettingStringValue(SettingType const settingType,
 	return std::string("");
 }
 
-std::vector<S_MaterialInfo> C_ConfigLoader::GetAllMaterials() const
+std::vector<MaterialInfo> C_ConfigLoader::GetAllMaterials() const
 {
 	using namespace rapidxml;
 	using namespace std;
@@ -316,7 +316,7 @@ std::vector<S_MaterialInfo> C_ConfigLoader::GetAllMaterials() const
 
 	xml_node<>* rootNode = doc.first_node("Materials");
 
-	std::vector<S_MaterialInfo> allMaterials;
+	std::vector<MaterialInfo> allMaterials;
 
 	for (xml_node<>* materialNode = rootNode->first_node("Material"); materialNode; materialNode = materialNode->next_sibling())
 	{
@@ -329,20 +329,20 @@ std::vector<S_MaterialInfo> C_ConfigLoader::GetAllMaterials() const
 		xml_node<>* diffuseNode = materialNode->first_node("Diffuse");
 		xml_node<>* specularNode = materialNode->first_node("Specular");
 
-		XMFLOAT4 ambient(strtof(ambientNode->first_attribute("red")->value(), nullptr), 
+		XMFLOAT4 Ambient(strtof(ambientNode->first_attribute("red")->value(), nullptr), 
 			strtof(ambientNode->first_attribute("green")->value(), nullptr),
 			strtof(ambientNode->first_attribute("blue")->value(), nullptr), 1.0f);
 
-		XMFLOAT4 diffuse(strtof(diffuseNode->first_attribute("red")->value(), nullptr),
+		XMFLOAT4 Diffuse(strtof(diffuseNode->first_attribute("red")->value(), nullptr),
 			strtof(diffuseNode->first_attribute("green")->value(), nullptr),
 			strtof(diffuseNode->first_attribute("blue")->value(), nullptr), 1.0f);
 
-		XMFLOAT4 specular(strtof(specularNode->first_attribute("red")->value(), nullptr),
+		XMFLOAT4 Specular(strtof(specularNode->first_attribute("red")->value(), nullptr),
 			strtof(specularNode->first_attribute("green")->value(), nullptr),
 			strtof(specularNode->first_attribute("blue")->value(), nullptr), 
 			strtof(specularNode->first_attribute("shinyness")->value(), nullptr));
 
-		S_MaterialInfo matInfo(materialName.c_str(), ambient, diffuse, specular);
+		MaterialInfo matInfo(materialName.c_str(), Ambient, Diffuse, Specular);
 
 		allMaterials.emplace_back(move(matInfo));
 	}
@@ -350,12 +350,12 @@ std::vector<S_MaterialInfo> C_ConfigLoader::GetAllMaterials() const
 	return allMaterials;
 }
 
-S_ConfigInfo C_ConfigLoader::GetConfigByName(char const* const inConfigName) const
+ConfigInfo C_ConfigLoader::GetConfigByName(char const* const inConfigName) const
 {
-	auto const it = std::find_if(m_AllConfigs.cbegin(), m_AllConfigs.cend(), [inConfigName](S_ConfigInfo const& configInfo)
+	auto const it = std::find_if(m_AllConfigs.cbegin(), m_AllConfigs.cend(), [inConfigName](ConfigInfo const& configInfo)
 		{
 			std::string const configNameStr(inConfigName);
-			return configNameStr == configInfo.m_ConfigName;
+			return configNameStr == configInfo.ConfigName;
 		});
 
 	if (it != m_AllConfigs.cend())
@@ -363,7 +363,7 @@ S_ConfigInfo C_ConfigLoader::GetConfigByName(char const* const inConfigName) con
 		return (*it);
 	}
 
-	return S_ConfigInfo();
+	return ConfigInfo();
 }
 
 void C_ConfigLoader::ReloadAllConfigs()

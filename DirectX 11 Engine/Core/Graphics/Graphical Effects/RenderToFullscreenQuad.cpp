@@ -1,32 +1,36 @@
 #include "RenderToFullscreenQuad.h"
 #include "../../ApplicationNew.h"
 #include "../../Loaders/ConfigLoader.h"
+#include "../Core/Handlers/System Handlers/BufferClass.h"
+#include "../Core/Handlers/System Handlers/ShaderClass.h"
+#include "../Core/Handlers/System Handlers/RenderClass.h"
+#include "../Core/Handlers/System Handlers/WindowClass.h"
 
 RenderToFullscreenQuad::RenderToFullscreenQuad()
-	: _quadVS(nullptr)
-		, _quadPS(nullptr)
-		, _inputLayout(nullptr)
-		, _quad()
-		, m_MSAARTV(nullptr)
-		, m_MSAARenderTargetTex2D(nullptr)
-		, m_MSAACount(0)
+	: m_QuadVS(nullptr)
+	, m_QuadPS(nullptr)
+	, m_InputLayout(nullptr)
+	, m_MSAARTV(nullptr)
+	, m_MSAARenderTargetTex2D(nullptr)
+	, m_MSAACount(0)
+	, m_ValuesBufferPtr(nullptr)
 {
 }
 
 RenderToFullscreenQuad::~RenderToFullscreenQuad()
 {
-	_quad.vertexBuffer.Reset();
-	_quad.indexBuffer.Reset();
+	m_Quad.VertexBuffer.Reset();
+	m_Quad.IndexBuffer.Reset();
 }
 
 void RenderToFullscreenQuad::Cleanup()
 {
 	m_MSAARenderTargetTex2D->Release();
 	m_MSAARTV->Release();
-	_inputLayout->Release();
-	_quadVS->Release();
-	_quadPS->Release();
-	m_ValuesBuffer->Release();
+	m_InputLayout->Release();
+	m_QuadVS->Release();
+	m_QuadPS->Release();
+	m_ValuesBufferPtr->Release();
 }
 
 HRESULT RenderToFullscreenQuad::Initialise(const float width, const float height)
@@ -54,7 +58,7 @@ HRESULT RenderToFullscreenQuad::Initialise(const float width, const float height
 	bd.ByteWidth = sizeof(FullscreenQuadValues);
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = 0;
-	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &m_ValuesBuffer);
+	ApplicationNew::Get().GetDevice()->CreateBuffer(&bd, nullptr, &m_ValuesBufferPtr);
 
 	InitRenderTargets(width, height);
 
@@ -122,12 +126,12 @@ void RenderToFullscreenQuad::SetAsCurrentRenderTarget() const
 
 void RenderToFullscreenQuad::SetAsCurrentVertexShader() const
 {
-	ShaderClass::SetShadersAndInputLayout(_quadVS, nullptr, _inputLayout);
+	ShaderClass::SetShadersAndInputLayout(m_QuadVS, nullptr, m_InputLayout);
 }
 
 void RenderToFullscreenQuad::SetAsCurrentPixelShader() const
 {
-	ShaderClass::SetShadersAndInputLayout(nullptr, _quadPS, _inputLayout);
+	ShaderClass::SetShadersAndInputLayout(nullptr, m_QuadPS, m_InputLayout);
 }
 
 HRESULT RenderToFullscreenQuad::InitialiseShaders()
@@ -139,10 +143,10 @@ HRESULT RenderToFullscreenQuad::InitialiseShaders()
 	};
 
 	
-	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/FullscreenQuadVS.cso", &_quadVS, &_inputLayout, quadLayout, ARRAYSIZE(quadLayout));
+	HRESULT hr = ShaderClass::CreateVertexShader((WCHAR*)L"Core/Shaders/FullscreenQuadVS.cso", &m_QuadVS, &m_InputLayout, quadLayout, ARRAYSIZE(quadLayout));
 	if (FAILED(hr))
 		return hr;
-	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/FullscreenQuadPS.cso", &_quadPS);
+	hr = ShaderClass::CreatePixelShader((WCHAR*)L"Core/Shaders/FullscreenQuadPS.cso", &m_QuadPS);
 	if (FAILED(hr))
 		return hr;
 
@@ -151,48 +155,48 @@ HRESULT RenderToFullscreenQuad::InitialiseShaders()
 
 void RenderToFullscreenQuad::BuildQuad()
 {
-	HRESULT hr = BufferClass::CreateQuad(&_quad.vertexBuffer, &_quad.indexBuffer);
+	HRESULT hr = BufferClass::CreateQuad(&m_Quad.VertexBuffer, &m_Quad.IndexBuffer);
 	if (FAILED(hr))
 	{
 		return;
 	}
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	char const vbuffername[] = "Quad VB";
 	char const ibuffername[] = "Quad IB";
 
-	_quad.vertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(vbuffername) - 1, vbuffername);
-	_quad.indexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(ibuffername) - 1, ibuffername);
+	m_Quad.VertexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(vbuffername) - 1, vbuffername);
+	m_Quad.IndexBuffer->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(ibuffername) - 1, ibuffername);
 #endif
 
-	_quad.numberOfIndices = 6;
-	_quad.vertexBufferOffset = 0;
-	_quad.vertexBufferStride = sizeof(SimpleQuad);
+	m_Quad.NumberOfIndices = 6;
+	m_Quad.VertexBufferOffset = 0;
+	m_Quad.vertexBufferStride = sizeof(SimpleQuad);
 }
 
 void RenderToFullscreenQuad::Render(ID3D11ShaderResourceView * textureToRender)
 {
 	auto context = ApplicationNew::Get().GetContext();
 	FullscreenQuadValues values;
-	values.sampleCount = m_MSAACount;
+	values.SampleCount = m_MSAACount;
 
-	RenderClass::SetRasterizerState(NO_CULL);
-	context->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(LINEAR));
+	RenderClass::SetRasterizerState(RasterizerType::NO_CULL);
+	context->PSSetSamplers(0, 1, ShaderClass::GetSamplerState(SamplerType::LINEAR));
 	SetAsCurrentRenderTarget();
 	SetAsCurrentVertexShader();
 	SetAsCurrentPixelShader();
-	BufferClass::SetPixelShaderBuffers(&m_ValuesBuffer, 0);
+	BufferClass::SetPixelShaderBuffers(&m_ValuesBufferPtr, 0);
 	
-	context->IASetVertexBuffers(0, 1, _quad.vertexBuffer.GetAddressOf(), &_quad.vertexBufferStride, &_quad.vertexBufferOffset);
-	context->IASetIndexBuffer(_quad.indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+	context->IASetVertexBuffers(0, 1, m_Quad.VertexBuffer.GetAddressOf(), &m_Quad.vertexBufferStride, &m_Quad.VertexBufferOffset);
+	context->IASetIndexBuffer(m_Quad.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
 	context->PSSetShaderResources(0, 1, &textureToRender);
 
-	context->UpdateSubresource(m_ValuesBuffer, 0, nullptr, &values, 0, 0);
+	context->UpdateSubresource(m_ValuesBufferPtr, 0, nullptr, &values, 0, 0);
 
-	context->DrawIndexed(static_cast<UINT>(_quad.numberOfIndices), 0, 0);
+	context->DrawIndexed(static_cast<UINT>(m_Quad.NumberOfIndices), 0, 0);
 
-	auto backBuff = ApplicationNew::Get().GetWindowByName(L"DX11 Engine")->GetBackBufferTex();
+	ID3D11Texture2D* backBuff = ApplicationNew::Get().GetWindowByName(L"DX11 Engine")->GetBackBufferTex();
 
 	context->ResolveSubresource(backBuff, 0, m_MSAARenderTargetTex2D, 0, DXGI_FORMAT_R8G8B8A8_UNORM);
 }

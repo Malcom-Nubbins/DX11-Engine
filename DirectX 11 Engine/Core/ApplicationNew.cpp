@@ -218,7 +218,7 @@ void ApplicationNew::Initialise()
 
 	CreateDevice(nullptr);
 	
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	HRESULT hr = m_Device->QueryInterface(__uuidof(ID3D11Debug), (void**)&m_Debug);
 #endif
 }
@@ -231,7 +231,7 @@ void ApplicationNew::Cleanup()
 	delete m_ConfigLoader;
 	m_ConfigLoader = nullptr;
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	m_Debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 #endif
 }
@@ -241,7 +241,7 @@ ComPtr<IDXGIAdapter1> ApplicationNew::GetAdapter()
 	ComPtr<IDXGIFactory1> dxgiFactory;
 	UINT createFactoryFlags = 0;
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	createFactoryFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -297,7 +297,7 @@ void ApplicationNew::CreateDevice(ComPtr<IDXGIAdapter1> adapter)
 {
 	UINT flags = 0;
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
@@ -313,7 +313,7 @@ void ApplicationNew::CreateDevice(ComPtr<IDXGIAdapter1> adapter)
 
 	ThrowIfFailed(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, numFeatureLevels, D3D11_SDK_VERSION, &m_Device, NULL, &m_Context));
 
-#if defined(_DEBUG) && (USE_D3D11_DEBUGGING == 1)
+#if defined(_DEBUG)
 	char const deviceName[] = "D3D11 Device";
 	char const contextName[] = "D3D11 Context";
 	m_Device->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof(deviceName) - 1, deviceName);
