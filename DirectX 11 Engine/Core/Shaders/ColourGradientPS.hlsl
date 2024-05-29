@@ -26,19 +26,19 @@ struct VertexOutput
 
 float4 main(VertexOutput input) : SV_TARGET
 {
-    float height;
+    float height = input.SkyDomePos.y;
     float4 finalColour = float4(0.0f, 0.0f, 0.0f, 1.0f);
-
-    height = input.SkyDomePos.y;
+    float3 sunColour = float3(1.f, 1.f, 1.f);
 
     if (height < 0.0f)
     {
         height = 0.0f;
     }
-
+    
     if (sunPos.y >= 20.0f)
     {
         finalColour = lerp(horizonColourDay, overheadColourDay, height);
+        sunColour = float3(1.0f, 1.0f, 1.0f);
     }
     else if (sunPos.y <= 20.0f && sunPos.y > -10.0f)
     {
@@ -48,17 +48,29 @@ float4 main(VertexOutput input) : SV_TARGET
             float4 blendedHorizon = lerp(horizonColourSunrise, horizonColourDay, sunPosClamped / 20);
             float4 blendedOverhead = lerp(overheadColourSunrise, overheadColourDay, sunPosClamped / 20);
             finalColour = lerp(blendedHorizon, blendedOverhead, height);
+            sunColour = lerp(horizonColourSunrise.xyz, float3(1.0f, 1.0f, 1.0f), sunPosClamped / 20);
         }
         else if (sunPos.y <= 0.0f && sunPos.y > -10.0f)
         {
             float4 blendedHorizon = lerp(horizonColourSunrise, horizonColourNight, -sunPosClamped / 10);
             float4 blendedOverhead = lerp(overheadColourSunrise, overheadColourNight, -sunPosClamped / 10);
             finalColour = lerp(blendedHorizon, blendedOverhead, height);
+            sunColour = lerp(horizonColourSunrise.xyz, horizonColourNight.xyz, -sunPosClamped / 10);
         }
     }
     else
     {
         finalColour = lerp(horizonColourNight, overheadColourNight, height);
+        sunColour = finalColour.xyz;
+    }
+    
+    float3 dir = normalize(input.SkyDomePos.xyz);
+    float cosSunAngle = dot(dir, normalize(sunPos));
+    int intensity = 9;
+    
+    if (cosSunAngle > (cosSunAngle / 2))
+    {
+        finalColour.xyz = lerp(finalColour.xyz, sunColour * 1.03f, pow(cosSunAngle, intensity));
     }
 
     return finalColour;

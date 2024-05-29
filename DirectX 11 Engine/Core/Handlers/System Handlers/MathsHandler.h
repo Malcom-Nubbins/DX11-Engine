@@ -34,5 +34,28 @@ public:
 	static bool WorldToScreen(XMFLOAT3 const inPos, XMFLOAT2& outScreenPos, XMFLOAT4X4 const world, XMFLOAT4X4 const view, XMFLOAT4X4 const proj, XMFLOAT2 const screenSize);
 
 	static float RandomFloat(float one, float two);
+
+	template<typename T>
+	static T Clamp(T val, T min, T max)
+	{
+		assert(max >= min);
+
+		if (val < min)
+		{
+			val = min;
+		}
+		else if (val > max)
+		{
+			val = max;
+		}
+
+		return val;
+	}
+
+	template<typename T>
+	static T Saturate(T val)
+	{
+		return Clamp<T>(val, T(0.f), T(1.f));
+	}
 };
 

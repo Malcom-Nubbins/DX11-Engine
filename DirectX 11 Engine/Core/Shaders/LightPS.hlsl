@@ -105,9 +105,9 @@ float4 main(VertexOutput input) : SV_TARGET
 		}
 
 		// Camera light
-		//ComputeSpotLight(surface, spotLight, input.PosW, input.NormW, toEye, A, D, S);
-	   /* specular += S;
-		diffuse += D;*/
+		ComputeSpotLight(surface, spotLight, input.PosW, input.NormW, toEye, A, D, S);
+        specular += S;
+        diffuse += D;
 
 		if(useSpecularMap == 1.0f)
 		{

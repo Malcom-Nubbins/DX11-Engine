@@ -35,10 +35,10 @@ GraphicsHandler::GraphicsHandler()
 
 	m_SeasonsSunHeightOffset =
 	{
-		{0},
-		{2},
-		{0},
-		{-2}
+		{0.f},
+		{0.4f},
+		{0.f},
+		{-0.4f}
 	};
 
 	m_SeasonNames =
@@ -48,6 +48,9 @@ GraphicsHandler::GraphicsHandler()
 		{2, "Autumn"},
 		{3, "Winter"}
 	};
+
+	//LoadConfig();
+	LoadMaterialsConfig();
 }
 
 GraphicsHandler::~GraphicsHandler()
@@ -78,7 +81,12 @@ void GraphicsHandler::Init(float const windowWidth, float const windowHeight)
 	m_BasicLight = new BasicLight();
 	m_BasicLight->Initialise(windowWidth, windowHeight);
 
-	int const shadowQuality = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "Shadows");
+	int shadowQuality = ApplicationNew::Get().GetConfigLoader()->GetSettingValue(SettingType::Graphics, "Shadows");
+
+	if (shadowQuality < 0)
+	{
+		shadowQuality = 512;
+	}
 
 	m_Shadows = new Shadows();
 	m_Shadows->Initialise(static_cast<float>(shadowQuality), static_cast<float>(shadowQuality));
@@ -95,7 +103,7 @@ void GraphicsHandler::Init(float const windowWidth, float const windowHeight)
 	m_SceneLight.Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_SceneLight.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	m_SceneLight.Specular = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_SceneLight.LightDirection = XMFLOAT3(5.0f, 5.0f, 0.0f);
+	m_SceneLight.LightDirection = XMFLOAT3(1.0f, 0.0f, 0.0f);
 
 	m_PreOffsetLightDir = m_SceneLight.LightDirection;
 
@@ -112,8 +120,6 @@ void GraphicsHandler::Init(float const windowWidth, float const windowHeight)
 	m_SpotLight.Attenuation = XMFLOAT3(0.4f, 0.02f, 0.0f);
 	m_SpotLight.Spot = 20.0f;
 	m_SpotLight.Range = 1000.0f;
-
-	LoadMaterialsConfig();
 }
 
 void GraphicsHandler::Cleanup()

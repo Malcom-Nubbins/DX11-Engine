@@ -53,7 +53,7 @@ private:
 	int m_CurrentDay;
 	int m_CurrentSeason;
 
-	std::vector<int> m_SeasonsSunHeightOffset;
+	std::vector<float> m_SeasonsSunHeightOffset;
 	std::map<int, std::string> m_SeasonNames;
 
 	std::vector<PointLight> m_PointLights;

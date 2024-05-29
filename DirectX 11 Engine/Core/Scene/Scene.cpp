@@ -59,7 +59,7 @@ void Scene::InitialiseScene()
 			std::wstring modelPath(converter.from_bytes(OBJECTS_DIR));
 			std::wstring modelFN(converter.from_bytes(ElementInfo.ModelName));
 
-			wstring fullModelPath(modelPath + modelPath);
+			wstring fullModelPath(modelPath + modelFN);
 
 			NewObjectMesh objectMesh;
 			ModelLoader::LoadModel(ApplicationNew::Get().GetDevice().Get(), fullModelPath, objectMesh, false);

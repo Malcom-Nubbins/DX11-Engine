@@ -53,7 +53,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
 		if (vsync == -1)
 		{
-			std::exception(R"(Invalud vsync value obtained from config file)");
+			std::exception(R"(Invalid vsync value obtained from config file)");
 		}
 
 		if (retCode != -1)

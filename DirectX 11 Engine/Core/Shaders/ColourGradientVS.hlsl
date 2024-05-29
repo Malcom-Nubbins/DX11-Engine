@@ -24,8 +24,8 @@ VertexOutput main( VertexInput input )
 {
     VertexOutput output;
     
-    output.PosH = mul(float4(input.Pos, 1.0f), World);
-    output.PosH = mul(output.PosH, mul(View, Projection));
+    float3 posVS = mul(input.Pos.xyz, (float3x3) View);
+    output.PosH = mul(float4(posVS, 1.f), Projection);
     output.SkyDomePos.xyz = input.Pos;
     output.SkyDomePos.w = 1.0f;
 
